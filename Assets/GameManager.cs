@@ -1,65 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public Vector3 position;
-
-    PointerEventData pointerEventData;
-    public EventSystem eventSystem;
-    GameObject selected;
-    public List<Animator> animator;
-
-    private void OnEnable()
-    {
-        Actions.Begin += PlayAnimation;
-    }
-    private void OnDisable()
-    {
-        Actions.Begin -= PlayAnimation;
-    }
+    public GameObject background;
 
     // Start is called before the first frame update
     void Start()
     {
-        eventSystem = EventSystem.current;
+        StartCoroutine(Fade());
     }
 
     // Update is called once per frame
     void Update()
     {
-        //method 1
-        pointerEventData = new PointerEventData(eventSystem);
-        pointerEventData.position = Input.mousePosition;
-        var raycastResults = new List<RaycastResult>();
-        eventSystem.RaycastAll(pointerEventData, raycastResults);
-
-        if (raycastResults.Count > 0)
-        {
-            if (raycastResults[0].gameObject.GetComponent<MenuButton>())
-            {
-                if (!raycastResults[0].gameObject.GetComponent<MenuButton>().selected)
-                {
-                    selected = raycastResults[0].gameObject;
-                    selected.GetComponent<MenuButton>().selected = true;
-                    StartCoroutine(selected.GetComponent<MenuButton>().Selected());
-                }
-            }
-            else
-            {
-                if (selected)
-                {
-                    selected.GetComponent<MenuButton>().selected = false;
-                    selected.GetComponent<MenuButton>().End();
-                }
-            }
-        }
+        
     }
 
-    public void PlayAnimation()
+    IEnumerator Fade()
     {
-        animator[0].Play("MenuSelectOption");
+        Color c = background.transform.GetComponent<Image>().color;
+        for (float alpha = 1f; alpha >= 0; alpha -= 0.01f * 0.5f)
+        {
+            c.a = alpha;
+            background.transform.GetComponent<Image>().color = c;
+            yield return null;
+        }
     }
 }
