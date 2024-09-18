@@ -17,12 +17,17 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
     public Vector2 position;
     public bool selected;
     RectTransform rect;
+    public bool shouldFloat;
 
     // Start is called before the first frame update
     void Start()
     {
         rect = GetComponent<RectTransform>();
         position = rect.anchoredPosition;
+    }
+    void Update()
+    {
+        if (shouldFloat) rect.anchoredPosition = new Vector2(position.x, position.y + Mathf.Sin(Time.timeSinceLevelLoad) * 10);
     }
     public void OnPointerUp(PointerEventData eventData)
     {

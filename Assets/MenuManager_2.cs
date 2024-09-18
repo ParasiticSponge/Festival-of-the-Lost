@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
-public class MenuManager : MonoBehaviour
+public class MenuManager_2 : MonoBehaviour
 {
     public Vector3 position;
 
@@ -61,11 +61,13 @@ public class MenuManager : MonoBehaviour
 
     public void PlayAnimation()
     {
-        animator[0].Play("MenuSelectOption");
         StartCoroutine(playAnimAndLoad());
     }
     IEnumerator playAnimAndLoad()
     {
+        animator[0].Play("pop");
+        yield return new WaitForSeconds(.5f);
+        animator[1].Play("MenuSelectOption");
         yield return new WaitForSeconds(1f);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
