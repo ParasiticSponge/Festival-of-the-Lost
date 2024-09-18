@@ -6,7 +6,14 @@ public class Play_Menu_Sounds : MonoBehaviour
 {
     [SerializeField] private List<AudioClip> audioClips = new List<AudioClip>();
     [SerializeField] private GameObject audioClipPrefab;
-
+    private void OnEnable()
+    {
+        Actions.MenuBeginSound += PressPlay;
+    }
+    private void OnDisable()
+    {
+        Actions.MenuBeginSound -= PressPlay;
+    }
     public static IEnumerator PlayClip(ushort clipId, float clipVol)
     {
         Play_Menu_Sounds currentManager = FindObjectOfType<Play_Menu_Sounds>();
@@ -21,6 +28,6 @@ public class Play_Menu_Sounds : MonoBehaviour
 
     public void PressPlay()
     {
-        StartCoroutine(PlayClip(1, 0.5f));
+        StartCoroutine(PlayClip(1, 2));
     }
 }

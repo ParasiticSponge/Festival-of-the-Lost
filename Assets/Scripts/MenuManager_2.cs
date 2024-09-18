@@ -66,7 +66,13 @@ public class MenuManager_2 : MonoBehaviour
     IEnumerator playAnimAndLoad()
     {
         animator[0].Play("pop");
+        //play gate open anim
+        Actions.MenuBeginSound.Invoke();
         yield return new WaitForSeconds(.5f);
+        animator[2].enabled = true;
+        animator[2].Play("HideMenuUI");
+        animator[2].Play("OpenGate");
+        yield return new WaitForSeconds(2f);
         animator[1].Play("MenuSelectOption");
         yield return new WaitForSeconds(1f);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
