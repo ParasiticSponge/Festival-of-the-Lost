@@ -6,11 +6,13 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public GameObject background;
+    public GameObject textBoxPrefab;
 
     // Start is called before the first frame update
     void Start()
     {
         StartCoroutine(Fade());
+        TextBox.Text("hello", 0.1f);
     }
 
     // Update is called once per frame

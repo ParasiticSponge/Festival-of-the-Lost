@@ -39,13 +39,12 @@ public class MenuManager_2 : MonoBehaviour
 
         if (raycastResults.Count > 0)
         {
-            if (raycastResults[0].gameObject.GetComponent<MenuButton>())
+            if (raycastResults[0].gameObject.GetComponent<MenuButton>() != null)
             {
                 if (!raycastResults[0].gameObject.GetComponent<MenuButton>().selected)
                 {
                     selected = raycastResults[0].gameObject;
                     selected.GetComponent<MenuButton>().selected = true;
-                    StartCoroutine(selected.GetComponent<MenuButton>().Selected());
                 }
             }
             else
@@ -53,7 +52,6 @@ public class MenuManager_2 : MonoBehaviour
                 if (selected)
                 {
                     selected.GetComponent<MenuButton>().selected = false;
-                    selected.GetComponent<MenuButton>().End();
                 }
             }
         }
@@ -65,7 +63,14 @@ public class MenuManager_2 : MonoBehaviour
     }
     IEnumerator playAnimAndLoad()
     {
-        animator[0].Play("pop");
+        switch (selected.GetComponent<MenuButton>().type)
+        {
+            case MenuButton.TYPE.PLAY:
+                animator[0].Play("pop");
+                break;
+            case MenuButton.TYPE.EXIT:
+                break;
+        }
         //play gate open anim
         Actions.MenuBeginSound.Invoke();
         yield return new WaitForSeconds(.5f);
