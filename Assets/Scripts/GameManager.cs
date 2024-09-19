@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     {
         StartCoroutine(Fade());
         TextBox.Text("hello", 0.1f);
+        TextBox.Text("Who are you?", 0.1f);
     }
 
     // Update is called once per frame

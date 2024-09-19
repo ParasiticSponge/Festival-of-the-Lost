@@ -10,8 +10,10 @@ public class TextBox : MonoBehaviour
     static float shakeIntensity;
     static GameObject textBox;
     static Canvas canvas;
+    static GameObject go;
+    static TextBox script;
 
-    public string text;
+    public static List<string> texts = new List<string>();
     public float speed;
     public float intensity;
 
@@ -19,10 +21,14 @@ public class TextBox : MonoBehaviour
     {
         textBox = FindObjectOfType<GameManager>().textBoxPrefab;
         canvas = FindObjectOfType<Canvas>();
-        GameObject go = Instantiate(textBox);
-        go.transform.SetParent(canvas.transform, false);
-        TextBox script = go.AddComponent<TextBox>();
-        script.text = text;
+        texts.Add(text);
+
+        if (texts.Count <= 1)
+        {
+            go = Instantiate(textBox);
+            go.transform.SetParent(canvas.transform, false);
+            script = go.AddComponent<TextBox>();
+        }
         script.speed = speed;
         script.intensity = 0;
     }
@@ -31,13 +37,17 @@ public class TextBox : MonoBehaviour
         textBox = FindObjectOfType<GameManager>().textBoxPrefab;
         GameObject go = Instantiate(textBox);
         TextBox script = go.AddComponent<TextBox>();
-        script.text = text;
+        texts.Add(text);
         script.speed = speed;
         script.intensity = intensity;
     }
     private void Start()
     {
-        StartCoroutine(DisplayText(text, speed, intensity));
+        Begin();
+    }
+    public void Begin()
+    {
+        StartCoroutine(DisplayText(texts[0], speed, intensity));
     }
     IEnumerator DisplayText(string text, float speed, float intensity)
     {
@@ -51,6 +61,15 @@ public class TextBox : MonoBehaviour
     }
     private void Update()
     {
-        if (Input.anyKeyDown) Destroy(gameObject);
+        if (Input.anyKeyDown)
+        {
+            if(texts.Count > 1)
+            {
+                texts.Remove(texts[0]);
+                dialogue = "";
+                Begin();
+            }
+            else Destroy(gameObject);
+        }
     }
 }
