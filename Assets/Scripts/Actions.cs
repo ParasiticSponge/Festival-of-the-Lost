@@ -7,4 +7,5 @@ public class Actions
 {
     public static Action Begin;
     public static Action MenuBeginSound;
+    public static Action<string> Input;
 }
