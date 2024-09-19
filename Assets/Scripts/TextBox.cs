@@ -79,6 +79,7 @@ public class TextBox : MonoBehaviour
         {
             string[] tokens = text.Split(new[] { "I*" }, StringSplitOptions.None);
             text = tokens[0] + input + tokens[1];
+            texts[0] = text;
         }
         yield return new WaitForSeconds(speed);
         for (int i = 0; i < text.Length; i++)
@@ -101,7 +102,7 @@ public class TextBox : MonoBehaviour
                 else transform.GetChild(1).gameObject.SetActive(false);
             }
 
-            if (Input.anyKeyDown)
+            if (Input.anyKeyDown && dialogue.Length == texts[0].Length)
             {
                 if (texts.Count > 1)
                 {
