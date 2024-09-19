@@ -12,7 +12,7 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(Fade());
+        StartCoroutine(Functions.Fade(background, 1));
         StartCoroutine(Intro());
     }
 
@@ -20,17 +20,6 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         
-    }
-
-    IEnumerator Fade()
-    {
-        Color c = background.transform.GetComponent<Image>().color;
-        for (float alpha = 1f; alpha >= 0; alpha -= 0.01f)
-        {
-            c.a = alpha;
-            background.transform.GetComponent<Image>().color = c;
-            yield return null;
-        }
     }
     IEnumerator Intro()
     {

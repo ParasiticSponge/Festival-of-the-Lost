@@ -14,7 +14,8 @@ public class TextBox : MonoBehaviour
     static Canvas canvas;
     static GameObject go;
     static TextBox script;
-    public static List<string> texts = new List<string>();
+    static List<string> texts = new List<string>();
+    static CharacterMovement character;
 
     public float speed;
     public float intensity;
@@ -67,6 +68,7 @@ public class TextBox : MonoBehaviour
 
     private void Start()
     {
+        character = FindObjectOfType<CharacterMovement>();
         Begin();
     }
     public void Begin()
@@ -91,6 +93,7 @@ public class TextBox : MonoBehaviour
     }
     private void Update()
     {
+        character.canMove = 0;
         //TODO: tidy pyramid of if statements
         if (texts[0] != "I*")
         {
@@ -110,7 +113,11 @@ public class TextBox : MonoBehaviour
                     dialogue = "";
                     Begin();
                 }
-                else Destroy(gameObject);
+                else
+                {
+                    character.canMove = 1;
+                    Destroy(gameObject);
+                }
             }
         }
         else
@@ -121,7 +128,7 @@ public class TextBox : MonoBehaviour
         }
     }
 
-    public void ProcessString()
+    void ProcessString()
     {
         foreach (char c in Input.inputString)
         {
