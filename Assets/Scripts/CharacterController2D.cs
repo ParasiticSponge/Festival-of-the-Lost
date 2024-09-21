@@ -1,5 +1,9 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using System;
 
 public class CharacterController2D : MonoBehaviour
 {
@@ -7,6 +11,11 @@ public class CharacterController2D : MonoBehaviour
     public int canMove = 1;
 	public float runSpeed = 20;
 	bool jump = false;
+	float horizontal = 0;
+	public float gravity = 3;
+	bool enter;
+	int doorNum;
+
 
     Animator animator;
     [SerializeField] private float m_JumpForce = 400f;							// Amount of force added when the player jumps.
@@ -42,6 +51,7 @@ public class CharacterController2D : MonoBehaviour
     private void Awake()
 	{
 		m_Rigidbody2D = GetComponent<Rigidbody2D>();
+		m_Rigidbody2D.gravityScale = gravity;
 		animator = GetComponent<Animator>();
 
 		if (OnLandEvent == null)
@@ -56,15 +66,16 @@ public class CharacterController2D : MonoBehaviour
     }
     private void FixedUpdate()
 	{
-        float horizontal = Input.GetAxisRaw("Horizontal") * runSpeed;
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.Space))
+		//horizontal = Input.GetAxisRaw("Horizontal") * runSpeed;
+
+        if (Input.GetKey(KeyCode.Space) && canMove == 1)
         {
             jump = true;
             animator.SetBool("jump", jump);
         }
         animator.SetFloat("velocity", Mathf.Abs(horizontal));
 
-        Move(horizontal * Time.fixedDeltaTime, false, jump);
+        if (canMove == 1) Move(horizontal * Time.fixedDeltaTime, false, jump);
         
 		bool wasGrounded = m_Grounded;
 		m_Grounded = false;
@@ -178,4 +189,24 @@ public class CharacterController2D : MonoBehaviour
 	{
 		animator.SetBool("jump", false);
 	}
+
+	private void OnMove(InputValue input)
+	{
+		horizontal = input.Get<Vector2>().x * runSpeed;
+	}
+	private void OnEnter(InputValue input)
+	{
+		if (enter) Actions.EnterRoom.Invoke(doorNum);
+	}
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+		Actions.isOverDoor.Invoke(other, true);
+		doorNum = Int32.Parse(other.gameObject.name);
+		enter = true;
+    }
+    private void OnTriggerExit2D(Collider2D other)
+    {
+		Actions.isOverDoor.Invoke(other, false);
+		enter = false;
+    }
 }

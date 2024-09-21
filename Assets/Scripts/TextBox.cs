@@ -91,7 +91,6 @@ public class TextBox : MonoBehaviour
         for (int i = 0; i < text.Length; i++)
         {
             dialogue += text[i];
-            print(dialogue);
             gameObject.GetComponentInChildren<Text>().text = dialogue;
             foreach (char c in pauses)
             {

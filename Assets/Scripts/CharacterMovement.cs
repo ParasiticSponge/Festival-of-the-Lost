@@ -4,13 +4,14 @@ using UnityEngine;
 
 public class CharacterMovement : MonoBehaviour
 { 
-    public float movementSpeed = 4;
+    public float movementSpeed = 5;
     public string charName;
     public int canMove = 1;
     public float smoothTime = 0.125f;
     public Vector2 velocity;
+    Vector2 smoothMovement;
 
-    Rigidbody2D rb;
+    public Rigidbody2D rb;
 
     private void OnEnable()
     {
@@ -20,20 +21,22 @@ public class CharacterMovement : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        rb.gravityScale = 0;
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         float vertical = Input.GetAxisRaw("Vertical");
         float horizontal = Input.GetAxisRaw("Horizontal");
         Vector3 moveDir = new Vector3(horizontal, vertical, 0);
         Vector3 targetVelocity = moveDir * movementSpeed;
 
-        //Vector3 smoothed = Vector2.SmoothDamp(transform.position, targetVelocity, ref velocity, smoothTime);
+        smoothMovement = Vector2.SmoothDamp(smoothMovement, targetVelocity, ref velocity, smoothTime);
         //transform.position = smoothed;
 
-        rb.velocity = targetVelocity * canMove;
+        //rb.velocity = targetVelocity * canMove;
+        rb.velocity = smoothMovement * canMove;
     }
 
     void GetName(string name)
