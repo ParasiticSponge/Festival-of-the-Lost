@@ -25,12 +25,13 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
 
-        TextBox.Text("hello", 0.05f);
-        TextBox.Text("Who are you?", 0.05f);
+        /*TextBox.Text("hello", 0.02f);
+        TextBox.Text("Who are you?", 0.02f);
         TextBox.Text();
-        TextBox.Text("...", 0.1f);
+        TextBox.Text("...", 0.2f);
         //TextBox.Text($"Oh! Your name is {character.charName}?", 0.05f, true);
         //I* ouputs the input of the player
-        TextBox.Text("Oh! Your name is I*?", 0.05f);
+        TextBox.Text("Oh! Your name is I*?", 0.02f);
+        TextBox.Text("Mum? Dad? Where did you go?", 0.02f);*/
     }
 }

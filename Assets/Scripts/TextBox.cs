@@ -15,7 +15,10 @@ public class TextBox : MonoBehaviour
     static GameObject go;
     static TextBox script;
     static List<string> texts = new List<string>();
-    static CharacterMovement character;
+    //static CharacterMovement character;
+    //static carMovement character;
+    static CharacterController2D character;
+    static List<char> pauses = new List<char>() { '.', '?', '!'};
 
     public float speed;
     public float intensity;
@@ -68,7 +71,8 @@ public class TextBox : MonoBehaviour
 
     private void Start()
     {
-        character = FindObjectOfType<CharacterMovement>();
+        //character = FindObjectOfType<CharacterMovement>();
+        character = FindObjectOfType<CharacterController2D>();
         Begin();
     }
     public void Begin()
@@ -89,7 +93,11 @@ public class TextBox : MonoBehaviour
             dialogue += text[i];
             print(dialogue);
             gameObject.GetComponentInChildren<Text>().text = dialogue;
-            yield return new WaitForSeconds(speed);
+            foreach (char c in pauses)
+            {
+                if (text[i] == c) yield return new WaitForSeconds(speed + 0.5f);
+                else yield return new WaitForSeconds(speed);
+            }
         }
     }
     private void Update()
