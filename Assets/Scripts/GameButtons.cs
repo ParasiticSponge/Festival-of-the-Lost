@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-public class GameButtons : MonoBehaviour
+public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
 {
     public enum TYPE
     {
@@ -12,9 +12,11 @@ public class GameButtons : MonoBehaviour
     }
     public TYPE type;
 
-    public void OnClick()
+    public void OnPointerUp(PointerEventData eventData)
     {
         Actions.Back.Invoke(type);
-        print("pointer up");
+    }
+    public void OnPointerDown(PointerEventData eventData)
+    {
     }
 }

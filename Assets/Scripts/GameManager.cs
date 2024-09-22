@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour
         }
 
         StartCoroutine(Functions.Fade(fade, 1));
-        StartCoroutine(Intro());
+        //StartCoroutine(Intro());
     }
 
     // Update is called once per frame
@@ -80,9 +80,8 @@ public class GameManager : MonoBehaviour
 
     IEnumerator SwitchRooms(int n)
     {
-
         switchScreen.speed = 1;
-        switchScreen.Play("MenuSelectOption");
+        switchScreen.Play("MenuSelectOption", 0, 0);
         foreach (BoxCollider2D collider in doors) { collider.enabled = false; }
 
         character.enabled = false;
@@ -133,6 +132,9 @@ public class GameManager : MonoBehaviour
 
         background[currentRoom].SetActive(true);
         foreground[currentRoom].SetActive(true);
+
+        yield return new WaitForSeconds(2);
+        switchScreen.StopPlayback();
     }
     public void DoorAnim(Collider2D obj, bool visible)
     {
@@ -143,7 +145,7 @@ public class GameManager : MonoBehaviour
         switch (type)
         {
             case GameButtons.TYPE.back:
-                Actions.EnterRoom.Invoke(0);
+                StartCoroutine(SwitchRooms(0));
                 break;
         }
     }

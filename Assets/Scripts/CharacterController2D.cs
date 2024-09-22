@@ -67,6 +67,7 @@ public class CharacterController2D : MonoBehaviour
     private void FixedUpdate()
 	{
 		//horizontal = Input.GetAxisRaw("Horizontal") * runSpeed;
+		horizontal *= canMove;
 
         if (Input.GetKey(KeyCode.Space) && canMove == 1)
         {
@@ -75,7 +76,7 @@ public class CharacterController2D : MonoBehaviour
         }
         animator.SetFloat("velocity", Mathf.Abs(horizontal));
 
-        if (canMove == 1) Move(horizontal * Time.fixedDeltaTime, false, jump);
+        Move(horizontal * Time.fixedDeltaTime, false, jump);
         
 		bool wasGrounded = m_Grounded;
 		m_Grounded = false;
