@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public class Functions : MonoBehaviour
 {
@@ -20,4 +22,21 @@ public class Functions : MonoBehaviour
             yield return null;
         }
     }
+    public static float Loop(float time, float factor, float offset)
+    {
+        //example
+        // 0 % 3 = 0. 0 * 3 = 0.
+        // 1 % 3 = 0.3r. 0.3r * 3 = 1
+        // 2 % 3 = 0.6r. 0.6r * 3 = 2
+        // 3 % 3 = 0. 0 * 3 = 0
+        // 4 % 3 = 0.3r. 0.3r * 3 = 1
+        // 5 % 3 = 0.6r. 0.6r * 3 = 2
+        return ((time % factor) * factor) + offset;
+    }
+
+    /*public static IEnumerator CodeBlock(Action action)
+    {
+        action();
+        yield return action;
+    }*/
 }

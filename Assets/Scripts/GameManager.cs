@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public Image powerBar;
     public GameObject fade;
     public GameObject textBoxPrefab;
     public CharacterController2D character;
@@ -21,6 +22,8 @@ public class GameManager : MonoBehaviour
 
     int currentRoom = 0;
     float initialGravity;
+    bool hold;
+    [SerializeField] private int maxPower = 100;
 
     private void Awake()
     {
@@ -32,12 +35,16 @@ public class GameManager : MonoBehaviour
         Actions.EnterRoom += SwitchRoom;
         Actions.isOverDoor += DoorAnim;
         Actions.Back += showUI;
+        Actions.Hold += Hold;
+        Actions.Release += Release;
     }
     private void OnDisable()
     {
         Actions.EnterRoom -= SwitchRoom;
         Actions.isOverDoor -= DoorAnim;
         Actions.Back -= showUI;
+        Actions.Hold -= Hold;
+        Actions.Release -= Release;
     }
     // Start is called before the first frame update
     void Start()
@@ -87,7 +94,6 @@ public class GameManager : MonoBehaviour
         character.enabled = false;
         //mouseInteract.enabled = true;
         character.gameObject.GetComponent<Rigidbody2D>().gravityScale = 0;
-        character.gameObject.GetComponent<Animator>().enabled = false;
 
         yield return new WaitForSeconds(1);
         switch (n)
@@ -106,7 +112,7 @@ public class GameManager : MonoBehaviour
                 character.enabled = true;
                 //mouseInteract.enabled = false;
                 character.gameObject.GetComponent<Rigidbody2D>().gravityScale = initialGravity;
-                character.gameObject.GetComponent<Animator>().enabled = true;
+                character.gameObject.GetComponent<Animator>().SetBool("dart", false);
                 Camera.main.GetComponent<CameraFollow>().enabled = true;
                 character.gameObject.GetComponent<MouseController2D>().enabled = false;
                 UI.SetActive(false);
@@ -123,8 +129,11 @@ public class GameManager : MonoBehaviour
                 character.gameObject.GetComponent<SpriteRenderer>().sprite = initialSprite;
                 character.gameObject.GetComponent<MouseController2D>().enabled = true;
                 character.gameObject.transform.position = background[currentRoom].transform.position;
+                character.gameObject.GetComponent<Animator>().SetBool("dart", true);
                 Camera.main.GetComponent<CameraFollow>().enabled = false;
                 UI.SetActive(true);
+                Vector3 pos = background[currentRoom].transform.position;
+                Camera.main.transform.position = new Vector3(pos.x, pos.y, -10);
                 break;
             case 2:
                 break;
@@ -148,5 +157,31 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(SwitchRooms(0));
                 break;
         }
+    }
+    public void Hold()
+    {
+        hold = true;
+        powerBar.gameObject.SetActive(true);
+        StartCoroutine(PowerBar());
+    }
+    public void Release()
+    {
+        hold = false;
+    }
+    IEnumerator PowerBar()
+    {
+        for (float i = 0; i < 101; i++)
+        {
+            if (!hold) {Actions.Power.Invoke(i/100); break; }
+            powerBar.fillAmount = i/100;
+            yield return null;
+        }
+        for (float i = 100; i > -1; i--)
+        {
+            if (!hold) { Actions.Power.Invoke(i / 100); break; }
+            powerBar.fillAmount = i/100;
+            yield return null;
+        }
+        if (hold) StartCoroutine(PowerBar());
     }
 }

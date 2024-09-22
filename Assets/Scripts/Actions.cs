@@ -11,4 +11,7 @@ public class Actions
     public static Action<int> EnterRoom;
     public static Action<Collider2D, bool> isOverDoor;
     public static Action<GameButtons.TYPE> Back;
+    public static Action Hold;
+    public static Action Release;
+    public static Action<float> Power;
 }
