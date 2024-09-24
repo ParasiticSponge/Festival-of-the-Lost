@@ -21,7 +21,7 @@ public class EasingFunctions : MonoBehaviour
     //domain (input) is between 0->1
     //range (output) can be between -1->2
     //normalised. Easing always starts at 0
-    protected static float EasingLinear(float time)
+    public static float EasingLinear(float time)
     {
         //Mathf.Clamp(time, 0, 1.0f);
         if (time < 0)
@@ -32,7 +32,7 @@ public class EasingFunctions : MonoBehaviour
         return time;
     }
 
-    protected static float EasingCubic(float time)
+    public static float EasingCubic(float time)
     {
         //Mathf.Clamp(time, 0, 1.0f);
         if (time < 0)
@@ -43,7 +43,7 @@ public class EasingFunctions : MonoBehaviour
         return Mathf.Pow(time, 3);
     }
 
-    protected static float EaseOutBounce(float time)
+    public static float EaseOutBounce(float time)
     {
         if (time < 0)
             time = 0;
@@ -72,7 +72,7 @@ public class EasingFunctions : MonoBehaviour
 
     }
 
-    protected static float EaseInBounce(float time)
+    public static float EaseInBounce(float time)
     {
         //Mathf.Clamp(time, 0, 1.0f);
         if (time < 0)
@@ -83,7 +83,7 @@ public class EasingFunctions : MonoBehaviour
         return 1 - EaseOutBounce(1 - time);
     }
 
-    protected static float EaseInCubic(float time)
+    public static float EaseInCubic(float time)
     {
         if (time < 0)
             time = 0;
@@ -93,7 +93,7 @@ public class EasingFunctions : MonoBehaviour
         return time * time * time;
     }
 
-    protected static float EaseOutCubic(float time)
+    public static float EaseOutCubic(float time)
     {
         if (time < 0)
             time = 0;
@@ -103,7 +103,7 @@ public class EasingFunctions : MonoBehaviour
         return 1 - Mathf.Pow(1 - time, 3);
     }
 
-    protected static float EaseInOutCubic(float time) 
+    public static float EaseInOutCubic(float time) 
     {
         if (time < 0)
             time = 0;
@@ -113,7 +113,7 @@ public class EasingFunctions : MonoBehaviour
         return time < 0.5 ? 4 * time * time * time : 1 - Mathf.Pow(-2 * time + 2, 3) / 2;
     }
 
-    protected static float EaseInBack(float time)
+    public static float EaseInBack(float time)
     {
         if (time < 0)
             time = 0;

@@ -39,4 +39,28 @@ public class Functions : MonoBehaviour
         action();
         yield return action;
     }*/
+
+    public static int Digits(int value)
+    {
+        int count = 1;
+        while (value > 9)
+        {
+            value = value / 10;
+            count++;
+        }
+        return count;
+    }
+
+    public static Quaternion Quat(float angle, Int32 axis)
+    {
+        float w = Mathf.Cos(angle / 2 * Mathf.Deg2Rad);
+        float component = Mathf.Sin(angle / 2 * Mathf.Deg2Rad);
+
+        axis = (int)(100 / Mathf.Pow(10, axis));
+        float x = component * (axis / 100);
+        float y = component * (axis % 100 / 10);
+        float z = component * (axis % 10);
+
+        return new Quaternion(x, y, z, w);
+    }
 }

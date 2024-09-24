@@ -11,6 +11,7 @@ public class TextBox : MonoBehaviour
     static string input;
     static float shakeIntensity;
     static GameObject textBox;
+    static Animator mask;
     static Canvas canvas;
     static GameObject go;
     static TextBox script;
@@ -73,6 +74,9 @@ public class TextBox : MonoBehaviour
     {
         //character = FindObjectOfType<CharacterMovement>();
         character = FindObjectOfType<CharacterController2D>();
+        mask = GameObject.Find("TextVisor").GetComponent<Animator>();
+        mask.gameObject.SetActive(true);
+        mask.Play("ShowDialogue");
         Begin();
     }
     public void Begin()
@@ -117,14 +121,11 @@ public class TextBox : MonoBehaviour
             {
                 if (texts.Count > 1)
                 {
-                    texts.Remove(texts[0]);
-                    dialogue = "";
-                    Begin();
+                    StartCoroutine(LoadNext());
                 }
                 else
                 {
-                    character.canMove = 1;
-                    Destroy(gameObject);
+                    StartCoroutine(Destroy());
                 }
             }
         }
@@ -151,9 +152,10 @@ public class TextBox : MonoBehaviour
             {
                 Actions.Input.Invoke(dialogue);
                 input = dialogue;
-                texts.Remove(texts[0]);
-                dialogue = "";
-                if (texts.Count > 1) Begin();
+                if (texts.Count > 1)
+                {
+                    StartCoroutine(LoadNext());
+                }
             }
             else
             {
@@ -163,8 +165,23 @@ public class TextBox : MonoBehaviour
         gameObject.GetComponentInChildren<Text>().text = dialogue;
     }
 
-    public static void UpdateOnInput(string textToUpdate)
+    IEnumerator LoadNext()
     {
+        mask.Play("HideDialogue", 0, 0);
+        yield return new WaitForSeconds(0.5f);
+        mask.Play("ShowDialogue", 0, 0);
 
+        texts.Remove(texts[0]);
+        dialogue = "";
+        Begin();
+    }
+    IEnumerator Destroy()
+    {
+        mask.Play("HideDialogue", 0, 0);
+        yield return new WaitForSeconds(0.5f);
+
+        character.canMove = 1;
+        mask.gameObject.SetActive(false);
+        Destroy(gameObject);
     }
 }

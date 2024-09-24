@@ -12,6 +12,7 @@ public class GameManager : MonoBehaviour
     public Animator switchScreen;
     public Animator gameCanvas;
     public GameObject UI;
+    public List<GameObject> darts;
 
     Sprite initialSprite;
     public GameObject backgrounds;
@@ -23,6 +24,7 @@ public class GameManager : MonoBehaviour
     int currentRoom = 0;
     float initialGravity;
     bool hold;
+    int startingDart;
     [SerializeField] private int maxPower = 100;
 
     private void Awake()
@@ -37,6 +39,7 @@ public class GameManager : MonoBehaviour
         Actions.Back += showUI;
         Actions.Hold += Hold;
         Actions.Release += Release;
+        Actions.Shot += SwitchDart;
     }
     private void OnDisable()
     {
@@ -45,6 +48,7 @@ public class GameManager : MonoBehaviour
         Actions.Back -= showUI;
         Actions.Hold -= Hold;
         Actions.Release -= Release;
+        Actions.Shot -= SwitchDart;
     }
     // Start is called before the first frame update
     void Start()
@@ -60,7 +64,7 @@ public class GameManager : MonoBehaviour
         }
 
         StartCoroutine(Functions.Fade(fade, 1));
-        //StartCoroutine(Intro());
+        StartCoroutine(Intro());
     }
 
     // Update is called once per frame
@@ -126,14 +130,14 @@ public class GameManager : MonoBehaviour
                 foreground[currentRoom].SetActive(false);
                 currentRoom = 1;
 
+                Vector3 room = background[currentRoom].transform.position;
+                character.gameObject.transform.position = new Vector3(room.x, room.y - 12, 0);
                 character.gameObject.GetComponent<SpriteRenderer>().sprite = initialSprite;
                 character.gameObject.GetComponent<MouseController2D>().enabled = true;
-                character.gameObject.transform.position = background[currentRoom].transform.position;
                 character.gameObject.GetComponent<Animator>().SetBool("dart", true);
                 Camera.main.GetComponent<CameraFollow>().enabled = false;
                 UI.SetActive(true);
-                Vector3 pos = background[currentRoom].transform.position;
-                Camera.main.transform.position = new Vector3(pos.x, pos.y, -10);
+                Camera.main.transform.position = new Vector3(room.x, room.y, -10);
                 break;
             case 2:
                 break;
@@ -172,16 +176,40 @@ public class GameManager : MonoBehaviour
     {
         for (float i = 0; i < 101; i++)
         {
-            if (!hold) {Actions.Power.Invoke(i/100); break; }
+            if (!hold) { print("this is 1"); Actions.Power.Invoke(i/100); break; }
             powerBar.fillAmount = i/100;
             yield return null;
         }
-        for (float i = 100; i > -1; i--)
+        if (hold)
         {
-            if (!hold) { Actions.Power.Invoke(i / 100); break; }
-            powerBar.fillAmount = i/100;
-            yield return null;
+            for (float i = 100; i > -1; i--)
+            {
+                if (!hold) { print("this is 2"); Actions.Power.Invoke(i / 100); break; }
+                powerBar.fillAmount = i / 100;
+                yield return null;
+            }
+            if (hold) StartCoroutine(PowerBar());
         }
-        if (hold) StartCoroutine(PowerBar());
+    }
+
+    public void SwitchDart()
+    {
+        Sprite dart = darts[startingDart].GetComponent<SpriteRenderer>().sprite;
+        Sprite thrown = character.GetComponent<SpriteRenderer>().sprite;
+
+        //Play Animation of switching darts
+
+        darts[startingDart].transform.position = character.gameObject.transform.position;
+        darts[startingDart].GetComponent<SpriteRenderer>().sprite = thrown;
+
+        Vector3 room = background[currentRoom].transform.position;
+        character.gameObject.transform.position = new Vector3(room.x, room.y - 12, 0);
+        character.gameObject.GetComponent<SpriteRenderer>().sprite = dart;
+
+        character.gameObject.GetComponent<MouseController2D>().fire = false;
+        startingDart++;
+    }
+    public void ResetDarts()
+    {
     }
 }
