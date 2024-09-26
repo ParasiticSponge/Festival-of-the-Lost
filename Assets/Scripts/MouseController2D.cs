@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class MouseController2D : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
+public class MouseController2D : MonoBehaviour
 {
+    Vector3 poop;
     public bool fire;
     public bool canClick = true;
     Animator animator;
@@ -13,10 +14,16 @@ public class MouseController2D : MonoBehaviour, IPointerUpHandler, IPointerDownH
     public float smoothTime = 0.124f;
     Rigidbody2D rb;
 
+    bool collisionListener;
+    bool hasExited;
+    Collider2D otherCollider;
+
     private void OnEnable()
     {
         Actions.Power += PowerMetre;
         rb.velocity = Vector2.zero;
+
+        poop = new Vector3(transform.localPosition.x, transform.localPosition.y - 0.4f, transform.localPosition.z);
     }
     private void OnDisable()
     {
@@ -27,16 +34,6 @@ public class MouseController2D : MonoBehaviour, IPointerUpHandler, IPointerDownH
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
     }
-    public void OnPointerUp(PointerEventData eventData)
-    {
-        print("released");
-        if (canClick) Actions.Release.Invoke();
-    }
-    public void OnPointerDown(PointerEventData eventData)
-    {
-        print("holding");
-        if (canClick) Actions.Hold.Invoke();
-    }
 
     private void Update()
     {
@@ -45,40 +42,52 @@ public class MouseController2D : MonoBehaviour, IPointerUpHandler, IPointerDownH
             Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             screenToWorld.y = transform.position.y;
             screenToWorld.z = transform.position.z;
+
             transform.position = screenToWorld;
         }
 
         if (Input.GetMouseButtonDown(0))
         {
-            print("holding");
+            //StartCoroutine(Move(transform.position, poop));
             if (canClick) Actions.Hold.Invoke();
         }
         if(Input.GetMouseButtonUp(0))
         {
-            print("released");
             if (canClick) Actions.Release.Invoke();
+        }
+
+        //>:( silly 2D collision detection only happening once and 3D doesn't help
+        //collisions also still triggers when disabled!!!
+        if (collisionListener)
+        {
+            if (otherCollider.transform.position.z == transform.localPosition.z && !hasExited)
+            {
+                //do stuff
+                print("collision");
+                otherCollider.GetComponent<Animator>().Play("BalloonPop", 0, 0);
+                collisionListener = false;
+            }
+            if (hasExited)
+            {
+                collisionListener = false;
+                hasExited = false;
+            }
         }
     }
 
     public void PowerMetre(float amount)
     {
         animator.Play("dartThrow");
-        animator.speed = 1 - amount;
         var cam = Camera.main;
         fire = true;
 
-        print("AMOUNT: " + amount);
-
-        Vector3 worldToScreen = Camera.main.WorldToScreenPoint(transform.position);
-        //Vector3 p = cam.ScreenToWorldPoint(new Vector3(0, cam.pixelHeight, cam.nearClipPlane));
-        Vector3 desiredPos = new Vector3(worldToScreen.x, amount * cam.pixelHeight, transform.position.z);
-        Vector3 screenToWorld = cam.ScreenToWorldPoint(desiredPos);
-        Vector3 newPos = new Vector3(screenToWorld.x, screenToWorld.y, 0);
+        Vector3 screenToWorld = cam.ScreenToWorldPoint(new Vector3(0, cam.pixelHeight * amount, 0));
+        Vector3 desiredPos = new Vector3(transform.position.x, screenToWorld.y, transform.position.z);
 
         //Vector3 lerp = Vector3.SmoothDamp(transform.position, newPos, ref velocity, smoothTime);
         //Vector3 lerp = Vector3.Lerp(transform.position, newPos, 3);
 
-        StartCoroutine(Move(transform.position, newPos));
+        StartCoroutine(Move(transform.position, desiredPos));
         //transform.position = newPos;
     }
     IEnumerator Move(Vector3 a, Vector3 b)
@@ -90,7 +99,8 @@ public class MouseController2D : MonoBehaviour, IPointerUpHandler, IPointerDownH
             transform.position = a + (desired * EasingFunctions.EaseOutCubic(i));
             yield return null;
         }
-        animator.Play("dartIdle");
+        transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+
         Actions.Shot.Invoke();
     }
 
@@ -125,4 +135,39 @@ public class MouseController2D : MonoBehaviour, IPointerUpHandler, IPointerDownH
         yield return null;
         callback(true);
     }*/
+    /*private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (enabled)
+        {
+            if (other.transform.position.z == transform.localPosition.z)
+            {
+                print("COLLISION");
+            }
+        }
+    }*/
+    /*private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (enabled)
+        {
+            otherCollider = other;
+            collisionListener = true;
+        }
+    }*/
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (enabled)
+        {
+            print("has entered");
+            collisionListener = true;
+            otherCollider = other;
+        }
+    }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (enabled)
+        {
+            print("exited");
+            hasExited = true;
+        }
+    }
 }

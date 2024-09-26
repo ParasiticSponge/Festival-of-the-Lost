@@ -199,15 +199,21 @@ public class CharacterController2D : MonoBehaviour
 	{
 		if (enter) Actions.EnterRoom.Invoke(doorNum);
 	}
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-		Actions.isOverDoor.Invoke(other, true);
-		doorNum = Int32.Parse(other.gameObject.name);
-		enter = true;
-    }
-    private void OnTriggerExit2D(Collider2D other)
-    {
-		Actions.isOverDoor.Invoke(other, false);
-		enter = false;
-    }
+	private void OnTriggerEnter2D(Collider2D other)
+	{
+		if (enabled)
+		{
+			Actions.isOverDoor.Invoke(other, true);
+			doorNum = Int32.Parse(other.gameObject.name);
+			enter = true;
+		}
+	}
+	private void OnTriggerExit2D(Collider2D other)
+	{
+		if (enabled)
+		{
+			Actions.isOverDoor.Invoke(other, false);
+			enter = false;
+		}
+	}
 }

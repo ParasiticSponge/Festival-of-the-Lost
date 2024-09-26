@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,7 +21,9 @@ public class GameManager : MonoBehaviour
     List<GameObject> background = new List<GameObject>();
     List<GameObject> foreground = new List<GameObject>();
     public List<BoxCollider2D> doors = new List<BoxCollider2D>();
+    Sprite dart;
 
+    float dartDistanceFromCam = -1;
     int currentRoom = 0;
     float initialGravity;
     bool hold;
@@ -30,6 +33,7 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         initialSprite = character.gameObject.GetComponent<SpriteRenderer>().sprite;
+        dart = darts[startingDart].GetComponent<SpriteRenderer>().sprite;
     }
     private void OnEnable()
     {
@@ -64,7 +68,7 @@ public class GameManager : MonoBehaviour
         }
 
         StartCoroutine(Functions.Fade(fade, 1));
-        StartCoroutine(Intro());
+        //StartCoroutine(Intro());
     }
 
     // Update is called once per frame
@@ -76,12 +80,12 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
 
-        TextBox.Text("What is your name?", 0.02f);
+        TextBox.Text("???", "What is your name?", 0.05f);
         TextBox.Text();
-        TextBox.Text("...", 0.2f);
+        TextBox.Text("???", "...", 0.2f);
         //TextBox.Text($"Oh! Your name is {character.charName}?", 0.05f, true);
         //I* ouputs the input of the player
-        TextBox.Text("I*: Mum? Dad? Where did you go?", 0.02f);
+        TextBox.Text("I*", "Mum? Dad? Where did you go?", 0.02f);
     }
 
     public void SwitchRoom(int n)
@@ -91,6 +95,8 @@ public class GameManager : MonoBehaviour
 
     IEnumerator SwitchRooms(int n)
     {
+        ResetDarts();
+
         switchScreen.speed = 1;
         switchScreen.Play("MenuSelectOption", 0, 0);
         foreach (BoxCollider2D collider in doors) { collider.enabled = false; }
@@ -111,6 +117,12 @@ public class GameManager : MonoBehaviour
                 background[currentRoom].SetActive(false);
                 foreground[currentRoom].SetActive(false);
                 foreach (BoxCollider2D collider in doors) { collider.enabled = true; }
+                switch (currentRoom)
+                {
+                    case 1:
+                        character.gameObject.transform.localPosition = new Vector3(-2.9f, -3.06f, 0);
+                        break;
+                }
                 currentRoom = 0;
 
                 character.enabled = true;
@@ -132,6 +144,10 @@ public class GameManager : MonoBehaviour
 
                 Vector3 room = background[currentRoom].transform.position;
                 character.gameObject.transform.position = new Vector3(room.x, room.y - 12, 0);
+                Vector3 pos = character.gameObject.transform.localPosition;
+                character.gameObject.transform.localPosition = new Vector3(pos.x, pos.y, dartDistanceFromCam);
+
+                character.gameObject.GetComponent<BoxCollider2D>().enabled = true;
                 character.gameObject.GetComponent<SpriteRenderer>().sprite = initialSprite;
                 character.gameObject.GetComponent<MouseController2D>().enabled = true;
                 character.gameObject.GetComponent<Animator>().SetBool("dart", true);
@@ -176,7 +192,7 @@ public class GameManager : MonoBehaviour
     {
         for (float i = 0; i < 101; i++)
         {
-            if (!hold) { print("this is 1"); Actions.Power.Invoke(i/100); break; }
+            if (!hold) { Actions.Power.Invoke(i/100); break; }
             powerBar.fillAmount = i/100;
             yield return null;
         }
@@ -184,7 +200,7 @@ public class GameManager : MonoBehaviour
         {
             for (float i = 100; i > -1; i--)
             {
-                if (!hold) { print("this is 2"); Actions.Power.Invoke(i / 100); break; }
+                if (!hold) { Actions.Power.Invoke(i / 100); break; }
                 powerBar.fillAmount = i / 100;
                 yield return null;
             }
@@ -194,22 +210,33 @@ public class GameManager : MonoBehaviour
 
     public void SwitchDart()
     {
-        Sprite dart = darts[startingDart].GetComponent<SpriteRenderer>().sprite;
-        Sprite thrown = character.GetComponent<SpriteRenderer>().sprite;
-
         //Play Animation of switching darts
-
+        StartCoroutine(MoveDart());
+    }
+    IEnumerator MoveDart()
+    {
+        yield return new WaitForSeconds(1);
+        Sprite thrown = character.GetComponent<SpriteRenderer>().sprite;
         darts[startingDart].transform.position = character.gameObject.transform.position;
         darts[startingDart].GetComponent<SpriteRenderer>().sprite = thrown;
 
         Vector3 room = background[currentRoom].transform.position;
         character.gameObject.transform.position = new Vector3(room.x, room.y - 12, 0);
+        Vector3 pos = character.gameObject.transform.localPosition;
+        character.gameObject.transform.localPosition = new Vector3(pos.x, pos.y, dartDistanceFromCam);
+
         character.gameObject.GetComponent<SpriteRenderer>().sprite = dart;
+        character.gameObject.GetComponent<Animator>().Play("dartIdle");
 
         character.gameObject.GetComponent<MouseController2D>().fire = false;
         startingDart++;
     }
     public void ResetDarts()
     {
+        for (int i = 1; i < darts.Count + 1; i++)
+        {
+            darts[i - 1].transform.localPosition = new Vector3(i + 1.5f, -3, dartDistanceFromCam);
+            darts[i - 1].GetComponent<SpriteRenderer>().sprite = dart;
+        }
     }
 }

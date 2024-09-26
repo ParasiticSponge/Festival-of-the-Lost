@@ -15,7 +15,12 @@ public class TextBox : MonoBehaviour
     static Canvas canvas;
     static GameObject go;
     static TextBox script;
+
     static List<string> texts = new List<string>();
+    static List<float> speeds = new List<float>();
+    static List<float> intensities = new List<float>();
+    static List<string> speakers = new List<string>();
+
     //static CharacterMovement character;
     //static carMovement character;
     static CharacterController2D character;
@@ -23,12 +28,16 @@ public class TextBox : MonoBehaviour
 
     public float speed;
     public float intensity;
+    public string speaker;
 
-    public static void Text(string text, float speed)
+    public static void Text(string speaker, string text, float speed)
     {
         textBox = FindObjectOfType<GameManager>().textBoxPrefab;
         canvas = FindObjectOfType<Canvas>();
+        speakers.Add(speaker);
         texts.Add(text);
+        speeds.Add(speed);
+        intensities.Add(0);
 
         if (texts.Count <= 1)
         {
@@ -36,15 +45,15 @@ public class TextBox : MonoBehaviour
             go.transform.SetParent(canvas.transform, false);
             script = go.AddComponent<TextBox>();
         }
-        script.speed = speed;
-        script.intensity = 0;
     }
-    public static void Text(string text, float speed, float intensity)
+    public static void Text(string speaker, string text, float speed, float intensity)
     {
         textBox = FindObjectOfType<GameManager>().textBoxPrefab;
-        textBox = FindObjectOfType<GameManager>().textBoxPrefab;
         canvas = FindObjectOfType<Canvas>();
+        speakers.Add(speaker);
         texts.Add(text);
+        speeds.Add(speed);
+        intensities.Add(intensity);
 
         if (texts.Count <= 1)
         {
@@ -52,14 +61,15 @@ public class TextBox : MonoBehaviour
             go.transform.SetParent(canvas.transform, false);
             script = go.AddComponent<TextBox>();
         }
-        script.speed = speed;
-        script.intensity = intensity;
     }
     public static void Text()
     {
         textBox = FindObjectOfType<GameManager>().textBoxPrefab;
         canvas = FindObjectOfType<Canvas>();
+        speakers.Add("");
         texts.Add("I*");
+        speeds.Add(0);
+        intensities.Add(0);
 
         if (texts.Count <= 1)
         {
@@ -67,23 +77,23 @@ public class TextBox : MonoBehaviour
             go.transform.SetParent(canvas.transform, false);
             script = go.AddComponent<TextBox>();
         }
-        script.intensity = 0;
     }
 
     private void Start()
     {
         //character = FindObjectOfType<CharacterMovement>();
         character = FindObjectOfType<CharacterController2D>();
-        mask = GameObject.Find("TextVisor").GetComponent<Animator>();
-        mask.gameObject.SetActive(true);
+        //mask = GameObject.Find("TextVisor").GetComponent<Animator>();
+        //mask.gameObject.SetActive(true);
+        mask = GetComponent<Animator>();
         mask.Play("ShowDialogue");
         Begin();
     }
     public void Begin()
     {
-        if (texts[0] != "I*") StartCoroutine(DisplayText(texts[0], speed, intensity));
+        if (texts[0] != "I*") StartCoroutine(DisplayText(speakers[0], texts[0], speeds[0], intensities[0]));
     }
-    IEnumerator DisplayText(string text, float speed, float intensity)
+    IEnumerator DisplayText(string speaker, string text, float speed, float intensity)
     {
         if (text.Contains("I*"))
         {
@@ -91,6 +101,13 @@ public class TextBox : MonoBehaviour
             text = tokens[0] + input + tokens[1];
             texts[0] = text;
         }
+        if (speaker.Contains("I*"))
+        {
+            speaker = input;
+            speakers[0] = speaker;
+        }
+
+        transform.GetChild(0).GetChild(3).GetComponent<Text>().text = speaker;
         yield return new WaitForSeconds(speed);
         for (int i = 0; i < text.Length; i++)
         {
@@ -109,12 +126,12 @@ public class TextBox : MonoBehaviour
         //TODO: tidy pyramid of if statements
         if (texts[0] != "I*")
         {
-            transform.GetChild(2).gameObject.SetActive(false);
+            transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
 
             if (dialogue != null)
             {
-                if (dialogue.Length == texts[0].Length) transform.GetChild(1).gameObject.SetActive(true);
-                else transform.GetChild(1).gameObject.SetActive(false);
+                if (dialogue.Length == texts[0].Length) transform.GetChild(0).GetChild(1).gameObject.SetActive(true);
+                else transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
             }
 
             if (Input.anyKeyDown && dialogue.Length == texts[0].Length)
@@ -131,8 +148,8 @@ public class TextBox : MonoBehaviour
         }
         else
         {
-            transform.GetChild(1).gameObject.SetActive(false);
-            transform.GetChild(2).gameObject.SetActive(true);
+            transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+            transform.GetChild(0).GetChild(2).gameObject.SetActive(true);
             ProcessString();
         }
     }
@@ -171,7 +188,11 @@ public class TextBox : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         mask.Play("ShowDialogue", 0, 0);
 
+        speakers.Remove(speakers[0]);
         texts.Remove(texts[0]);
+        speeds.Remove(speeds[0]);
+        intensities.Remove(intensities[0]);
+
         dialogue = "";
         Begin();
     }
