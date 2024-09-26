@@ -8,7 +8,6 @@ public class MouseController2D : MonoBehaviour
 {
     Vector3 poop;
     public bool fire;
-    public bool canClick = true;
     Animator animator;
     Vector3 velocity;
     public float smoothTime = 0.124f;
@@ -44,16 +43,16 @@ public class MouseController2D : MonoBehaviour
             screenToWorld.z = transform.position.z;
 
             transform.position = screenToWorld;
-        }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            //StartCoroutine(Move(transform.position, poop));
-            if (canClick) Actions.Hold.Invoke();
-        }
-        if(Input.GetMouseButtonUp(0))
-        {
-            if (canClick) Actions.Release.Invoke();
+            if (Input.GetMouseButtonDown(0))
+            {
+                //StartCoroutine(Move(transform.position, poop));
+                Actions.Hold.Invoke();
+            }
+            if (Input.GetMouseButtonUp(0))
+            {
+                Actions.Release.Invoke();
+            }
         }
 
         //>:( silly 2D collision detection only happening once and 3D doesn't help
@@ -63,8 +62,9 @@ public class MouseController2D : MonoBehaviour
             if (otherCollider.transform.position.z == transform.localPosition.z && !hasExited)
             {
                 //do stuff
-                print("collision");
+                Actions.HitBalloon.Invoke();
                 otherCollider.GetComponent<Animator>().Play("BalloonPop", 0, 0);
+                otherCollider.GetComponent<CircleCollider2D>().enabled = false;
                 collisionListener = false;
             }
             if (hasExited)
@@ -94,7 +94,7 @@ public class MouseController2D : MonoBehaviour
     {
         Vector3 desired = b - a;
         //float FPS = 1.0f / Time.deltaTime;
-        for (float i = 0; i <= 1; i+= 0.01f)
+        for (float i = 0; i <= 1; i+= Time.deltaTime)
         {
             transform.position = a + (desired * EasingFunctions.EaseOutCubic(i));
             yield return null;

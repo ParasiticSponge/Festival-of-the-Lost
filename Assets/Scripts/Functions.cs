@@ -63,4 +63,15 @@ public class Functions : MonoBehaviour
 
         return new Quaternion(x, y, z, w);
     }
+
+    public static IEnumerator Move(Vector3 a, Vector3 b, Action<Vector3> transform)
+    {
+        Vector3 desired = b - a;
+        //float FPS = 1.0f / Time.deltaTime;
+        for (float i = 0; i <= 1; i += Time.deltaTime)
+        {
+            transform.Invoke(a + (desired * EasingFunctions.EaseOutCubic(i)));
+            yield return null;
+        }
+    }
 }

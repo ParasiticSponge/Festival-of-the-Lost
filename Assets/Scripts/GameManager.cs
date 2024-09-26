@@ -9,13 +9,20 @@ public class GameManager : MonoBehaviour
     public Image powerBar;
     public GameObject fade;
     public GameObject textBoxPrefab;
-    public CharacterController2D character;
+    //public CharacterController2D character;
+    public GameObject character;
     public Animator switchScreen;
     public Animator gameCanvas;
     public GameObject UI;
     public List<GameObject> darts;
+    public List<GameObject> balloons;
+    public Text scoreDartsText;
+    int scoreDarts = 0;
+    int tickets = 0;
 
     Sprite initialSprite;
+    Sprite balloon;
+
     public GameObject backgrounds;
     public GameObject foregrounds;
     List<GameObject> background = new List<GameObject>();
@@ -33,6 +40,21 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         initialSprite = character.gameObject.GetComponent<SpriteRenderer>().sprite;
+
+        GameObject f2 = foregrounds.transform.GetChild(1).gameObject;
+        foreach (Transform t2 in f2.transform)
+        {
+            if (t2.gameObject.name.Contains("Balloon"))
+            {
+                balloons.Add(t2.gameObject);
+            }
+            if (t2.gameObject.name.Contains("ThrowDart"))
+            {
+                darts.Add(t2.gameObject);
+            }
+        }
+
+        balloon = balloons[0].GetComponent<SpriteRenderer>().sprite;
         dart = darts[startingDart].GetComponent<SpriteRenderer>().sprite;
     }
     private void OnEnable()
@@ -44,6 +66,7 @@ public class GameManager : MonoBehaviour
         Actions.Hold += Hold;
         Actions.Release += Release;
         Actions.Shot += SwitchDart;
+        Actions.HitBalloon += ScoreDarts;
     }
     private void OnDisable()
     {
@@ -53,6 +76,7 @@ public class GameManager : MonoBehaviour
         Actions.Hold -= Hold;
         Actions.Release -= Release;
         Actions.Shot -= SwitchDart;
+        Actions.HitBalloon -= ScoreDarts;
     }
     // Start is called before the first frame update
     void Start()
@@ -95,15 +119,13 @@ public class GameManager : MonoBehaviour
 
     IEnumerator SwitchRooms(int n)
     {
-        ResetDarts();
-
         switchScreen.speed = 1;
         switchScreen.Play("MenuSelectOption", 0, 0);
         foreach (BoxCollider2D collider in doors) { collider.enabled = false; }
 
-        character.enabled = false;
+        character.GetComponent<CharacterController2D>().enabled = false;
         //mouseInteract.enabled = true;
-        character.gameObject.GetComponent<Rigidbody2D>().gravityScale = 0;
+        character.GetComponent<Rigidbody2D>().gravityScale = 0;
 
         yield return new WaitForSeconds(1);
         switch (n)
@@ -120,20 +142,21 @@ public class GameManager : MonoBehaviour
                 switch (currentRoom)
                 {
                     case 1:
-                        character.gameObject.transform.localPosition = new Vector3(-2.9f, -3.06f, 0);
+                        character.transform.localPosition = new Vector3(-2.9f, -3.06f, 0);
                         break;
                 }
                 currentRoom = 0;
 
-                character.enabled = true;
+                character.GetComponent<CharacterController2D>().enabled = true;
                 //mouseInteract.enabled = false;
-                character.gameObject.GetComponent<Rigidbody2D>().gravityScale = initialGravity;
-                character.gameObject.GetComponent<Animator>().SetBool("dart", false);
+                character.GetComponent<Rigidbody2D>().gravityScale = initialGravity;
+                character.GetComponent<Animator>().SetBool("dart", false);
                 Camera.main.GetComponent<CameraFollow>().enabled = true;
-                character.gameObject.GetComponent<MouseController2D>().enabled = false;
+                character.GetComponent<MouseController2D>().enabled = false;
                 UI.SetActive(false);
                 break;
             case 1:
+                ResetDartsGame();
                 switchScreen.StartPlayback();
                 switchScreen.speed = -1;
                 switchScreen.Play("MenuSelectOption", -1, float.NegativeInfinity);
@@ -143,14 +166,14 @@ public class GameManager : MonoBehaviour
                 currentRoom = 1;
 
                 Vector3 room = background[currentRoom].transform.position;
-                character.gameObject.transform.position = new Vector3(room.x, room.y - 12, 0);
-                Vector3 pos = character.gameObject.transform.localPosition;
-                character.gameObject.transform.localPosition = new Vector3(pos.x, pos.y, dartDistanceFromCam);
+                character.transform.position = new Vector3(room.x, room.y - 12, 0);
+                Vector3 pos = character.transform.localPosition;
+                character.transform.localPosition = new Vector3(pos.x, pos.y, dartDistanceFromCam);
 
-                character.gameObject.GetComponent<BoxCollider2D>().enabled = true;
-                character.gameObject.GetComponent<SpriteRenderer>().sprite = initialSprite;
-                character.gameObject.GetComponent<MouseController2D>().enabled = true;
-                character.gameObject.GetComponent<Animator>().SetBool("dart", true);
+                character.GetComponent<BoxCollider2D>().enabled = true;
+                character.GetComponent<SpriteRenderer>().sprite = initialSprite;
+                character.GetComponent<MouseController2D>().enabled = true;
+                character.GetComponent<Animator>().SetBool("dart", true);
                 Camera.main.GetComponent<CameraFollow>().enabled = false;
                 UI.SetActive(true);
                 Camera.main.transform.position = new Vector3(room.x, room.y, -10);
@@ -210,33 +233,55 @@ public class GameManager : MonoBehaviour
 
     public void SwitchDart()
     {
-        //Play Animation of switching darts
-        StartCoroutine(MoveDart());
+        if (startingDart < darts.Count)
+        {
+            //Play Animation of switching darts
+            StartCoroutine(MoveDart());
+        }
     }
     IEnumerator MoveDart()
     {
-        yield return new WaitForSeconds(1);
+        //next dart to starting position
+        Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        screenToWorld.y = darts[startingDart].transform.position.y;
+        screenToWorld.z = darts[startingDart].transform.position.z;
+        yield return StartCoroutine(Functions.Move(darts[startingDart].transform.position, screenToWorld, (value => darts[startingDart].transform.position = value)));
+
         Sprite thrown = character.GetComponent<SpriteRenderer>().sprite;
-        darts[startingDart].transform.position = character.gameObject.transform.position;
+        darts[startingDart].transform.position = character.transform.position;
         darts[startingDart].GetComponent<SpriteRenderer>().sprite = thrown;
 
         Vector3 room = background[currentRoom].transform.position;
-        character.gameObject.transform.position = new Vector3(room.x, room.y - 12, 0);
-        Vector3 pos = character.gameObject.transform.localPosition;
-        character.gameObject.transform.localPosition = new Vector3(pos.x, pos.y, dartDistanceFromCam);
+        character.transform.position = new Vector3(room.x, room.y - 12, 0);
+        Vector3 pos = character.transform.localPosition;
+        character.transform.localPosition = new Vector3(pos.x, pos.y, dartDistanceFromCam);
 
-        character.gameObject.GetComponent<SpriteRenderer>().sprite = dart;
-        character.gameObject.GetComponent<Animator>().Play("dartIdle");
+        character.GetComponent<SpriteRenderer>().sprite = dart;
+        character.GetComponent<Animator>().Play("dartIdle");
 
-        character.gameObject.GetComponent<MouseController2D>().fire = false;
+        character.GetComponent<MouseController2D>().fire = false;
         startingDart++;
     }
-    public void ResetDarts()
+    public void ResetDartsGame()
     {
+        scoreDarts = 0;
+        character.GetComponent<MouseController2D>().fire = false;
+        startingDart = 0;
         for (int i = 1; i < darts.Count + 1; i++)
         {
             darts[i - 1].transform.localPosition = new Vector3(i + 1.5f, -3, dartDistanceFromCam);
             darts[i - 1].GetComponent<SpriteRenderer>().sprite = dart;
         }
+        for (int i = 0; i < balloons.Count; i++)
+        {
+            balloons[i].GetComponent<SpriteRenderer>().sprite = balloon;
+            balloons[i].GetComponent<CircleCollider2D>().enabled = true;
+        }
+    }
+    public void ScoreDarts()
+    {
+        tickets++;
+        scoreDarts++;
+        scoreDartsText.text = scoreDarts.ToString();
     }
 }

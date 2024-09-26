@@ -15,4 +15,5 @@ public class Actions
     public static Action Release;
     public static Action<float> Power;
     public static Action Shot;
+    public static Action HitBalloon;
 }
