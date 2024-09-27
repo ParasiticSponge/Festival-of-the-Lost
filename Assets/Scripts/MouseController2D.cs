@@ -12,6 +12,7 @@ public class MouseController2D : MonoBehaviour
     Vector3 velocity;
     public float smoothTime = 0.124f;
     Rigidbody2D rb;
+    float speed = 1.5f;
 
     bool collisionListener;
     bool hasExited;
@@ -59,7 +60,8 @@ public class MouseController2D : MonoBehaviour
         //collisions also still triggers when disabled!!!
         if (collisionListener)
         {
-            if (otherCollider.transform.position.z == transform.localPosition.z && !hasExited)
+            //if (otherCollider.transform.position.z == transform.localPosition.z && !hasExited)
+            if (transform.localPosition.z == -1 && !hasExited)
             {
                 //do stuff
                 Actions.HitBalloon.Invoke();
@@ -94,12 +96,13 @@ public class MouseController2D : MonoBehaviour
     {
         Vector3 desired = b - a;
         //float FPS = 1.0f / Time.deltaTime;
-        for (float i = 0; i <= 1; i+= Time.deltaTime)
+        for (float i = 0; i <= 1; i+= Time.deltaTime * speed)
         {
             transform.position = a + (desired * EasingFunctions.EaseOutCubic(i));
             yield return null;
         }
         transform.position = new Vector3(transform.position.x, transform.position.y, 0);
+        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, -1);
 
         Actions.Shot.Invoke();
     }

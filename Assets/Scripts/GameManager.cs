@@ -30,7 +30,7 @@ public class GameManager : MonoBehaviour
     public List<BoxCollider2D> doors = new List<BoxCollider2D>();
     Sprite dart;
 
-    float dartDistanceFromCam = -1;
+    float dartDistanceFromCam = -2;
     int currentRoom = 0;
     float initialGravity;
     bool hold;
