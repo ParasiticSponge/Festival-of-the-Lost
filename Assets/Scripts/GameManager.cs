@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     public List<GameObject> darts;
     public List<GameObject> balloons;
     public Text scoreDartsText;
+    public Text scoreTicketsText;
     int scoreDarts = 0;
     int tickets = 0;
 
@@ -61,6 +62,7 @@ public class GameManager : MonoBehaviour
     {
         //var addCar = new Action<string, decimal>((number, test) => { } );
         Actions.EnterRoom += SwitchRoom;
+        Actions.isOverDoor += DoorAnim;
         Actions.isOverDoor += DoorAnim;
         Actions.Back += showUI;
         Actions.Hold += Hold;
@@ -188,7 +190,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(2);
         switchScreen.StopPlayback();
     }
-    public void DoorAnim(Collider2D obj, bool visible)
+    public void DoorAnim(GameObject obj, bool visible)
     {
         obj.transform.GetChild(0).gameObject.SetActive(visible);
     }
@@ -283,5 +285,6 @@ public class GameManager : MonoBehaviour
         tickets++;
         scoreDarts++;
         scoreDartsText.text = scoreDarts.ToString();
+        scoreTicketsText.text = tickets.ToString();
     }
 }

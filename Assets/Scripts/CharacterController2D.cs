@@ -13,8 +13,8 @@ public class CharacterController2D : MonoBehaviour
 	bool jump = false;
 	float horizontal = 0;
 	public float gravity = 3;
-	bool enter;
-	int doorNum;
+	public bool enter;
+	public int doorNum;
 
 
     Animator animator;
@@ -203,7 +203,7 @@ public class CharacterController2D : MonoBehaviour
 	{
 		if (enabled)
 		{
-			Actions.isOverDoor.Invoke(other, true);
+			Actions.isOverDoor.Invoke(other.gameObject, true);
 			doorNum = Int32.Parse(other.gameObject.name);
 			enter = true;
 		}
@@ -212,7 +212,7 @@ public class CharacterController2D : MonoBehaviour
 	{
 		if (enabled)
 		{
-			Actions.isOverDoor.Invoke(other, false);
+			Actions.isOverDoor.Invoke(other.gameObject, false);
 			enter = false;
 		}
 	}

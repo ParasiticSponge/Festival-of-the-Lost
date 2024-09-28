@@ -65,6 +65,7 @@ public class MouseController2D : MonoBehaviour
             {
                 //do stuff
                 Actions.HitBalloon.Invoke();
+                print("POPPED");
                 otherCollider.GetComponent<Animator>().Play("BalloonPop", 0, 0);
                 otherCollider.GetComponent<CircleCollider2D>().enabled = false;
                 collisionListener = false;
