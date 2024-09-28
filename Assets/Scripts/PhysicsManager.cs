@@ -9,6 +9,7 @@ public class PhysicsManager : MonoBehaviour
     CircleCollider2D[] circCollision;
     Collision2D[] collision;
     CharacterController2D character;
+    float count = 0;
     private void Awake()
     {
         character = FindObjectOfType<CharacterController2D>();
@@ -19,6 +20,7 @@ public class PhysicsManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        count = 0;
         foreach (Collision2D this_collision in collision)
         {
             //print(this_collision.gameObject.name);
@@ -49,9 +51,7 @@ public class PhysicsManager : MonoBehaviour
 
                     if (intersection_depth > 0.0f)
                     {
-                        Actions.isOverDoor.Invoke(this_collision.gameObject, true);
-                        character.doorNum = Int32.Parse(this_collision.gameObject.name);
-                        character.enter = true;
+                        count++;
                         /*// AI Resolution: Create a collision event that the gameobjects can respond to
 
                         float total_mass = this_collision.mass + other_collision.mass;
@@ -65,11 +65,18 @@ public class PhysicsManager : MonoBehaviour
                         // Move this using other_to_this vector
                         this_collision.transform.position += other_to_this.normalized * intersection_depth * other_mass_ratio;*/
                     }
+                    if (count > 0)
+                    {
+                        Actions.isOverDoor.Invoke(this_collision.gameObject, true);
+                        character.doorNum = Int32.Parse(this_collision.gameObject.name);
+                        character.enter = true;
+                    }
                     else
                     {
                         Actions.isOverDoor.Invoke(this_collision.gameObject, false);
                         character.enter = false;
                     }
+                    print(character.enter);
                 //}
             }
         }

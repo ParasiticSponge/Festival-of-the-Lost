@@ -69,7 +69,6 @@ public class GameManager : MonoBehaviour
         //var addCar = new Action<string, decimal>((number, test) => { } );
         Actions.EnterRoom += SwitchRoom;
         Actions.isOverDoor += DoorAnim;
-        Actions.isOverDoor += DoorAnim;
         Actions.Back += showUI;
         Actions.Hold += Hold;
         Actions.Release += Release;
@@ -122,52 +121,40 @@ public class GameManager : MonoBehaviour
 
     IEnumerator SwitchRooms(int n)
     {
+        character.GetComponent<MouseController2D>().fire = true;
         switchScreen.speed = 1;
         switchScreen.Play("MenuSelectOption", 0, 0);
         foreach (Collision2D collider in door) { collider.enabled = false; }
-        //foreach (BoxCollider2D collider in door2 ) { collider.enabled = false; }
-
-        character.GetComponent<CharacterController2D>().enabled = false;
-        //mouseInteract.enabled = true;
-        character.GetComponent<Rigidbody2D>().gravityScale = 0;
 
         yield return new WaitForSeconds(1);
+        background[currentRoom].SetActive(false);
+        foreground[currentRoom].SetActive(false);
         switch (n)
         {
             //this option brings user back to main circus
             case 0:
-                switchScreen.StartPlayback();
-                switchScreen.speed = -1;
-                switchScreen.Play("MenuSelectOption", -1, float.NegativeInfinity);
-
-                background[currentRoom].SetActive(false);
-                foreground[currentRoom].SetActive(false);
                 foreach (Collision2D collider in door) { collider.enabled = true; }
-                //foreach (BoxCollider2D collider in door2) { collider.enabled = true; }
                 switch (currentRoom)
                 {
                     case 1:
-                        //character.transform.localPosition = new Vector3(-2.9f, -3.06f, 0);
+                        character.transform.localPosition = new Vector3(-2.9f, -3.06f, 0);
+                        break;
+                    case 2:
+                        character.transform.localPosition = new Vector3(17, -3.06f, 0);
                         break;
                 }
                 currentRoom = 0;
 
-                character.GetComponent<CharacterController2D>().enabled = true;
-                //mouseInteract.enabled = false;
                 character.GetComponent<Rigidbody2D>().gravityScale = initialGravity;
-                character.GetComponent<Animator>().SetBool("dart", false);
-                Camera.main.GetComponent<CameraFollow>().enabled = true;
+                character.GetComponent<CharacterController2D>().enabled = true;
                 character.GetComponent<MouseController2D>().enabled = false;
+                character.GetComponent<Animator>().SetBool("dart", false);
+                character.GetComponent<CircleCollider2D>().enabled = true;
+                Camera.main.GetComponent<CameraFollow>().enabled = true;
                 UI.SetActive(false);
                 break;
             case 1:
                 ResetDartsGame();
-                switchScreen.StartPlayback();
-                switchScreen.speed = -1;
-                switchScreen.Play("MenuSelectOption", -1, float.NegativeInfinity);
-
-                background[currentRoom].SetActive(false);
-                foreground[currentRoom].SetActive(false);
                 currentRoom = 1;
 
                 Vector3 room = background[currentRoom].transform.position;
@@ -175,17 +162,25 @@ public class GameManager : MonoBehaviour
                 Vector3 pos = character.transform.localPosition;
                 character.transform.localPosition = new Vector3(pos.x, pos.y, dartDistanceFromCam);
 
-                character.GetComponent<BoxCollider2D>().enabled = true;
-                character.GetComponent<SpriteRenderer>().sprite = initialSprite;
+                character.GetComponent<CharacterController2D>().enabled = false;
                 character.GetComponent<MouseController2D>().enabled = true;
+                character.GetComponent<Rigidbody2D>().gravityScale = 0;
+                character.GetComponent<SpriteRenderer>().sprite = initialSprite;
                 character.GetComponent<Animator>().SetBool("dart", true);
+                character.GetComponent<CircleCollider2D>().enabled = false;
                 Camera.main.GetComponent<CameraFollow>().enabled = false;
-                UI.SetActive(true);
                 Camera.main.transform.position = new Vector3(room.x, room.y, -10);
+                UI.SetActive(true);
                 break;
             case 2:
+                currentRoom = 2;
+
+                character.transform.localPosition = new Vector3(0, -33.5f, 0);
                 break;
         }
+        switchScreen.StartPlayback();
+        switchScreen.speed = -1;
+        switchScreen.Play("MenuSelectOption", -1, float.NegativeInfinity);
 
         background[currentRoom].SetActive(true);
         foreground[currentRoom].SetActive(true);
