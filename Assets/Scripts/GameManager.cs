@@ -28,7 +28,9 @@ public class GameManager : MonoBehaviour
     public GameObject foregrounds;
     List<GameObject> background = new List<GameObject>();
     List<GameObject> foreground = new List<GameObject>();
-    public List<BoxCollider2D> doors = new List<BoxCollider2D>();
+    public GameObject doors;
+    List<Collision2D> door = new List<Collision2D>();
+    //List<BoxCollider2D> door2 = new List<BoxCollider2D>();
     Sprite dart;
 
     float dartDistanceFromCam = -2;
@@ -41,7 +43,6 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         initialSprite = character.gameObject.GetComponent<SpriteRenderer>().sprite;
-
         GameObject f2 = foregrounds.transform.GetChild(1).gameObject;
         foreach (Transform t2 in f2.transform)
         {
@@ -53,6 +54,11 @@ public class GameManager : MonoBehaviour
             {
                 darts.Add(t2.gameObject);
             }
+        }
+        foreach (Transform t in doors.transform)
+        {
+            door.Add(t.GetComponent<Collision2D>());
+            //door2.Add(t.GetComponent<BoxCollider2D>());
         }
 
         balloon = balloons[0].GetComponent<SpriteRenderer>().sprite;
@@ -97,11 +103,6 @@ public class GameManager : MonoBehaviour
         //StartCoroutine(Intro());
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     IEnumerator Intro()
     {
         yield return new WaitForSeconds(1);
@@ -123,7 +124,8 @@ public class GameManager : MonoBehaviour
     {
         switchScreen.speed = 1;
         switchScreen.Play("MenuSelectOption", 0, 0);
-        foreach (BoxCollider2D collider in doors) { collider.enabled = false; }
+        foreach (Collision2D collider in door) { collider.enabled = false; }
+        //foreach (BoxCollider2D collider in door2 ) { collider.enabled = false; }
 
         character.GetComponent<CharacterController2D>().enabled = false;
         //mouseInteract.enabled = true;
@@ -140,11 +142,12 @@ public class GameManager : MonoBehaviour
 
                 background[currentRoom].SetActive(false);
                 foreground[currentRoom].SetActive(false);
-                foreach (BoxCollider2D collider in doors) { collider.enabled = true; }
+                foreach (Collision2D collider in door) { collider.enabled = true; }
+                //foreach (BoxCollider2D collider in door2) { collider.enabled = true; }
                 switch (currentRoom)
                 {
                     case 1:
-                        character.transform.localPosition = new Vector3(-2.9f, -3.06f, 0);
+                        //character.transform.localPosition = new Vector3(-2.9f, -3.06f, 0);
                         break;
                 }
                 currentRoom = 0;
@@ -186,9 +189,6 @@ public class GameManager : MonoBehaviour
 
         background[currentRoom].SetActive(true);
         foreground[currentRoom].SetActive(true);
-
-        yield return new WaitForSeconds(2);
-        switchScreen.StopPlayback();
     }
     public void DoorAnim(GameObject obj, bool visible)
     {
