@@ -68,9 +68,13 @@ public class MenuManager_2 : MonoBehaviour
     }
     IEnumerator playAnimAndLoad()
     {
+        //TODO: switch animator from canvas to individual and play pop anim + sound from MenuButton.cs
         switch (selected.GetComponent<MenuButton>().type)
         {
             case MenuButton.TYPE.PLAY:
+                animator[0].Play("pop");
+                break;
+            case MenuButton.TYPE.SETTINGS:
                 animator[0].Play("pop");
                 break;
             case MenuButton.TYPE.EXIT:
