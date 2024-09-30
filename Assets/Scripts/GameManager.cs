@@ -74,6 +74,7 @@ public class GameManager : MonoBehaviour
         Actions.Release += Release;
         Actions.Shot += SwitchDart;
         Actions.HitBalloon += ScoreDarts;
+        Actions.Talk += Talk;
     }
     private void OnDisable()
     {
@@ -84,6 +85,7 @@ public class GameManager : MonoBehaviour
         Actions.Release -= Release;
         Actions.Shot -= SwitchDart;
         Actions.HitBalloon -= ScoreDarts;
+        Actions.Talk -= Talk;
     }
     // Start is called before the first frame update
     void Start()
@@ -99,7 +101,7 @@ public class GameManager : MonoBehaviour
         }
 
         StartCoroutine(Functions.Fade(fade, 1));
-        //StartCoroutine(Intro());
+        StartCoroutine(Intro());
     }
 
     IEnumerator Intro()
@@ -281,5 +283,23 @@ public class GameManager : MonoBehaviour
         scoreDarts++;
         scoreDartsText.text = scoreDarts.ToString();
         scoreTicketsText.text = tickets.ToString();
+    }
+
+    public void Talk(GameObject obj)
+    {
+        print("talking!!!");
+        obj.transform.GetChild(0).gameObject.SetActive(false);
+        TextBox.Text(obj.GetComponent<NPC_AI>().charName, "Hello!", 0.02f);
+        obj.GetComponent<NPC_AI>().canMove = 0;
+        StartCoroutine(Talking(obj));
+    }
+    public IEnumerator Talking(GameObject obj)
+    {
+        TextBox text = FindObjectOfType<TextBox>();
+        while (text != null)
+        {
+            yield return null;
+        }
+        obj.GetComponent<NPC_AI>().canMove = 1;
     }
 }

@@ -8,6 +8,9 @@ public class MenuManager_2 : MonoBehaviour
 {
     public Vector3 position;
 
+    public GameObject mainMenu;
+    public GameObject settings;
+
     PointerEventData pointerEventData;
     public EventSystem eventSystem;
     GameObject selected;
@@ -16,10 +19,12 @@ public class MenuManager_2 : MonoBehaviour
     private void OnEnable()
     {
         Actions.Begin += PlayAnimation;
+        Actions.Settings += Move;
     }
     private void OnDisable()
     {
         Actions.Begin -= PlayAnimation;
+        Actions.Settings -= Move;
     }
 
     // Start is called before the first frame update
@@ -81,5 +86,22 @@ public class MenuManager_2 : MonoBehaviour
         animator[1].Play("MenuSelectOption");
         yield return new WaitForSeconds(1f);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+    }
+    public void Move(bool isOn)
+    {
+        Vector3 left = new Vector3(-700, 0, 0);
+        Vector3 centre = new Vector3(0, 0, 0);
+        Vector3 right = new Vector3(700, 0, 0);
+        switch (isOn)
+        {
+            case true:
+                StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, left, value => mainMenu.GetComponent<RectTransform>().localPosition = value));
+                StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, centre, value => settings.GetComponent<RectTransform>().localPosition = value));
+                break;
+            case false:
+                StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, centre, value => mainMenu.GetComponent<RectTransform>().localPosition = value));
+                StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, right, value => settings.GetComponent<RectTransform>().localPosition = value));
+                break;
+        }
     }
 }

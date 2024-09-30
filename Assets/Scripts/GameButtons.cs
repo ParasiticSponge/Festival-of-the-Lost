@@ -8,13 +8,22 @@ public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
 {
     public enum TYPE
     {
-        back
+        back,
+        backToMenu
     }
     public TYPE type;
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        Actions.Back.Invoke(type);
+        switch (type)
+        {
+            case TYPE.back:
+                Actions.Back.Invoke(type);
+                break;
+            case TYPE.backToMenu:
+                Actions.Settings.Invoke(false);
+                break;
+        }
     }
     public void OnPointerDown(PointerEventData eventData)
     {

@@ -29,6 +29,8 @@ public class PhysicsManager : MonoBehaviour
                 //print(other_collision.gameObject.name);
                 // Do not detect collision with yourself.
                 if (this_collision == other_collision) continue;
+                //weird effects happen with arrow animation if NPCs are included
+                if (!other_collision.GetComponent<CharacterController2D>()) continue;
 
                 // Circle to Circle collision.
                 /*if (this_collision.type == Collision2D.Type.Circle && other_collision.type == Collision2D.Type.Circle)

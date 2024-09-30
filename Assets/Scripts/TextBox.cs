@@ -9,7 +9,7 @@ public class TextBox : MonoBehaviour
 {
     static string dialogue;
     static string input;
-    static float shakeIntensity;
+
     static GameObject textBox;
     static Animator mask;
     static Canvas canvas;
@@ -25,10 +25,6 @@ public class TextBox : MonoBehaviour
     //static carMovement character;
     static CharacterController2D character;
     static List<char> pauses = new List<char>() { '.', '?', '!'};
-
-    public float speed;
-    public float intensity;
-    public string speaker;
 
     public static void Text(string speaker, string text, float speed)
     {
@@ -192,14 +188,20 @@ public class TextBox : MonoBehaviour
         texts.Remove(texts[0]);
         speeds.Remove(speeds[0]);
         intensities.Remove(intensities[0]);
-
         dialogue = "";
+
         Begin();
     }
     IEnumerator Destroy()
     {
         mask.Play("HideDialogue", 0, 0);
         yield return new WaitForSeconds(0.5f);
+
+        speakers.Remove(speakers[0]);
+        texts.Remove(texts[0]);
+        speeds.Remove(speeds[0]);
+        intensities.Remove(intensities[0]);
+        dialogue = "";
 
         character.canMove = 1;
         mask.gameObject.SetActive(false);

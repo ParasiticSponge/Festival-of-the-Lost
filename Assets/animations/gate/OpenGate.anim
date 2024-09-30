@@ -35,7 +35,7 @@ AnimationClip:
     - time: 1.5
       value: {fileID: 21300000, guid: 6e4c1debcb69f6c4eb4e300e4debc0e9, type: 3}
     attribute: m_Sprite
-    path: GateLeft
+    path: Main/GateLeft
     classID: 114
     script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
     flags: 2
@@ -56,7 +56,7 @@ AnimationClip:
     - time: 1.5
       value: {fileID: 21300000, guid: 6e4c1debcb69f6c4eb4e300e4debc0e9, type: 3}
     attribute: m_Sprite
-    path: GateRight
+    path: Main/GateRight
     classID: 114
     script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
     flags: 2
@@ -68,7 +68,7 @@ AnimationClip:
   m_ClipBindingConstant:
     genericBindings:
     - serializedVersion: 2
-      path: 1372287852
+      path: 3409242681
       attribute: 2015549526
       script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
       typeID: 114
@@ -77,7 +77,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 3012304281
+      path: 2820097915
       attribute: 2015549526
       script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
       typeID: 114

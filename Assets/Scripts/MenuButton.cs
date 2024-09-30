@@ -11,6 +11,7 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
     public enum TYPE
     {
         PLAY,
+        SETTINGS,
         EXIT
     }
     public TYPE type;
@@ -36,6 +37,9 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
             case TYPE.PLAY:
                 //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
                 Actions.Begin.Invoke();
+                break;
+            case TYPE.SETTINGS:
+                Actions.Settings.Invoke(true);
                 break;
             case TYPE.EXIT:
                 Application.Quit();
