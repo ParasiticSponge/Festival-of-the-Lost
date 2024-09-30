@@ -96,9 +96,12 @@ public class MouseController2D : MonoBehaviour
     IEnumerator Move(Vector3 a, Vector3 b)
     {
         Vector3 desired = b - a;
+        float acceleration = 0;
         //float FPS = 1.0f / Time.deltaTime;
         for (float i = 0; i <= 1; i+= Time.deltaTime * speed)
         {
+            acceleration += 0.01f;
+            i += acceleration;
             transform.position = a + (desired * EasingFunctions.EaseOutCubic(i));
             yield return null;
         }

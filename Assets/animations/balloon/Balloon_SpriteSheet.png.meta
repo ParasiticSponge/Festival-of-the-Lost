@@ -1,0 +1,355 @@
+fileFormatVersion: 2
+guid: 617a86b049b5d6a46a61f2a7edd80549
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Balloon_SpriteSheet_0
+      rect:
+        serializedVersion: 2
+        x: 494
+        y: 1531
+        width: 292
+        height: 430
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3c1b0a88bcadc21468c680debf7f923c
+      internalID: -1757675767
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Balloon_SpriteSheet_1
+      rect:
+        serializedVersion: 2
+        x: 862
+        y: 1542
+        width: 324
+        height: 419
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f7b5db6f53244e46844e2da948ee591
+      internalID: 1305693075
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Balloon_SpriteSheet_2
+      rect:
+        serializedVersion: 2
+        x: 1218
+        y: 1582
+        width: 380
+        height: 360
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef6837d2f8eee4c41a424349aa4be43f
+      internalID: -387133874
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Balloon_SpriteSheet_3
+      rect:
+        serializedVersion: 2
+        x: 454
+        y: 755
+        width: 372
+        height: 568
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a74b8f16279692b488af36dc17c7f7b7
+      internalID: 43175769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Balloon_SpriteSheet_5
+      rect:
+        serializedVersion: 2
+        x: 1221
+        y: 755
+        width: 366
+        height: 568
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f7b5d6f626ac18d498ce0ed5e0a1a9a1
+      internalID: 6741322
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Balloon_SpriteSheet_4
+      rect:
+        serializedVersion: 2
+        x: 828
+        y: 755
+        width: 390
+        height: 568
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b6bdd4ccdf2ef3947b51b3a7cebbebf4
+      internalID: 296536021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Balloon_SpriteSheet_6
+      rect:
+        serializedVersion: 2
+        x: 454
+        y: 92
+        width: 372
+        height: 568
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3f8dcde7822163544a5f890eb4116bdf
+      internalID: -1163662304
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Balloon_SpriteSheet_7
+      rect:
+        serializedVersion: 2
+        x: 828
+        y: 92
+        width: 390
+        height: 568
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c9ba22d7803c6984b8f5b9f499b841f8
+      internalID: 1764880522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Balloon_SpriteSheet_8
+      rect:
+        serializedVersion: 2
+        x: 1221
+        y: 92
+        width: 366
+        height: 568
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6aca07bcf01ae834c8614ef69f145aec
+      internalID: 77603092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      Balloon_SpriteSheet_0: -1757675767
+      Balloon_SpriteSheet_1: 1305693075
+      Balloon_SpriteSheet_10: -732881476
+      Balloon_SpriteSheet_12: -203481901
+      Balloon_SpriteSheet_13: 1043363026
+      Balloon_SpriteSheet_14: 3186491
+      Balloon_SpriteSheet_15: -1150686388
+      Balloon_SpriteSheet_16: -2115986998
+      Balloon_SpriteSheet_17: 104448742
+      Balloon_SpriteSheet_18: 57871002
+      Balloon_SpriteSheet_2: -387133874
+      Balloon_SpriteSheet_20: -1556859011
+      Balloon_SpriteSheet_21: 1559307049
+      Balloon_SpriteSheet_22: 650508658
+      Balloon_SpriteSheet_23: 1611348657
+      Balloon_SpriteSheet_24: -765717522
+      Balloon_SpriteSheet_25: 1516018031
+      Balloon_SpriteSheet_26: -1343932868
+      Balloon_SpriteSheet_27: 560208176
+      Balloon_SpriteSheet_28: -829276878
+      Balloon_SpriteSheet_29: -1633240732
+      Balloon_SpriteSheet_3: 43175769
+      Balloon_SpriteSheet_30: 399922784
+      Balloon_SpriteSheet_32: 215422108
+      Balloon_SpriteSheet_33: 1789574894
+      Balloon_SpriteSheet_34: 858246672
+      Balloon_SpriteSheet_35: -305061213
+      Balloon_SpriteSheet_36: 586473476
+      Balloon_SpriteSheet_37: -1850856068
+      Balloon_SpriteSheet_38: 1984150891
+      Balloon_SpriteSheet_4: 296536021
+      Balloon_SpriteSheet_40: -887805779
+      Balloon_SpriteSheet_42: -1342904293
+      Balloon_SpriteSheet_43: -1056699025
+      Balloon_SpriteSheet_5: 6741322
+      Balloon_SpriteSheet_6: -1163662304
+      Balloon_SpriteSheet_7: 1764880522
+      Balloon_SpriteSheet_8: 77603092
+      Balloon_SpriteSheet_9: -2062650418
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

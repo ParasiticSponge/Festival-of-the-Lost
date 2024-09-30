@@ -203,7 +203,7 @@ public class CharacterController2D : MonoBehaviour
 	{
 		if (enabled)
 		{
-			Actions.isOverDoor.Invoke(other.gameObject, true);
+            Actions.isOverDoor.Invoke(other.gameObject, true);
 			doorNum = Int32.Parse(other.gameObject.name);
 			enter = true;
 		}
@@ -212,7 +212,7 @@ public class CharacterController2D : MonoBehaviour
 	{
 		if (enabled)
 		{
-			Actions.isOverDoor.Invoke(other.gameObject, false);
+            Actions.isOverDoor.Invoke(other.gameObject, false);
 			enter = false;
 		}
 	}

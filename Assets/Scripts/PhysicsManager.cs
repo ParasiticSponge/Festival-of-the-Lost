@@ -52,6 +52,9 @@ public class PhysicsManager : MonoBehaviour
                     if (intersection_depth > 0.0f)
                     {
                         count++;
+                        Actions.isOverDoor.Invoke(this_collision.gameObject, true);
+                        character.doorNum = Int32.Parse(this_collision.gameObject.name);
+                        character.enter = true;
                         /*// AI Resolution: Create a collision event that the gameobjects can respond to
 
                         float total_mass = this_collision.mass + other_collision.mass;
@@ -65,18 +68,11 @@ public class PhysicsManager : MonoBehaviour
                         // Move this using other_to_this vector
                         this_collision.transform.position += other_to_this.normalized * intersection_depth * other_mass_ratio;*/
                     }
-                    if (count > 0)
-                    {
-                        Actions.isOverDoor.Invoke(this_collision.gameObject, true);
-                        character.doorNum = Int32.Parse(this_collision.gameObject.name);
-                        character.enter = true;
-                    }
-                    else
+                    if (count == 0)
                     {
                         Actions.isOverDoor.Invoke(this_collision.gameObject, false);
                         character.enter = false;
                     }
-                    print(character.enter);
                 //}
             }
         }
