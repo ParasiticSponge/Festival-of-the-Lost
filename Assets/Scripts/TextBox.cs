@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -17,10 +18,14 @@ public class TextBox : MonoBehaviour
     static GameObject go;
     static TextBox script;
 
+    static GameObject imageChild;
+    static GameObject textChild;
+
     static List<string> texts = new List<string>();
     static List<float> speeds = new List<float>();
     static List<float> intensities = new List<float>();
     static List<string> speakers = new List<string>();
+    static List<Sprite> appearances = new List<Sprite>();
 
     //static CharacterMovement character;
     //static carMovement character;
@@ -35,13 +40,13 @@ public class TextBox : MonoBehaviour
         texts.Add(text);
         speeds.Add(speed);
         intensities.Add(0);
+        appearances.Add(image);
 
         if (texts.Count <= 1)
         {
             go = Instantiate(textBox);
             go.transform.SetParent(canvas.transform, false);
             go.transform.GetChild(1).gameObject.GetComponent<Image>().sprite = MenuManager_2.textBoxColourLight;
-            go.transform.GetChild(0).gameObject.GetComponent<Image>().sprite = image;
             script = go.AddComponent<TextBox>();
         }
     }
@@ -53,13 +58,13 @@ public class TextBox : MonoBehaviour
         texts.Add(text);
         speeds.Add(speed);
         intensities.Add(intensity);
+        appearances.Add(image);
 
         if (texts.Count <= 1)
         {
             go = Instantiate(textBox);
             go.transform.SetParent(canvas.transform, false);
             go.transform.GetChild(1).gameObject.GetComponent<Image>().sprite = MenuManager_2.textBoxColourLight;
-            go.transform.GetChild(0).gameObject.GetComponent<Image>().sprite = image;
             script = go.AddComponent<TextBox>();
         }
     }
@@ -71,25 +76,28 @@ public class TextBox : MonoBehaviour
         texts.Add("I*");
         speeds.Add(0);
         intensities.Add(0);
+        appearances.Add(null);
 
         if (texts.Count <= 1)
         {
             go = Instantiate(textBox);
             go.transform.SetParent(canvas.transform, false);
             go.transform.GetChild(1).gameObject.GetComponent<Image>().sprite = MenuManager_2.textBoxColourLight;
-            go.transform.GetChild(0).gameObject.GetComponent<Image>().sprite = null;
             script = go.AddComponent<TextBox>();
         }
     }
 
     private void Start()
     {
+        imageChild = transform.GetChild(0).gameObject;
+        textChild = transform.GetChild(1).gameObject;
+
         //character = FindObjectOfType<CharacterMovement>();
         character = FindObjectOfType<CharacterController2D>();
         //mask = GameObject.Find("TextVisor").GetComponent<Animator>();
         //mask.gameObject.SetActive(true);
         mask = GetComponent<Animator>();
-        appearance = transform.GetChild(0).gameObject.GetComponent<Animator>();
+        appearance = imageChild.GetComponent<Animator>();
 
         mask.Play("ShowDialogue");
         appearance.Play("showCharacter");
@@ -98,10 +106,22 @@ public class TextBox : MonoBehaviour
     }
     public void Begin()
     {
-        if (texts[0] != "I*") StartCoroutine(DisplayText(speakers[0], texts[0], speeds[0], intensities[0]));
+        if (texts[0] != "I*") StartCoroutine(DisplayText(appearances[0], speakers[0], texts[0], speeds[0], intensities[0]));
     }
-    IEnumerator DisplayText(string speaker, string text, float speed, float intensity)
+    IEnumerator DisplayText(Sprite appearance, string speaker, string text, float speed, float intensity)
     {
+        if (appearance != null)
+        {
+            TextBox.appearance.enabled = true;
+            imageChild.GetComponent<Image>().color = Color.white;
+        }
+        else
+        {
+            TextBox.appearance.enabled = false;
+            imageChild.GetComponent<Image>().color = Color.clear;
+        }
+        imageChild.GetComponent<Image>().sprite = appearance;
+
         if (text.Contains("I*"))
         {
             string[] tokens = text.Split(new[] { "I*" }, StringSplitOptions.None);
@@ -114,7 +134,7 @@ public class TextBox : MonoBehaviour
             speakers[0] = speaker;
         }
 
-        transform.GetChild(1).GetChild(3).GetComponent<Text>().text = speaker;
+        textChild.transform.GetChild(3).GetComponent<Text>().text = speaker;
         yield return new WaitForSeconds(speed);
         for (int i = 0; i < text.Length; i++)
         {
@@ -133,12 +153,12 @@ public class TextBox : MonoBehaviour
         //TODO: tidy pyramid of if statements
         if (texts[0] != "I*")
         {
-            transform.GetChild(1).GetChild(2).gameObject.SetActive(false);
+            textChild.transform.GetChild(2).gameObject.SetActive(false);
 
             if (dialogue != null)
             {
-                if (dialogue.Length == texts[0].Length) transform.GetChild(1).GetChild(1).gameObject.SetActive(true);
-                else transform.GetChild(1).GetChild(1).gameObject.SetActive(false);
+                if (dialogue.Length == texts[0].Length) textChild.transform.GetChild(1).gameObject.SetActive(true);
+                else textChild.transform.GetChild(1).gameObject.SetActive(false);
             }
 
             if (Input.anyKeyDown && dialogue.Length == texts[0].Length)
@@ -155,14 +175,15 @@ public class TextBox : MonoBehaviour
         }
         else
         {
-            transform.GetChild(1).GetChild(1).gameObject.SetActive(false);
-            transform.GetChild(1).GetChild(2).gameObject.SetActive(true);
+            textChild.transform.GetChild(1).gameObject.SetActive(false);
+            textChild.transform.GetChild(2).gameObject.SetActive(true);
             ProcessString();
         }
     }
 
     void ProcessString()
     {
+        imageChild.GetComponent<Image>().color = Color.clear;
         foreach (char c in Input.inputString)
         {
             if (c == '\b') // has backspace/delete been pressed?
@@ -202,6 +223,7 @@ public class TextBox : MonoBehaviour
         texts.Remove(texts[0]);
         speeds.Remove(speeds[0]);
         intensities.Remove(intensities[0]);
+        appearances.Remove(appearances[0]);
         dialogue = "";
 
         Begin();
@@ -216,6 +238,7 @@ public class TextBox : MonoBehaviour
         texts.Remove(texts[0]);
         speeds.Remove(speeds[0]);
         intensities.Remove(intensities[0]);
+        appearances.Remove(appearances[0]);
         dialogue = "";
 
         character.canMove = 1;

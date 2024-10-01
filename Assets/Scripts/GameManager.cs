@@ -42,7 +42,7 @@ public class GameManager : MonoBehaviour
     public Sprite testingSprite;
     private void Awake()
     {
-        MenuManager_2.textBoxColourLight = testingSprite;
+        if (MenuManager_2.textBoxColourLight == null) MenuManager_2.textBoxColourLight = testingSprite;
         initialSprite = character.gameObject.GetComponent<SpriteRenderer>().sprite;
         GameObject f2 = foregrounds.transform.GetChild(1).gameObject;
         foreach (Transform t2 in f2.transform)
@@ -102,7 +102,7 @@ public class GameManager : MonoBehaviour
         }
 
         StartCoroutine(Functions.Fade(fade, 1));
-        //StartCoroutine(Intro());
+        StartCoroutine(Intro());
     }
 
     IEnumerator Intro()
