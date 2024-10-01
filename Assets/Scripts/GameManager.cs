@@ -19,10 +19,12 @@ public class GameManager : MonoBehaviour
     public Text scoreDartsText;
     public Text scoreTicketsText;
     int scoreDarts = 0;
-    int tickets = 0;
+    [SerializeField] int tickets = 0;
+    int ticketsToEnterTent = 10;
 
     Sprite initialSprite;
     Sprite balloon;
+    [SerializeField] Sprite[] tentSheet;
 
     public GameObject backgrounds;
     public GameObject foregrounds;
@@ -37,14 +39,24 @@ public class GameManager : MonoBehaviour
     float initialGravity;
     bool hold;
     int startingDart;
+    GameObject circusTent;
     [SerializeField] private int maxPower = 100;
 
     public Sprite testingSprite;
     private void Awake()
     {
+        //tentSheet = Resources.LoadAll<Sprite>("Circus_Sheet");
         if (MenuManager_2.textBoxColourLight == null) MenuManager_2.textBoxColourLight = testingSprite;
         initialSprite = character.gameObject.GetComponent<SpriteRenderer>().sprite;
+        GameObject f1 = foregrounds.transform.GetChild(0).gameObject;
         GameObject f2 = foregrounds.transform.GetChild(1).gameObject;
+        foreach (Transform t1 in f1.transform)
+        {
+            if (t1.gameObject.name.Contains("Tent"))
+            {
+                circusTent = t1.gameObject;
+            }
+        }
         foreach (Transform t2 in f2.transform)
         {
             if (t2.gameObject.name.Contains("Balloon"))
@@ -124,7 +136,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator SwitchRooms(int n)
     {
-        if (n == 2 && tickets < 10)
+        if (n == 2 && tickets < ticketsToEnterTent)
         {
             TextBox.Text(character.GetComponent<CharacterController2D>().appearance, character.name, "It appears I don't have enough tickets...", 0.02f);
             yield break;
@@ -289,6 +301,11 @@ public class GameManager : MonoBehaviour
         scoreDarts++;
         scoreDartsText.text = scoreDarts.ToString();
         scoreTicketsText.text = tickets.ToString();
+
+        if (tickets >= ticketsToEnterTent)
+        {
+            circusTent.GetComponent<SpriteRenderer>().sprite = tentSheet[1];
+        }
     }
 
     public void Talk(GameObject obj)
