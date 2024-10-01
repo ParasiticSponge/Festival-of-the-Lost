@@ -12,6 +12,7 @@ public class TextBox : MonoBehaviour
 
     static GameObject textBox;
     static Animator mask;
+    static Animator appearance;
     static Canvas canvas;
     static GameObject go;
     static TextBox script;
@@ -26,7 +27,7 @@ public class TextBox : MonoBehaviour
     static CharacterController2D character;
     static List<char> pauses = new List<char>() { '.', '?', '!'};
 
-    public static void Text(string speaker, string text, float speed)
+    public static void Text(Sprite image, string speaker, string text, float speed)
     {
         textBox = FindObjectOfType<GameManager>().textBoxPrefab;
         canvas = FindObjectOfType<Canvas>();
@@ -39,10 +40,12 @@ public class TextBox : MonoBehaviour
         {
             go = Instantiate(textBox);
             go.transform.SetParent(canvas.transform, false);
+            go.transform.GetChild(1).gameObject.GetComponent<Image>().sprite = MenuManager_2.textBoxColourLight;
+            go.transform.GetChild(0).gameObject.GetComponent<Image>().sprite = image;
             script = go.AddComponent<TextBox>();
         }
     }
-    public static void Text(string speaker, string text, float speed, float intensity)
+    public static void Text(Sprite image, string speaker, string text, float speed, float intensity)
     {
         textBox = FindObjectOfType<GameManager>().textBoxPrefab;
         canvas = FindObjectOfType<Canvas>();
@@ -55,6 +58,8 @@ public class TextBox : MonoBehaviour
         {
             go = Instantiate(textBox);
             go.transform.SetParent(canvas.transform, false);
+            go.transform.GetChild(1).gameObject.GetComponent<Image>().sprite = MenuManager_2.textBoxColourLight;
+            go.transform.GetChild(0).gameObject.GetComponent<Image>().sprite = image;
             script = go.AddComponent<TextBox>();
         }
     }
@@ -71,6 +76,8 @@ public class TextBox : MonoBehaviour
         {
             go = Instantiate(textBox);
             go.transform.SetParent(canvas.transform, false);
+            go.transform.GetChild(1).gameObject.GetComponent<Image>().sprite = MenuManager_2.textBoxColourLight;
+            go.transform.GetChild(0).gameObject.GetComponent<Image>().sprite = null;
             script = go.AddComponent<TextBox>();
         }
     }
@@ -82,7 +89,11 @@ public class TextBox : MonoBehaviour
         //mask = GameObject.Find("TextVisor").GetComponent<Animator>();
         //mask.gameObject.SetActive(true);
         mask = GetComponent<Animator>();
+        appearance = transform.GetChild(0).gameObject.GetComponent<Animator>();
+
         mask.Play("ShowDialogue");
+        appearance.Play("showCharacter");
+
         Begin();
     }
     public void Begin()
@@ -103,7 +114,7 @@ public class TextBox : MonoBehaviour
             speakers[0] = speaker;
         }
 
-        transform.GetChild(0).GetChild(3).GetComponent<Text>().text = speaker;
+        transform.GetChild(1).GetChild(3).GetComponent<Text>().text = speaker;
         yield return new WaitForSeconds(speed);
         for (int i = 0; i < text.Length; i++)
         {
@@ -122,12 +133,12 @@ public class TextBox : MonoBehaviour
         //TODO: tidy pyramid of if statements
         if (texts[0] != "I*")
         {
-            transform.GetChild(0).GetChild(2).gameObject.SetActive(false);
+            transform.GetChild(1).GetChild(2).gameObject.SetActive(false);
 
             if (dialogue != null)
             {
-                if (dialogue.Length == texts[0].Length) transform.GetChild(0).GetChild(1).gameObject.SetActive(true);
-                else transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
+                if (dialogue.Length == texts[0].Length) transform.GetChild(1).GetChild(1).gameObject.SetActive(true);
+                else transform.GetChild(1).GetChild(1).gameObject.SetActive(false);
             }
 
             if (Input.anyKeyDown && dialogue.Length == texts[0].Length)
@@ -144,8 +155,8 @@ public class TextBox : MonoBehaviour
         }
         else
         {
-            transform.GetChild(0).GetChild(1).gameObject.SetActive(false);
-            transform.GetChild(0).GetChild(2).gameObject.SetActive(true);
+            transform.GetChild(1).GetChild(1).gameObject.SetActive(false);
+            transform.GetChild(1).GetChild(2).gameObject.SetActive(true);
             ProcessString();
         }
     }
@@ -181,8 +192,11 @@ public class TextBox : MonoBehaviour
     IEnumerator LoadNext()
     {
         mask.Play("HideDialogue", 0, 0);
+        appearance.Play("hideCharacter", 0, 0);
+
         yield return new WaitForSeconds(0.5f);
         mask.Play("ShowDialogue", 0, 0);
+        appearance.Play("showCharacter", 0, 0);
 
         speakers.Remove(speakers[0]);
         texts.Remove(texts[0]);
@@ -195,6 +209,7 @@ public class TextBox : MonoBehaviour
     IEnumerator Destroy()
     {
         mask.Play("HideDialogue", 0, 0);
+        appearance.Play("hideCharacter", 0, 0);
         yield return new WaitForSeconds(0.5f);
 
         speakers.Remove(speakers[0]);

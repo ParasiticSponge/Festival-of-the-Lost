@@ -13,6 +13,7 @@ public class NPC_AI : MonoBehaviour
     }
     public STATES state = STATES.idle;
     Vector3 initialPos;
+    public Sprite appearance;
     public string charName = "NPC";
     int wanderRange = 10;
     float idleProbability = 0.5f;
@@ -24,7 +25,6 @@ public class NPC_AI : MonoBehaviour
     protected bool jump = false;
     protected float horizontal = 0;
     public float gravity = 3;
-
 
     protected Animator animator;
     [SerializeField] protected float m_JumpForce = 400f;                          // Amount of force added when the player jumps.

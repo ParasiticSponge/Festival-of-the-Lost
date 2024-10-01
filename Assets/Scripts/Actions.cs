@@ -18,4 +18,5 @@ public class Actions
     public static Action HitBalloon;
     public static Action<GameObject> Talk;
     public static Action<bool> Settings;
+    public static Action<int> TextBoxColour;
 }

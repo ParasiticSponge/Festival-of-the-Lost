@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using static UnityEngine.Rendering.DebugUI;
 
-public class MenuManager_2 : MonoBehaviour
+public partial class MenuManager_2 : MonoBehaviour
 {
     public Vector3 position;
 
@@ -15,16 +18,70 @@ public class MenuManager_2 : MonoBehaviour
     public EventSystem eventSystem;
     GameObject selected;
     public List<Animator> animator;
+    public AudioSource audioSource;
 
+    Dropdown resolutionBar;
+    Slider musicSlider;
+    Slider sfxSlider;
+
+    public static int textBox = 0;
+    public static Sprite textBoxColourLight;
+    public static Sprite textBoxColourDark;
+    public static int resolution;
+    public static float musicVol;
+    public static float sfxVol;
+
+    [SerializeField] GameObject scrollContent;
+    List<GameObject> boxes = new List<GameObject>();
+
+    GameObject border;
+    GameObject selection;
+
+    private void Awake()
+    {
+        foreach (Transform child in settings.transform)
+        {
+            switch (child.name)
+            {
+                case "MUSIC":
+                    musicSlider = child.GetChild(1).gameObject.GetComponent<Slider>();
+                    break;
+                case "SFX":
+                    sfxSlider = child.GetChild(1).gameObject.GetComponent<Slider>();
+                    break;
+                case "Scroll":
+                    border = child.GetChild(0).GetChild(0).gameObject;
+                    selection = child.GetChild(0).GetChild(2).gameObject;
+                    break;
+                case "RESOLUTION":
+                    resolutionBar = child.GetChild(1).gameObject.GetComponent<Dropdown>();
+                    break;
+            }
+        }
+        for (int i = 0; i < scrollContent.transform.childCount; i++)
+        {
+            boxes.Add(scrollContent.transform.GetChild(i).gameObject);
+        }
+        audioSource.volume = musicSlider.value;
+        musicVol = musicSlider.value;
+        sfxVol = sfxSlider.value;
+        resolution = resolutionBar.value;
+        textBoxColourLight = boxes[textBox].transform.GetChild(0).gameObject.GetComponent<Image>().sprite;
+        textBoxColourDark = boxes[textBox].transform.GetChild(1).gameObject.GetComponent<Image>().sprite;
+    }
     private void OnEnable()
     {
         Actions.Begin += PlayAnimation;
         Actions.Settings += Move;
+        //Actions.TextBoxColour += value => textBox = value;
+        Actions.TextBoxColour += SetBox;
     }
     private void OnDisable()
     {
         Actions.Begin -= PlayAnimation;
         Actions.Settings -= Move;
+        //Actions.TextBoxColour -= value => textBox = value;
+        Actions.TextBoxColour -= SetBox;
     }
 
     // Start is called before the first frame update
@@ -60,6 +117,14 @@ public class MenuManager_2 : MonoBehaviour
                 }
             }
         }
+
+        border.transform.position = boxes[textBox].transform.position;
+        selection.transform.position = boxes[textBox].transform.position;
+
+        audioSource.volume = musicSlider.value;
+        musicVol = musicSlider.value;
+        sfxVol = sfxSlider.value;
+        resolution = resolutionBar.value;
     }
 
     public void PlayAnimation()
@@ -68,26 +133,12 @@ public class MenuManager_2 : MonoBehaviour
     }
     IEnumerator playAnimAndLoad()
     {
-        //TODO: switch animator from canvas to individual and play pop anim + sound from MenuButton.cs
-        switch (selected.GetComponent<MenuButton>().type)
-        {
-            case MenuButton.TYPE.PLAY:
-                animator[0].Play("pop");
-                break;
-            case MenuButton.TYPE.SETTINGS:
-                animator[0].Play("pop");
-                break;
-            case MenuButton.TYPE.EXIT:
-                break;
-        }
-        //play gate open anim
-        Actions.MenuBeginSound.Invoke();
         yield return new WaitForSeconds(.5f);
-        animator[2].enabled = true;
-        animator[2].Play("HideMenuUI");
-        animator[2].Play("OpenGate");
+        animator[1].enabled = true;
+        animator[1].Play("HideMenuUI");
+        animator[1].Play("OpenGate");
         yield return new WaitForSeconds(2f);
-        animator[1].Play("MenuSelectOption");
+        animator[0].Play("MenuSelectOption");
         yield return new WaitForSeconds(1f);
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
@@ -107,5 +158,11 @@ public class MenuManager_2 : MonoBehaviour
                 StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, right, value => settings.GetComponent<RectTransform>().localPosition = value));
                 break;
         }
+    }
+    public void SetBox(int number)
+    {
+        textBox = number;
+        textBoxColourLight = boxes[textBox].transform.GetChild(0).gameObject.GetComponent<Image>().sprite;
+        textBoxColourDark = boxes[textBox].transform.GetChild(1).gameObject.GetComponent<Image>().sprite;
     }
 }

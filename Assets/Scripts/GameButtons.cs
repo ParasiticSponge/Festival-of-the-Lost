@@ -9,7 +9,6 @@ public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
     public enum TYPE
     {
         back,
-        backToMenu
     }
     public TYPE type;
 
@@ -19,9 +18,6 @@ public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
         {
             case TYPE.back:
                 Actions.Back.Invoke(type);
-                break;
-            case TYPE.backToMenu:
-                Actions.Settings.Invoke(false);
                 break;
         }
     }

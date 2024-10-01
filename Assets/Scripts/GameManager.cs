@@ -32,7 +32,6 @@ public class GameManager : MonoBehaviour
     List<Collision2D> door = new List<Collision2D>();
     //List<BoxCollider2D> door2 = new List<BoxCollider2D>();
     Sprite dart;
-
     float dartDistanceFromCam = -2;
     int currentRoom = 0;
     float initialGravity;
@@ -40,8 +39,10 @@ public class GameManager : MonoBehaviour
     int startingDart;
     [SerializeField] private int maxPower = 100;
 
+    public Sprite testingSprite;
     private void Awake()
     {
+        MenuManager_2.textBoxColourLight = testingSprite;
         initialSprite = character.gameObject.GetComponent<SpriteRenderer>().sprite;
         GameObject f2 = foregrounds.transform.GetChild(1).gameObject;
         foreach (Transform t2 in f2.transform)
@@ -101,19 +102,19 @@ public class GameManager : MonoBehaviour
         }
 
         StartCoroutine(Functions.Fade(fade, 1));
-        StartCoroutine(Intro());
+        //StartCoroutine(Intro());
     }
 
     IEnumerator Intro()
     {
         yield return new WaitForSeconds(1);
 
-        TextBox.Text("???", "What is your name?", 0.05f);
+        TextBox.Text(null, "???", "What is your name?", 0.05f);
         TextBox.Text();
-        TextBox.Text("???", "...", 0.2f);
+        TextBox.Text(null, "???", "...", 0.2f);
         //TextBox.Text($"Oh! Your name is {character.charName}?", 0.05f, true);
         //I* ouputs the input of the player
-        TextBox.Text("I*", "Mum? Dad? Where did you go?", 0.02f);
+        TextBox.Text(character.GetComponent<CharacterController2D>().appearance, "I*", "Mum? Dad? Where did you go?", 0.02f);
     }
 
     public void SwitchRoom(int n)
@@ -123,6 +124,11 @@ public class GameManager : MonoBehaviour
 
     IEnumerator SwitchRooms(int n)
     {
+        if (n == 2 && tickets < 10)
+        {
+            TextBox.Text(character.GetComponent<CharacterController2D>().appearance, character.name, "It appears I don't have enough tickets...", 0.02f);
+            yield break;
+        }
         character.GetComponent<MouseController2D>().fire = true;
         switchScreen.speed = 1;
         switchScreen.Play("MenuSelectOption", 0, 0);
@@ -289,7 +295,7 @@ public class GameManager : MonoBehaviour
     {
         print("talking!!!");
         obj.transform.GetChild(0).gameObject.SetActive(false);
-        TextBox.Text(obj.GetComponent<NPC_AI>().charName, "Hello!", 0.02f);
+        TextBox.Text(obj.GetComponent<NPC_AI>().appearance, obj.GetComponent<NPC_AI>().charName, "Hello!", 0.02f);
         obj.GetComponent<NPC_AI>().canMove = 0;
         StartCoroutine(Talking(obj));
     }

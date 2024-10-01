@@ -4,26 +4,33 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
 {
-
     public enum TYPE
     {
         PLAY,
         SETTINGS,
-        EXIT
+        EXIT,
+        BOXOPTION1,
+        BOXOPTION2, 
+        BOXOPTION3,
+        BOXOPTION4,
+        MENU
     }
     public TYPE type;
     public Vector2 position;
     public bool selected;
     RectTransform rect;
     public bool shouldFloat;
+    Animator animator;
 
     // Start is called before the first frame update
     void Start()
     {
         rect = GetComponent<RectTransform>();
+        if (transform.childCount > 0) animator = transform.GetChild(0).gameObject.GetComponent<Animator>();
         position = rect.anchoredPosition;
     }
     void Update()
@@ -36,13 +43,30 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
         {
             case TYPE.PLAY:
                 //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+                animator.Play("pop");
+                Actions.MenuBeginSound.Invoke();
                 Actions.Begin.Invoke();
                 break;
             case TYPE.SETTINGS:
-                Actions.Settings.Invoke(true);
+                StartCoroutine(SettingsPop());
                 break;
             case TYPE.EXIT:
                 Application.Quit();
+                break;
+            case TYPE.BOXOPTION1:
+                Actions.TextBoxColour(0);
+                break;
+            case TYPE.BOXOPTION2:
+                Actions.TextBoxColour(1);
+                break;
+            case TYPE.BOXOPTION3:
+                Actions.TextBoxColour(2);
+                break;
+            case TYPE.BOXOPTION4:
+                Actions.TextBoxColour(3);
+                break;
+            case TYPE.MENU:
+                Actions.Settings.Invoke(false);
                 break;
         }
     }
@@ -72,5 +96,13 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
     public void End() 
     {
         StartCoroutine(Move(position, 1));
+    }
+
+    IEnumerator SettingsPop()
+    {
+        animator.Play("pop");
+        Actions.Settings.Invoke(true);
+        yield return new WaitForSeconds(1);
+        animator.Rebind();
     }
 }
