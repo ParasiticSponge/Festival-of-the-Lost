@@ -51,8 +51,11 @@ public class CharacterController2D : NPC_AI
 	}
 	private void OnEnter(InputValue input)
 	{
-		if (enter) Actions.EnterRoom.Invoke(doorNum);
-		if (talk) Actions.Talk.Invoke(talkingTo);
+		if (enabled)
+		{
+			if (enter) Actions.EnterRoom.Invoke(doorNum);
+			if (talk) Actions.Talk.Invoke(talkingTo);
+		}
 	}
 	private void OnTriggerEnter2D(Collider2D other)
 	{
@@ -83,7 +86,6 @@ public class CharacterController2D : NPC_AI
 			}
 			else
 			{
-				print("leave player");
                 Actions.isOverDoor.Invoke(other.gameObject, false);
                 talk = false;
 			}

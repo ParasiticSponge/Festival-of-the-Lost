@@ -8,8 +8,9 @@ public class NPC_AI : MonoBehaviour
 {
     public enum STATES
     {
-        walk,
-        idle
+        idleWalk,
+        idle,
+        follow
     }
     public STATES state = STATES.idle;
     Vector3 initialPos;
@@ -19,6 +20,8 @@ public class NPC_AI : MonoBehaviour
     float idleProbability = 0.5f;
     bool speaking;
     System.Random random = new System.Random();
+    GameObject gameManager;
+    GameObject character;
 
     public int canMove = 1;
     public float runSpeed = 20;
@@ -59,6 +62,8 @@ public class NPC_AI : MonoBehaviour
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
         m_Rigidbody2D.gravityScale = gravity;
         animator = GetComponent<Animator>();
+        gameManager = FindObjectOfType<GameManager>().gameObject;
+        character = FindObjectOfType<CharacterController2D>().gameObject;
 
         if (OnLandEvent == null)
             OnLandEvent = new UnityEvent();
@@ -67,7 +72,6 @@ public class NPC_AI : MonoBehaviour
             OnCrouchEvent = new BoolEvent();
 
         initialPos = transform.position;
-        state = STATES.idle;
     }
     private void OnEnable()
     {
@@ -89,24 +93,29 @@ public class NPC_AI : MonoBehaviour
     }
     private void Switch()
     {
-        /*switch (state)
+        switch (state)
         {
-            case STATES.walk:
-                yield return StartCoroutine(Walk());
+            case STATES.idleWalk:
+                {
+                    if (!speaking)
+                    {
+                        ////0-100 / 100
+                        //float waitTime = (float)random.Next(101) / 100;
+                        ////probably a more efficient way using Mathf.Ceil(waitTime * numberOfStates) and idlProbability etc...
+                        //if (waitTime <= idleProbability)
+                        //    StartCoroutine(Idle());
+                        //else
+                        //    StartCoroutine(Walk());
+                        StartCoroutine(Walk());
+                    }
+                }
                 break;
             case STATES.idle:
-                yield return StartCoroutine(Idle());
-                break;
-        }*/
-        if (!speaking)
-        {
-            //0-100 / 100
-            float waitTime = (float)random.Next(101) / 100;
-            //probably a more efficient way using Mathf.Ceil(waitTime * numberOfStates) and idlProbability etc...
-            if (waitTime <= idleProbability)
                 StartCoroutine(Idle());
-            else
-                StartCoroutine(Walk());
+                break;
+            case STATES.follow:
+                StartCoroutine(Follow(character.transform.position, 10));
+                break;
         }
     }
     private IEnumerator Walk()
@@ -133,8 +142,7 @@ public class NPC_AI : MonoBehaviour
         horizontal = 0;
         yield return new WaitForSeconds(waitTime);
 
-        //Switch();
-        StartCoroutine(Walk());
+        Switch();
     }
 
     public void Move(float move, bool crouch, bool jump)
@@ -249,5 +257,17 @@ public class NPC_AI : MonoBehaviour
                     OnLandEvent.Invoke();
             }
         }
+    }
+
+    private IEnumerator Follow(Vector3 target, float edge)
+    {
+        Vector3 distance = (target - transform.position);
+        float magnitude = distance.magnitude;
+
+        horizontal = Mathf.Sign(distance.x) * 1 * runSpeed;
+        if (magnitude <= edge)
+            horizontal = 0;
+        yield return null;
+        Switch();
     }
 }

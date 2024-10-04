@@ -15,7 +15,7 @@ public class MouseController2D : MonoBehaviour
     float speed = 1.5f;
 
     bool collisionListener;
-    bool hasExited;
+    bool hasExited = true;
     Collider2D otherCollider;
 
     private void OnEnable()
@@ -55,27 +55,6 @@ public class MouseController2D : MonoBehaviour
                 Actions.Release.Invoke();
             }
         }
-
-        //>:( silly 2D collision detection only happening once and 3D doesn't help
-        //collisions also still triggers when disabled!!!
-        if (collisionListener)
-        {
-            //if (otherCollider.transform.position.z == transform.localPosition.z && !hasExited)
-            if (transform.localPosition.z == -1 && !hasExited)
-            {
-                //do stuff
-                Actions.HitBalloon.Invoke();
-                print("POPPED");
-                otherCollider.GetComponent<Animator>().Play("BalloonPop", 0, 0);
-                otherCollider.GetComponent<CircleCollider2D>().enabled = false;
-                collisionListener = false;
-            }
-            if (hasExited)
-            {
-                collisionListener = false;
-                hasExited = false;
-            }
-        }
     }
 
     public void PowerMetre(float amount)
@@ -96,19 +75,25 @@ public class MouseController2D : MonoBehaviour
     IEnumerator Move(Vector3 a, Vector3 b)
     {
         Vector3 desired = b - a;
-        float acceleration = 0;
         //float FPS = 1.0f / Time.deltaTime;
         for (float i = 0; i <= 1; i+= Time.deltaTime * speed)
         {
-            //acceleration += 0.01f;
-            //i += acceleration;
             transform.position = a + (desired * EasingFunctions.EaseOutCubic(i));
             yield return null;
         }
         transform.position = new Vector3(transform.position.x, transform.position.y, 0);
         transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, -1);
 
-        Actions.Shot.Invoke();
+        //if (otherCollider.transform.position.z == transform.localPosition.z && !hasExited)
+        if (!hasExited)
+        {
+            //do stuff
+            Actions.HitBalloon.Invoke(true);
+            otherCollider.GetComponent<Animator>().Play("BalloonPop", 0, 0);
+            otherCollider.GetComponent<CircleCollider2D>().enabled = false;
+        }
+        else
+            Actions.HitBalloon.Invoke(false);
     }
 
     /*private IEnumerator LoadSomeStuff()
@@ -164,8 +149,7 @@ public class MouseController2D : MonoBehaviour
     {
         if (enabled)
         {
-            print("has entered");
-            collisionListener = true;
+            hasExited = false;
             otherCollider = other;
         }
     }
@@ -173,7 +157,6 @@ public class MouseController2D : MonoBehaviour
     {
         if (enabled)
         {
-            print("exited");
             hasExited = true;
         }
     }

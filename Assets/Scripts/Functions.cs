@@ -7,18 +7,21 @@ using System;
 
 public class Functions : MonoBehaviour
 {
+    //0 = fadeIn, 1 = fadeOut
     public static IEnumerator Fade(GameObject image, int fadeIn)
     {
         Color c = new Color(0, 0, 0);
         if (image.transform.GetComponent<Image>()) c = image.transform.GetComponent<Image>().color;
         if (image.transform.GetComponent<Text>()) c = image.transform.GetComponent<Text>().color;
+        if (image.transform.GetComponent<SpriteRenderer>()) c = image.transform.GetComponent<SpriteRenderer>().color;
         //if fadeIn is 0, increment upwards, otherwise reverse it.
-        float increment = fadeIn == 0 ? 0.01f : -0.01f;
-        for (float alpha = fadeIn; fadeIn == 0 ? alpha <= 1 : alpha >= 0; alpha += increment)
+        float increment = fadeIn == 0 ? 1 : -1;
+        for (float alpha = fadeIn; fadeIn == 0 ? alpha <= 1 : alpha >= 0; alpha += (increment * Time.deltaTime))
         {
             c.a = alpha;
             if (image.transform.GetComponent<Image>()) image.transform.GetComponent<Image>().color = c;
             if (image.transform.GetComponent<Text>()) image.transform.GetComponent<Text>().color = c;
+            if (image.transform.GetComponent<SpriteRenderer>()) image.transform.GetComponent<SpriteRenderer>().color = c;
             yield return null;
         }
     }
@@ -32,6 +35,15 @@ public class Functions : MonoBehaviour
         // 4 % 3 = 0.3r. 0.3r * 3 = 1
         // 5 % 3 = 0.6r. 0.6r * 3 = 2
         return ((time % factor) * factor) + offset;
+    }
+    public static IEnumerator Zoom(Camera camera, float zoom)
+    {
+        float currentSize = camera.orthographicSize;
+        for (float i = 0; i <= 1; i += Time.deltaTime)
+        {
+            camera.orthographicSize = currentSize + (EasingFunctions.EaseOutCubic(i) * zoom);
+            yield return null;
+        }
     }
 
     /*public static IEnumerator CodeBlock(Action action)
@@ -74,4 +86,10 @@ public class Functions : MonoBehaviour
             yield return null;
         }
     }
+
+    /*float x = 44.93875f;
+    x *= 100;
+    x = Mathf.Floor(x);
+    x /= 100;
+    Debug.Log(x); // 44.93*/
 }

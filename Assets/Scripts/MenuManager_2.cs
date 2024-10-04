@@ -22,7 +22,9 @@ public partial class MenuManager_2 : MonoBehaviour
 
     Dropdown resolutionBar;
     Slider musicSlider;
+    Text musicNumber;
     Slider sfxSlider;
+    Text sfxNumber;
 
     public static int textBox = 0;
     public static Sprite textBoxColourLight;
@@ -45,9 +47,11 @@ public partial class MenuManager_2 : MonoBehaviour
             {
                 case "MUSIC":
                     musicSlider = child.GetChild(1).gameObject.GetComponent<Slider>();
+                    musicNumber = child.GetChild(2).gameObject.GetComponent<Text>();
                     break;
                 case "SFX":
                     sfxSlider = child.GetChild(1).gameObject.GetComponent<Slider>();
+                    sfxNumber = child.GetChild(2).gameObject.GetComponent<Text>();
                     break;
                 case "Scroll":
                     border = child.GetChild(0).GetChild(0).gameObject;
@@ -123,7 +127,9 @@ public partial class MenuManager_2 : MonoBehaviour
 
         audioSource.volume = musicSlider.value;
         musicVol = musicSlider.value;
+        musicNumber.text = (Mathf.RoundToInt(musicVol*100)).ToString();
         sfxVol = sfxSlider.value;
+        sfxNumber.text = (Mathf.RoundToInt(sfxVol * 100)).ToString();
         resolution = resolutionBar.value;
     }
 

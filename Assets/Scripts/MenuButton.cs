@@ -17,7 +17,8 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
         BOXOPTION2, 
         BOXOPTION3,
         BOXOPTION4,
-        MENU
+        MENU,
+        SFX_TEST
     }
     public TYPE type;
     public Vector2 position;
@@ -67,6 +68,9 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
                 break;
             case TYPE.MENU:
                 Actions.Settings.Invoke(false);
+                break;
+            case TYPE.SFX_TEST:
+                Actions.MenuBeginSound.Invoke();
                 break;
         }
     }

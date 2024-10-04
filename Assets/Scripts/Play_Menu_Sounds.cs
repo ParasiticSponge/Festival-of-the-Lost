@@ -28,6 +28,6 @@ public class Play_Menu_Sounds : MonoBehaviour
 
     public void PressPlay()
     {
-        StartCoroutine(PlayClip(1, 2));
+        StartCoroutine(PlayClip(1, MenuManager_2.sfxVol));
     }
 }

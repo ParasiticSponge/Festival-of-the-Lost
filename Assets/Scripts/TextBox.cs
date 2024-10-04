@@ -30,6 +30,7 @@ public class TextBox : MonoBehaviour
     //static CharacterMovement character;
     //static carMovement character;
     static CharacterController2D character;
+    static GameManager gameManager;
     static List<char> pauses = new List<char>() { '.', '?', '!'};
 
     public static void Text(Sprite image, string speaker, string text, float speed)
@@ -94,6 +95,8 @@ public class TextBox : MonoBehaviour
 
         //character = FindObjectOfType<CharacterMovement>();
         character = FindObjectOfType<CharacterController2D>();
+        gameManager = FindObjectOfType<GameManager>();
+        gameManager.dialogueExists = true;
         //mask = GameObject.Find("TextVisor").GetComponent<Animator>();
         //mask.gameObject.SetActive(true);
         mask = GetComponent<Animator>();
@@ -243,6 +246,8 @@ public class TextBox : MonoBehaviour
 
         character.canMove = 1;
         mask.gameObject.SetActive(false);
+        gameManager.dialogueExists = false;
+        gameManager.timeLooking = 0;
         Destroy(gameObject);
     }
 }
