@@ -26,6 +26,7 @@ public class TextBox : MonoBehaviour
     static List<float> intensities = new List<float>();
     static List<string> speakers = new List<string>();
     static List<Sprite> appearances = new List<Sprite>();
+    static List<GameObject> objects = new List<GameObject>();
 
     //static CharacterMovement character;
     //static carMovement character;
@@ -33,6 +34,25 @@ public class TextBox : MonoBehaviour
     static GameManager gameManager;
     static List<char> pauses = new List<char>() { '.', '?', '!'};
 
+    public static void Text(Sprite image, string speaker, string text, float speed, GameObject obj)
+    {
+        textBox = FindObjectOfType<GameManager>().textBoxPrefab;
+        canvas = FindObjectOfType<Canvas>();
+        speakers.Add(speaker);
+        texts.Add(text);
+        speeds.Add(speed);
+        intensities.Add(0);
+        appearances.Add(image);
+        objects.Add(obj);
+
+        if (texts.Count <= 1)
+        {
+            go = Instantiate(textBox);
+            go.transform.SetParent(canvas.transform, false);
+            go.transform.GetChild(1).gameObject.GetComponent<Image>().sprite = MenuManager_2.textBoxColourLight;
+            script = go.AddComponent<TextBox>();
+        }
+    }
     public static void Text(Sprite image, string speaker, string text, float speed)
     {
         textBox = FindObjectOfType<GameManager>().textBoxPrefab;
@@ -42,6 +62,7 @@ public class TextBox : MonoBehaviour
         speeds.Add(speed);
         intensities.Add(0);
         appearances.Add(image);
+        objects.Add(null);
 
         if (texts.Count <= 1)
         {
@@ -60,6 +81,7 @@ public class TextBox : MonoBehaviour
         speeds.Add(speed);
         intensities.Add(intensity);
         appearances.Add(image);
+        objects.Add(null);
 
         if (texts.Count <= 1)
         {
@@ -78,6 +100,7 @@ public class TextBox : MonoBehaviour
         speeds.Add(0);
         intensities.Add(0);
         appearances.Add(null);
+        objects.Add(null);
 
         if (texts.Count <= 1)
         {
@@ -96,7 +119,6 @@ public class TextBox : MonoBehaviour
         //character = FindObjectOfType<CharacterMovement>();
         character = FindObjectOfType<CharacterController2D>();
         gameManager = FindObjectOfType<GameManager>();
-        gameManager.dialogueExists = true;
         //mask = GameObject.Find("TextVisor").GetComponent<Animator>();
         //mask.gameObject.SetActive(true);
         mask = GetComponent<Animator>();
@@ -109,9 +131,9 @@ public class TextBox : MonoBehaviour
     }
     public void Begin()
     {
-        if (texts[0] != "I*") StartCoroutine(DisplayText(appearances[0], speakers[0], texts[0], speeds[0], intensities[0]));
+        if (texts[0] != "I*") StartCoroutine(DisplayText(appearances[0], speakers[0], texts[0], speeds[0], intensities[0], objects[0]));
     }
-    IEnumerator DisplayText(Sprite appearance, string speaker, string text, float speed, float intensity)
+    IEnumerator DisplayText(Sprite appearance, string speaker, string text, float speed, float intensity, GameObject obj)
     {
         if (appearance != null)
         {
@@ -227,6 +249,7 @@ public class TextBox : MonoBehaviour
         speeds.Remove(speeds[0]);
         intensities.Remove(intensities[0]);
         appearances.Remove(appearances[0]);
+        objects.Remove(objects[0]);
         dialogue = "";
 
         Begin();
@@ -246,8 +269,10 @@ public class TextBox : MonoBehaviour
 
         character.canMove = 1;
         mask.gameObject.SetActive(false);
-        gameManager.dialogueExists = false;
-        gameManager.timeLooking = 0;
+
+        if (objects[0] != null) Actions.FinishTalk.Invoke(objects[0].name);
+        objects.Remove(objects[0]);
+
         Destroy(gameObject);
     }
 }

@@ -123,6 +123,7 @@ public class GameManager : MonoBehaviour
         Actions.Release += Release;
         Actions.HitBalloon += ScoreDarts;
         Actions.Talk += Talk;
+        Actions.FinishTalk += DoAction;
     }
     private void OnDisable()
     {
@@ -133,6 +134,7 @@ public class GameManager : MonoBehaviour
         Actions.Release -= Release;
         Actions.HitBalloon -= ScoreDarts;
         Actions.Talk -= Talk;
+        Actions.FinishTalk -= DoAction;
     }
     // Start is called before the first frame update
     void Start()
@@ -402,9 +404,8 @@ public class GameManager : MonoBehaviour
 
     public void Talk(GameObject obj)
     {
-        print("talking!!!");
         obj.transform.GetChild(0).gameObject.SetActive(false);
-        TextBox.Text(obj.GetComponent<NPC_AI>().appearance, obj.GetComponent<NPC_AI>().charName, "Hello!", 0.02f);
+        obj.GetComponent<NPC_AI>().Talk();
         obj.GetComponent<NPC_AI>().canMove = 0;
         StartCoroutine(Talking(obj));
     }
@@ -423,6 +424,7 @@ public class GameManager : MonoBehaviour
         TextBox.Text(charAppearance, charName, "Mum? Dad? Where did you go?", 0.02f);
     }
 
+    //TODO: could use DoAction to check if textbox is not there
     IEnumerator BoardLooking()
     {
         while (isLookingAtBoard)
@@ -443,8 +445,32 @@ public class GameManager : MonoBehaviour
                         TextBox.Text(charAppearance, charName, "I should get going", 0.02f);
                         break;
                 }
+                dialogueExists = true;
+                StartCoroutine(WaitBoard());
             }
             yield return null;
+        }
+    }
+
+    IEnumerator WaitBoard()
+    {
+        TextBox text = FindObjectOfType<TextBox>();
+        while (text != null)
+        {
+            yield return null;
+        }
+        dialogueExists = false;
+        timeLooking = 0;
+    }
+
+    void DoAction(string name)
+    {
+        print(name);
+        switch (name)
+        {
+            case string a when a.Contains("Balloon"):
+                StartCoroutine(SwitchRooms(1));
+                break;
         }
     }
 }

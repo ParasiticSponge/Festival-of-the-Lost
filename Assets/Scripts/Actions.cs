@@ -18,4 +18,5 @@ public class Actions
     public static Action<GameObject> Talk;
     public static Action<bool> Settings;
     public static Action<int> TextBoxColour;
+    public static Action<string> FinishTalk;
 }

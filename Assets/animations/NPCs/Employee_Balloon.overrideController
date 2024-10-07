@@ -1,0 +1,13 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Employee_Balloon
+  m_Controller: {fileID: 9100000, guid: 3c7a7ac617ce8b74ca8bd7463bbd7c70, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 276ebc45606f30e42932176ce4d531e8, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 7a9b43ad329933c458a15dd0aa47b63e, type: 2}

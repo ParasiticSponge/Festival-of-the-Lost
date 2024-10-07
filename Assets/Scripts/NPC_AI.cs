@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using System;
+using static UnityEngine.Rendering.DebugUI;
 
 public class NPC_AI : MonoBehaviour
 {
@@ -56,6 +57,10 @@ public class NPC_AI : MonoBehaviour
 
     public BoolEvent OnCrouchEvent;
     protected bool m_wasCrouching = false;
+    public int currentDial = 0;
+    public List<string> dialogue = new List<string>();
+    public List<int> dialogueKeys = new List<int>();
+    //public Dictionary<int, string> keyDialogue = new Dictionary<int, string>();
 
     private void Awake()
     {
@@ -269,5 +274,21 @@ public class NPC_AI : MonoBehaviour
             horizontal = 0;
         yield return null;
         Switch();
+    }
+
+    public void Talk()
+    {
+        /*foreach (KeyValuePair<int, string> value in keyDialogue)
+        {
+            if (value.Key == currentDial)
+                TextBox.Text(appearance, charName, value.Value, 0.02f);
+        }*/
+        for (int i = 0; i < dialogueKeys.Count; i++)
+        {
+            if (dialogueKeys[i] == currentDial)
+                TextBox.Text(appearance, charName, dialogue[i], 0.02f, gameObject);
+        }
+        if (currentDial < dialogueKeys[dialogueKeys.Count - 1])
+            currentDial++;
     }
 }
