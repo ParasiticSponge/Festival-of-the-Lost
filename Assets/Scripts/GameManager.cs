@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class GameManager : MonoBehaviour
 
     public Image powerBar;
     public GameObject fade;
+    List<GameObject> masks = new List<GameObject>();
     public GameObject textBoxPrefab;
     public Animator switchScreen;
     public GameObject animationCanvas;
@@ -56,6 +58,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private int maxPower = 100;
 
     public Sprite testingSprite;
+    bool paused;
     private void Awake()
     {
         character = FindObjectOfType<CharacterController2D>().gameObject;
@@ -107,6 +110,8 @@ public class GameManager : MonoBehaviour
         {
             if (child.GetComponent<Animator>())
                 anims.Add(child.gameObject.GetComponent<Animator>());
+            if (child.gameObject.name.Contains("Mask"))
+                masks.Add(child.gameObject);
         }
 
         balloon = balloons[0].GetComponent<SpriteRenderer>().sprite;
@@ -124,6 +129,7 @@ public class GameManager : MonoBehaviour
         Actions.HitBalloon += ScoreDarts;
         Actions.Talk += Talk;
         Actions.FinishTalk += DoAction;
+        Actions.Pause += Pause;
     }
     private void OnDisable()
     {
@@ -135,6 +141,7 @@ public class GameManager : MonoBehaviour
         Actions.HitBalloon -= ScoreDarts;
         Actions.Talk -= Talk;
         Actions.FinishTalk -= DoAction;
+        Actions.Pause -= Pause;
     }
     // Start is called before the first frame update
     void Start()
@@ -149,20 +156,24 @@ public class GameManager : MonoBehaviour
             foreground.Add(child.gameObject);
         }
 
+        switchScreen.gameObject.SetActive(false);
+        masks[1].SetActive(false);
+        fade.SetActive(true);
         StartCoroutine(Functions.Fade(fade, 1));
-        //StartCoroutine(Intro());
+        StartCoroutine(Intro());
     }
 
     IEnumerator Intro()
     {
         yield return new WaitForSeconds(1);
 
-        TextBox.Text(null, "???", "What is your name?", 0.05f);
+        /*TextBox.Text(null, "???", "What is your name?", 0.05f);
         TextBox.Text();
         TextBox.Text(null, "???", "...", 0.2f);
         //TextBox.Text($"Oh! Your name is {character.charName}?", 0.05f, true);
         //I* ouputs the input of the player
-        TextBox.Text(charAppearance, "I*", "Mum? Dad? Where did you go?", 0.02f);
+        TextBox.Text(charAppearance, "I*", "Mum? Dad? Where did you go?", 0.02f);*/
+        fade.SetActive(false);
     }
 
     public void SwitchRoom(int n)
@@ -198,6 +209,8 @@ public class GameManager : MonoBehaviour
             TextBox.Text(charAppearance, charName, "It appears I don't have enough tickets...", 0.02f);
             yield break;
         }
+        switchScreen.gameObject.SetActive(true);
+        masks[1].SetActive(true);
         character.GetComponent<MouseController2D>().fire = true;
         switchScreen.speed = 1;
         switchScreen.Play("MenuSelectOption", 0, 0);
@@ -264,6 +277,10 @@ public class GameManager : MonoBehaviour
 
         background[currentRoom].SetActive(true);
         foreground[currentRoom].SetActive(true);
+
+        yield return new WaitForSeconds(1);
+        switchScreen.gameObject.SetActive(false);
+        masks[1].SetActive(false);
     }
     public void DoorAnim(GameObject obj, bool visible)
     {
@@ -296,6 +313,9 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(Functions.Zoom(Camera.main, 9));
                 UI.transform.GetChild(0).GetComponent<GameButtons>().type = GameButtons.TYPE.back;
                 UI.SetActive(false);
+                break;
+            case GameButtons.TYPE.exitToMenu:
+                StartCoroutine(ExitToMenu());
                 break;
         }
     }
@@ -472,5 +492,33 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(SwitchRooms(1));
                 break;
         }
+    }
+
+    void Pause()
+    {
+        if (!paused)
+        {
+            print("pause");
+            anims[2].enabled = true;
+            anims[2].speed = 1;
+            anims[2].Play("PauseGameShow", 0, 0);
+            paused = true;
+        }
+        else
+        {
+            anims[2].StartPlayback();
+            anims[2].speed = -1;
+            anims[2].Play("PauseGameShow", -1, float.NegativeInfinity);
+            paused = false;
+        }
+    }
+
+    IEnumerator ExitToMenu()
+    {
+        switchScreen.speed = 1;
+        switchScreen.Play("MenuSelectOption", 0, 0);
+        fade.SetActive(true);
+        yield return new WaitForSeconds(1);
+        StartCoroutine(Functions.Fade(fade, 0));
     }
 }

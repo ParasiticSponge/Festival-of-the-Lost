@@ -57,7 +57,7 @@ public class CharacterController2D : NPC_AI
 			if (talk) Actions.Talk.Invoke(talkingTo);
 		}
 	}
-	private void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
 	{
 		if (enabled)
 		{
@@ -91,4 +91,8 @@ public class CharacterController2D : NPC_AI
 			}
 		}
 	}
+    private void OnPause(InputValue input)
+    {
+		Actions.Pause.Invoke();
+    }
 }

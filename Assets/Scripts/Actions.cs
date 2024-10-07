@@ -19,4 +19,5 @@ public class Actions
     public static Action<bool> Settings;
     public static Action<int> TextBoxColour;
     public static Action<string> FinishTalk;
+    public static Action Pause;
 }
