@@ -46,11 +46,11 @@ public class Functions : MonoBehaviour
         }
     }
 
-    /*public static IEnumerator CodeBlock(Action action)
+    public static IEnumerator WaitFor(Action action)
     {
         action();
         yield return action;
-    }*/
+    }
 
     public static int Digits(int value)
     {

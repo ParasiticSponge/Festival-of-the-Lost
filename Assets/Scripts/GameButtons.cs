@@ -10,7 +10,8 @@ public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
     {
         back,
         exitBoard,
-        exitToMenu
+        exitToMenu,
+        resetMini
     }
     public TYPE type;
 

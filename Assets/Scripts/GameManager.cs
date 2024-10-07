@@ -13,13 +13,13 @@ public class GameManager : MonoBehaviour
     System.Random random = new System.Random();
 
     public Image powerBar;
-    public GameObject fade;
     List<GameObject> masks = new List<GameObject>();
+    GameObject fade;
     public GameObject textBoxPrefab;
     public Animator switchScreen;
     public GameObject animationCanvas;
     public Animator gameCanvas;
-    public GameObject UI;
+    GameObject UI;
     GameObject f1_UI;
     public List<GameObject> darts;
     public List<GameObject> balloons;
@@ -74,32 +74,20 @@ public class GameManager : MonoBehaviour
         foreach (Transform t1 in f1.transform)
         {
             if (t1.gameObject.name.Contains("Tent"))
-            {
                 circusTent = t1.gameObject;
-            }
             if (t1.gameObject.name.Contains("NoticeBoard"))
-            {
                 noticeBoard = t1.gameObject;
-            }
             if (t1.gameObject.name.Contains("NPC"))
-            {
                 NPCs.Add(t1.gameObject);
-            }
             if (t1.gameObject.name.Contains("Canvas"))
-            {
                 f1_UI = t1.GetChild(0).gameObject;
-            }
         }
         foreach (Transform t2 in f2.transform)
         {
             if (t2.gameObject.name.Contains("Balloon"))
-            {
                 balloons.Add(t2.gameObject);
-            }
             if (t2.gameObject.name.Contains("ThrowDart"))
-            {
                 darts.Add(t2.gameObject);
-            }
         }
         foreach (Transform t in doors.transform)
         {
@@ -110,8 +98,18 @@ public class GameManager : MonoBehaviour
         {
             if (child.GetComponent<Animator>())
                 anims.Add(child.gameObject.GetComponent<Animator>());
-            if (child.gameObject.name.Contains("Mask"))
-                masks.Add(child.gameObject);
+            switch (child.gameObject.name)
+            {
+                case string a when a.Contains("Mask"):
+                    masks.Add(child.gameObject);
+                    break;
+                case string a when a.Contains("UI"):
+                    UI = child.gameObject;
+                    break;
+                case string a when a.Contains("Fade"):
+                    fade = child.gameObject;
+                    break;
+            }
         }
 
         balloon = balloons[0].GetComponent<SpriteRenderer>().sprite;
@@ -242,7 +240,6 @@ public class GameManager : MonoBehaviour
                 character.GetComponent<Animator>().SetBool("dart", false);
                 character.GetComponent<CircleCollider2D>().enabled = true;
                 Camera.main.GetComponent<CameraFollow>().enabled = true;
-                UI.SetActive(false);
                 if (tickets >= ticketsToEnterTent)
                     StartCoroutine(Sad());
                 break;
@@ -263,7 +260,6 @@ public class GameManager : MonoBehaviour
                 character.GetComponent<CircleCollider2D>().enabled = false;
                 Camera.main.GetComponent<CameraFollow>().enabled = false;
                 Camera.main.transform.position = new Vector3(room.x, room.y, -10);
-                UI.SetActive(true);
                 break;
             case 2:
                 currentRoom = 2;
@@ -292,6 +288,9 @@ public class GameManager : MonoBehaviour
         {
             case GameButtons.TYPE.back:
                 StartCoroutine(SwitchRooms(0));
+                anims[1].StartPlayback();
+                anims[1].speed = -1;
+                anims[1].Play("ScoreSheetShow", -1, float.NegativeInfinity);
                 break;
             case GameButtons.TYPE.exitBoard:
                 isLookingAtBoard = false;
@@ -316,6 +315,12 @@ public class GameManager : MonoBehaviour
                 break;
             case GameButtons.TYPE.exitToMenu:
                 StartCoroutine(ExitToMenu());
+                break;
+            case GameButtons.TYPE.resetMini:
+                anims[1].StartPlayback();
+                anims[1].speed = -1;
+                anims[1].Play("ScoreSheetShow", -1, float.NegativeInfinity);
+                ResetDartsGame();
                 break;
         }
     }
@@ -375,6 +380,7 @@ public class GameManager : MonoBehaviour
     {
         powerBar.fillAmount = 0;
         scoreDarts = 0;
+        scoreDartsText.text = scoreDarts.ToString();
         character.GetComponent<MouseController2D>().fire = false;
         startingDart = 0;
         for (int i = 1; i < darts.Count + 1; i++)
@@ -387,14 +393,19 @@ public class GameManager : MonoBehaviour
             balloons[i].GetComponent<SpriteRenderer>().sprite = balloon;
             balloons[i].GetComponent<CircleCollider2D>().enabled = true;
         }
+        Vector3 room = background[currentRoom].transform.position;
+        character.transform.position = new Vector3(room.x, room.y - 12, 0);
+        Vector3 pos = character.transform.localPosition;
+        character.transform.localPosition = new Vector3(pos.x, pos.y, dartDistanceFromCam);
+        character.GetComponent<Animator>().Play("dartIdle", 0, 0);
     }
     public void ScoreDarts(bool hit)
     {
-        anims[1].enabled = true;
+        anims[0].enabled = true;
         switch (hit)
         {
             case true:
-                anims[1].Play("Nice", 0, 0);
+                anims[0].Play("Nice", 0, 0);
                 tickets++;
                 scoreDarts++;
                 scoreDartsText.text = scoreDarts.ToString();
@@ -402,7 +413,7 @@ public class GameManager : MonoBehaviour
                 break;
             case false:
                 if (startingDart < darts.Count)
-                    anims[1].Play("TryAgain", 0, 0);
+                    anims[0].Play("TryAgain", 0, 0);
                 break;
         }
 
@@ -418,7 +429,7 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            anims[1].Play("GameOverMinigame", 0, 0);
+            StartCoroutine(GameOverDarts());
         }
     }
 
@@ -496,20 +507,33 @@ public class GameManager : MonoBehaviour
 
     void Pause()
     {
+        //anim 2 is for main game
+        //room 0 is for main game
+        //anim 3 is for mini-game
+        //room 1 is for darts game
+        //TODO: when there are more minigames, use switch(currentRoom) instead
         if (!paused)
         {
             print("pause");
-            anims[2].enabled = true;
-            anims[2].speed = 1;
-            anims[2].Play("PauseGameShow", 0, 0);
+            anims[currentRoom + 2].enabled = true;
+            anims[currentRoom + 2].speed = 1;
+            anims[currentRoom + 2].Play("PauseGameShow", 0, 0);
             paused = true;
+            //Time.timeScale = 0;
+            character.GetComponent<CharacterController2D>().canMove = 0;
+            foreach (GameObject npc in NPCs)
+                npc.GetComponent<NPC_AI>().canMove = 0;
         }
         else
         {
-            anims[2].StartPlayback();
-            anims[2].speed = -1;
-            anims[2].Play("PauseGameShow", -1, float.NegativeInfinity);
+            anims[currentRoom + 2].StartPlayback();
+            anims[currentRoom + 2].speed = -1;
+            anims[currentRoom + 2].Play("PauseGameShow", -1, float.NegativeInfinity);
             paused = false;
+            //Time.timeScale = 1;
+            character.GetComponent<CharacterController2D>().canMove = 1;
+            foreach (GameObject npc in NPCs)
+                npc.GetComponent<NPC_AI>().canMove = 1;
         }
     }
 
@@ -520,5 +544,37 @@ public class GameManager : MonoBehaviour
         fade.SetActive(true);
         yield return new WaitForSeconds(1);
         StartCoroutine(Functions.Fade(fade, 0));
+    }
+
+    IEnumerator GameOverDarts()
+    {
+        anims[1].enabled = true;
+        /*yield return StartCoroutine(Functions.WaitFor(() => 
+        { anims[0].Play("GameOverMinigame", 0, 0); 
+        }));
+        yield return StartCoroutine(Functions.WaitFor(() =>
+        {
+            anims[1].Play("ScoreSheetShow", 0, 0);
+        }));*/
+        anims[0].Play("GameOverMinigame", 0, 0);
+        yield return new WaitForSeconds(2);
+        anims[1].speed = 1;
+        anims[1].Play("ScoreSheetShow", 0, 0);
+        yield return new WaitForSeconds(1);
+        switch (scoreDarts)
+        {
+            case 0:
+                break;
+            case int a when a > 0 && a <= 2:
+                anims[1].Play("OneStar", 0, 0);
+                break;
+            case int a when a > 2 && a <= 4:
+                anims[1].Play("TwoStar", 0, 0);
+                break;
+            case 5:
+                anims[1].Play("ThreeStar", 0, 0);
+                break;
+        }
+        anims[1].transform.GetChild(5).gameObject.GetComponent<Text>().text = scoreDarts.ToString();
     }
 }
