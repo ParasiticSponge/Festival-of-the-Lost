@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEditor.Animations;
 
 public class GameManager : MonoBehaviour
 {
@@ -57,8 +58,6 @@ public class GameManager : MonoBehaviour
     public bool dialogueExists;
 
     bool mood = false;
-
-    [SerializeField] private int maxPower = 100;
 
     public Sprite testingSprite;
     public bool paused;
@@ -286,9 +285,7 @@ public class GameManager : MonoBehaviour
                 canPause = true;
                 Time.timeScale = 1;
                 StartCoroutine(SwitchRooms(0));
-                anims[1].StartPlayback();
-                anims[1].speed = -1;
-                anims[1].Play("ScoreSheetShow", -1, float.NegativeInfinity);
+                PlayAnimation(anims[1], "ScoreSheetShow", true);
                 break;
             case GameButtons.TYPE.pauseBack:
                 Pause();
@@ -297,9 +294,7 @@ public class GameManager : MonoBehaviour
             case GameButtons.TYPE.replayMini:
                 canPause = true;
                 Time.timeScale = 1;
-                anims[1].StartPlayback();
-                anims[1].speed = -1;
-                anims[1].Play("ScoreSheetShow", -1, float.NegativeInfinity);
+                PlayAnimation(anims[1], "ScoreSheetShow", true);
                 ResetDartsGame();
                 break;
             case GameButtons.TYPE.resetMini:
@@ -572,33 +567,38 @@ public class GameManager : MonoBehaviour
 
     void Pause()
     {
-        //anim 2 is for main game
-        //room 0 is for main game
-        //anim 3 is for mini-game
-        //room 1 is for darts game
-        //TODO: when there are more minigames, use switch(currentRoom) instead
-        if (!paused)
+        switch (currentRoom)
         {
-            print("pause");
-            anims[currentRoom + 2].enabled = true;
-            anims[currentRoom + 2].speed = 1;
-            anims[currentRoom + 2].Play("PauseGameShow", 0, 0);
-            paused = true;
-            Time.timeScale = 0;
-            /*character.GetComponent<CharacterController2D>().canMove = 0;
-            foreach (GameObject npc in NPCs)
-                npc.GetComponent<NPC_AI>().canMove = 0;*/
-        }
-        else
-        {
-            anims[currentRoom + 2].StartPlayback();
-            anims[currentRoom + 2].speed = -1;
-            anims[currentRoom + 2].Play("PauseGameShow", -1, float.NegativeInfinity);
-            paused = false;
-            Time.timeScale = 1;
-            /*character.GetComponent<CharacterController2D>().canMove = 1;
-            foreach (GameObject npc in NPCs)
-                npc.GetComponent<NPC_AI>().canMove = 1;*/
+            case 0:
+                anims[2].enabled = true;
+                if (!paused)
+                {
+                    PlayAnimation(anims[2], "PauseGameShow", false);
+                    paused = true;
+                    Time.timeScale = 0;
+                }
+                else
+                {
+                    PlayAnimation(anims[2], "PauseGameShow", true);
+                    paused = false;
+                    Time.timeScale = 1;
+                }
+                break;
+            case 1:
+                anims[3].enabled = true;
+                if (!paused)
+                {
+                    PlayAnimation(anims[3], "PauseMinigameShow", false);
+                    paused = true;
+                    Time.timeScale = 0;
+                }
+                else
+                {
+                    PlayAnimation(anims[3], "PauseMinigameShow", true);
+                    paused = false;
+                    Time.timeScale = 1;
+                }
+                break;
         }
     }
 
@@ -629,7 +629,7 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(2);
         Time.timeScale = 0;
         anims[1].speed = 1;
-        anims[1].Play("ScoreSheetShow", 0, 0);
+        PlayAnimation(anims[1], "ScoreSheetShow", false);
         yield return new WaitForSecondsRealtime(1);
         for (int i = 0; i <= scoreDarts; i++)
         {
@@ -650,6 +650,56 @@ public class GameManager : MonoBehaviour
                 break;
             case 5:
                 anims[1].Play("ThreeStar", 0, 0);
+                break;
+        }
+    }
+
+    void PlayAnimation(Animator animator, string name, bool reversed)
+    {
+        bool count = false;
+        for (int i = 0; i < animator.parameterCount; i++)
+        {
+            if (animator.parameters[i].name == "Speed")
+            {
+                count = true;
+                break;
+            }
+        }
+        //TODO: get correct layer for state
+        if (!count)
+        {
+            //get controller of animator at runtime
+            AnimatorController controller = (animator.runtimeAnimatorController as AnimatorController);
+            AnimatorControllerParameter paramater = new AnimatorControllerParameter();
+            paramater.name = "Speed";
+            paramater.type = AnimatorControllerParameterType.Float;
+            paramater.defaultFloat = 1;
+            controller.AddParameter(paramater);
+            
+            ChildAnimatorState[] states = controller.layers[0].stateMachine.states;
+            AnimatorState state = states[0].state;
+
+            //get correct state provided by name
+            for (int i = 0; i < states.Length; i++)
+            {
+                if (states[i].state.name == name)
+                    state = controller.layers[0].stateMachine.states[i].state;
+            }
+            //state.speed = animator.GetFloat("Speed");
+            print(state.name);
+            state.speedParameterActive = true;
+            state.speedParameter = "Speed";
+        }
+
+        switch (reversed)
+        {
+            case false:
+                animator.SetFloat("Speed", 1);
+                animator.Play(name, 0, 0);
+                break;
+            case true:
+                animator.SetFloat("Speed", -1);
+                animator.Play(name, -1, 1);
                 break;
         }
     }

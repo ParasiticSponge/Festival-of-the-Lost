@@ -8492,7 +8492,6 @@ MonoBehaviour:
   doors: {fileID: 1003583248}
   timeLooking: 0
   dialogueExists: 0
-  maxPower: 100
   testingSprite: {fileID: 21300000, guid: 5aaa19f88304eb64f9eec64e408a1c85, type: 3}
   paused: 0
   canPause: 1
