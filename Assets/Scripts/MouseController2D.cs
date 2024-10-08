@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.TextCore.Text;
 
 public class MouseController2D : MonoBehaviour
 {
+    public GameObject crosshair;
     Vector3 poop;
     public bool fire;
     Animator animator;
@@ -17,6 +19,7 @@ public class MouseController2D : MonoBehaviour
     bool collisionListener;
     bool hasExited = true;
     Collider2D otherCollider;
+    GameManager gameManager;
 
     private void OnEnable()
     {
@@ -33,17 +36,31 @@ public class MouseController2D : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+        gameManager = FindObjectOfType<GameManager>();
+
+        Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(Vector3.zero);
+        Vector3 desiredPos = new Vector3(crosshair.transform.localPosition.x, 0, crosshair.transform.localPosition.z);
+        if (crosshair.activeSelf)
+            crosshair.transform.localPosition = desiredPos;
     }
 
     private void Update()
     {
-        if (!fire)
+        if (!fire && !gameManager.paused)
         {
             Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             screenToWorld.y = transform.position.y;
             screenToWorld.z = transform.position.z;
 
             transform.position = screenToWorld;
+
+            if (MenuManager_2.crossAssist)
+            {
+                if (!crosshair.activeSelf) crosshair.SetActive(true);
+                crosshair.transform.position = new Vector3(screenToWorld.x, crosshair.transform.position.y, crosshair.transform.position.z);
+            }
+            else
+                crosshair.SetActive(false);
 
             if (Input.GetMouseButtonDown(0))
             {

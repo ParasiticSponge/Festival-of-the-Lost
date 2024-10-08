@@ -19,6 +19,7 @@ public class CharacterController2D : NPC_AI
     }
     private void Awake()
 	{
+		gameManager = FindObjectOfType<GameManager>();
 		m_Rigidbody2D = GetComponent<Rigidbody2D>();
 		m_Rigidbody2D.gravityScale = gravity;
 		animator = GetComponent<Animator>();
@@ -53,10 +54,10 @@ public class CharacterController2D : NPC_AI
 	{
 		if (enabled)
 		{
-			if (enter) Actions.EnterRoom.Invoke(doorNum);
 			if (talk) Actions.Talk.Invoke(talkingTo);
 		}
-	}
+        if (enter) Actions.EnterRoom.Invoke(doorNum);
+    }
     private void OnTriggerEnter2D(Collider2D other)
 	{
 		if (enabled)
@@ -93,6 +94,7 @@ public class CharacterController2D : NPC_AI
 	}
     private void OnPause(InputValue input)
     {
-		Actions.Pause.Invoke();
+		if (gameManager.canPause)
+			Actions.Pause.Invoke();
     }
 }

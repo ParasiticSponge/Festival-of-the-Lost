@@ -8,10 +8,11 @@ public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
 {
     public enum TYPE
     {
-        back,
-        exitBoard,
-        exitToMenu,
-        resetMini
+        scoreSheetBack,
+        pauseBack,
+        replayMini,
+        resetMini,
+        exitToMenu
     }
     public TYPE type;
 

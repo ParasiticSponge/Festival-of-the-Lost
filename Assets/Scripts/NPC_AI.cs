@@ -21,7 +21,7 @@ public class NPC_AI : MonoBehaviour
     float idleProbability = 0.5f;
     bool speaking;
     System.Random random = new System.Random();
-    GameObject gameManager;
+    public GameManager gameManager;
     GameObject character;
 
     public int canMove = 1;
@@ -67,7 +67,7 @@ public class NPC_AI : MonoBehaviour
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
         m_Rigidbody2D.gravityScale = gravity;
         animator = GetComponent<Animator>();
-        gameManager = FindObjectOfType<GameManager>().gameObject;
+        gameManager = FindObjectOfType<GameManager>();
         character = FindObjectOfType<CharacterController2D>().gameObject;
 
         if (OnLandEvent == null)

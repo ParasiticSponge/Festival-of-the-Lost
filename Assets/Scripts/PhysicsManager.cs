@@ -18,6 +18,10 @@ public class PhysicsManager : MonoBehaviour
         collision = FindObjectsOfType<Collision2D>();
     }
     // Update is called once per frame
+    public void UpdateCollision()
+    {
+        circCollision = FindObjectsOfType<CircleCollider2D>();
+    }
     void Update()
     {
         count = 0;

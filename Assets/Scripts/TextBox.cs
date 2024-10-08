@@ -44,6 +44,7 @@ public class TextBox : MonoBehaviour
         intensities.Add(0);
         appearances.Add(image);
         objects.Add(obj);
+        dialogue = "";
 
         if (texts.Count <= 1)
         {
@@ -63,6 +64,7 @@ public class TextBox : MonoBehaviour
         intensities.Add(0);
         appearances.Add(image);
         objects.Add(null);
+        dialogue = "";
 
         if (texts.Count <= 1)
         {
@@ -82,6 +84,7 @@ public class TextBox : MonoBehaviour
         intensities.Add(intensity);
         appearances.Add(image);
         objects.Add(null);
+        dialogue = "";
 
         if (texts.Count <= 1)
         {
@@ -101,6 +104,7 @@ public class TextBox : MonoBehaviour
         intensities.Add(0);
         appearances.Add(null);
         objects.Add(null);
+        dialogue = "";
 
         if (texts.Count <= 1)
         {

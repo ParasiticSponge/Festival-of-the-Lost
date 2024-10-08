@@ -25,6 +25,7 @@ public partial class MenuManager_2 : MonoBehaviour
     Text musicNumber;
     Slider sfxSlider;
     Text sfxNumber;
+    Toggle crossToggle;
 
     public static int textBox = 0;
     public static Sprite textBoxColourLight;
@@ -32,6 +33,7 @@ public partial class MenuManager_2 : MonoBehaviour
     public static int resolution;
     public static float musicVol;
     public static float sfxVol;
+    public static bool crossAssist = true;
 
     [SerializeField] GameObject scrollContent;
     List<GameObject> boxes = new List<GameObject>();
@@ -59,6 +61,9 @@ public partial class MenuManager_2 : MonoBehaviour
                     break;
                 case "RESOLUTION":
                     resolutionBar = child.GetChild(1).gameObject.GetComponent<Dropdown>();
+                    break;
+                case "CROSS":
+                    crossToggle = child.GetChild(1).gameObject.GetComponent<Toggle>();
                     break;
             }
         }
@@ -131,6 +136,7 @@ public partial class MenuManager_2 : MonoBehaviour
         sfxVol = sfxSlider.value;
         sfxNumber.text = (Mathf.RoundToInt(sfxVol * 100)).ToString();
         resolution = resolutionBar.value;
+        crossAssist = crossToggle.isOn;
     }
 
     public void PlayAnimation()

@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 
 public class GameManager : MonoBehaviour
 {
+    public PhysicsManager physics;
     GameObject character;
     Sprite charAppearance;
     string charName;
@@ -19,7 +20,6 @@ public class GameManager : MonoBehaviour
     public Animator switchScreen;
     public GameObject animationCanvas;
     public Animator gameCanvas;
-    GameObject UI;
     GameObject f1_UI;
     public List<GameObject> darts;
     public List<GameObject> balloons;
@@ -40,6 +40,7 @@ public class GameManager : MonoBehaviour
     public GameObject doors;
     List<Collision2D> door = new List<Collision2D>();
     List<GameObject> NPCs = new List<GameObject>();
+    GameObject mum;
     List<Animator> anims = new List<Animator>();
     //List<BoxCollider2D> door2 = new List<BoxCollider2D>();
     Sprite dart;
@@ -55,10 +56,13 @@ public class GameManager : MonoBehaviour
     public float timeLooking;
     public bool dialogueExists;
 
+    bool mood = false;
+
     [SerializeField] private int maxPower = 100;
 
     public Sprite testingSprite;
-    bool paused;
+    public bool paused;
+    public bool canPause = true;
     private void Awake()
     {
         character = FindObjectOfType<CharacterController2D>().gameObject;
@@ -78,7 +82,11 @@ public class GameManager : MonoBehaviour
             if (t1.gameObject.name.Contains("NoticeBoard"))
                 noticeBoard = t1.gameObject;
             if (t1.gameObject.name.Contains("NPC"))
+            {
                 NPCs.Add(t1.gameObject);
+                if (t1.gameObject.name.Contains("Mum"))
+                    mum = t1.gameObject;
+            }
             if (t1.gameObject.name.Contains("Canvas"))
                 f1_UI = t1.GetChild(0).gameObject;
         }
@@ -96,15 +104,14 @@ public class GameManager : MonoBehaviour
         }
         foreach (Transform child in animationCanvas.transform)
         {
+            if (child.gameObject.name == "GameOver")
+                anims.Add(child.GetChild(0).gameObject.GetComponent<Animator>());
             if (child.GetComponent<Animator>())
                 anims.Add(child.gameObject.GetComponent<Animator>());
             switch (child.gameObject.name)
             {
                 case string a when a.Contains("Mask"):
                     masks.Add(child.gameObject);
-                    break;
-                case string a when a.Contains("UI"):
-                    UI = child.gameObject;
                     break;
                 case string a when a.Contains("Fade"):
                     fade = child.gameObject;
@@ -183,23 +190,7 @@ public class GameManager : MonoBehaviour
     {
         if (n == 3)
         {
-            isLookingAtBoard = true;
-            StartCoroutine(BoardLooking());
-            StartCoroutine(Functions.Fade(f1_UI, 1));
-            StartCoroutine(Functions.Fade(character, 1));
-            character.GetComponent<CharacterController2D>().enabled = false;
-            foreach (GameObject npc in NPCs)
-            {
-                StartCoroutine(Functions.Fade(npc, 1));
-                npc.GetComponent<NPC_AI>().canMove = 0;
-            }
-            door[2].gameObject.SetActive(false);
-            Vector3 pos = new Vector3(noticeBoard.transform.position.x, noticeBoard.transform.position.y, -10);
-            Camera.main.GetComponent<CameraFollow>().enabled = false;
-            StartCoroutine(Functions.Move(Camera.main.transform.position, pos, (value => Camera.main.transform.position = value)));
-            StartCoroutine(Functions.Zoom(Camera.main, -9));
-            UI.transform.GetChild(0).GetComponent<GameButtons>().type = GameButtons.TYPE.exitBoard;
-            UI.SetActive(true);
+            ExitBoard(isLookingAtBoard);
             yield break;
         }
         if (n == 2 && tickets < ticketsToEnterTent)
@@ -233,15 +224,19 @@ public class GameManager : MonoBehaviour
                         break;
                 }
                 currentRoom = 0;
-
                 character.GetComponent<Rigidbody2D>().gravityScale = initialGravity;
                 character.GetComponent<CharacterController2D>().enabled = true;
                 character.GetComponent<MouseController2D>().enabled = false;
                 character.GetComponent<Animator>().SetBool("dart", false);
                 character.GetComponent<CircleCollider2D>().enabled = true;
                 Camera.main.GetComponent<CameraFollow>().enabled = true;
-                if (tickets >= ticketsToEnterTent)
+                if (tickets >= ticketsToEnterTent && !mood)
+                {
+                    Destroy(mum);
+                    physics.UpdateCollision();
+                    NPCs.Remove(mum);
                     StartCoroutine(Sad());
+                }
                 break;
             case 1:
                 ResetDartsGame();
@@ -284,43 +279,37 @@ public class GameManager : MonoBehaviour
     }
     public void showUI(GameButtons.TYPE type)
     {
+        //back is only called from 
         switch (type)
         {
-            case GameButtons.TYPE.back:
+            case GameButtons.TYPE.scoreSheetBack:
+                canPause = true;
+                Time.timeScale = 1;
                 StartCoroutine(SwitchRooms(0));
                 anims[1].StartPlayback();
                 anims[1].speed = -1;
                 anims[1].Play("ScoreSheetShow", -1, float.NegativeInfinity);
                 break;
-            case GameButtons.TYPE.exitBoard:
-                isLookingAtBoard = false;
-                timeLooking = 0;
-                StartCoroutine(Functions.Fade(f1_UI, 0));
-                StartCoroutine(Functions.Fade(character, 0));
-                //TODO: when moving before completely zoomed out, camera snaps rather than smooths to position 
-                character.GetComponent<CharacterController2D>().enabled = true;
-                foreach (GameObject npc in NPCs)
-                {
-                    StartCoroutine(Functions.Fade(npc, 0));
-                    npc.GetComponent<NPC_AI>().canMove = 1;
-                }
-                door[2].gameObject.SetActive(true);
-                CameraFollow component = Camera.main.GetComponent<CameraFollow>();
-                Vector3 pos = new Vector3(character.transform.position.x, character.transform.position.y, 0) + component.offset;
-                component.enabled = true;
-                StartCoroutine(Functions.Move(Camera.main.transform.position, pos, (value => Camera.main.transform.position = value)));
-                StartCoroutine(Functions.Zoom(Camera.main, 9));
-                UI.transform.GetChild(0).GetComponent<GameButtons>().type = GameButtons.TYPE.back;
-                UI.SetActive(false);
+            case GameButtons.TYPE.pauseBack:
+                Pause();
+                StartCoroutine(SwitchRooms(0));
                 break;
-            case GameButtons.TYPE.exitToMenu:
-                StartCoroutine(ExitToMenu());
-                break;
-            case GameButtons.TYPE.resetMini:
+            case GameButtons.TYPE.replayMini:
+                canPause = true;
+                Time.timeScale = 1;
                 anims[1].StartPlayback();
                 anims[1].speed = -1;
                 anims[1].Play("ScoreSheetShow", -1, float.NegativeInfinity);
                 ResetDartsGame();
+                break;
+            case GameButtons.TYPE.resetMini:
+                Pause();
+                ResetDartsGame();
+                break;
+            case GameButtons.TYPE.exitToMenu:
+                canPause = true;
+                Time.timeScale = 1;
+                StartCoroutine(ExitToMenu());
                 break;
         }
     }
@@ -336,10 +325,17 @@ public class GameManager : MonoBehaviour
     }
     IEnumerator PowerBar()
     {
+        Vector3 screenToWorld;
+        Vector3 desiredPos;
+        GameObject cross = character.GetComponent<MouseController2D>().crosshair;
         for (float i = 0; i < 101; i++)
         {
             if (!hold) { Actions.Power.Invoke(i/100); break; }
             powerBar.fillAmount = i/100;
+            screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
+            desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, cross.transform.position.z);
+            if (cross.activeSelf)
+                cross.transform.position = desiredPos;
             yield return null;
         }
         if (hold)
@@ -348,6 +344,10 @@ public class GameManager : MonoBehaviour
             {
                 if (!hold) { Actions.Power.Invoke(i / 100); break; }
                 powerBar.fillAmount = i / 100;
+                screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
+                desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, cross.transform.position.z);
+                if (cross.activeSelf)
+                    cross.transform.position = desiredPos;
                 yield return null;
             }
             if (hold) StartCoroutine(PowerBar());
@@ -375,6 +375,13 @@ public class GameManager : MonoBehaviour
 
         character.GetComponent<MouseController2D>().fire = false;
         startingDart++;
+        powerBar.fillAmount = 0;
+
+        //reset y to middle of screen
+        GameObject cross = character.GetComponent<MouseController2D>().crosshair;
+        Vector3 desiredPos = new Vector3(cross.transform.localPosition.x, 0, cross.transform.localPosition.z);
+        if (cross.activeSelf)
+            cross.transform.localPosition = desiredPos;
     }
     public void ResetDartsGame()
     {
@@ -398,10 +405,19 @@ public class GameManager : MonoBehaviour
         Vector3 pos = character.transform.localPosition;
         character.transform.localPosition = new Vector3(pos.x, pos.y, dartDistanceFromCam);
         character.GetComponent<Animator>().Play("dartIdle", 0, 0);
+
+        //reset y to middle of screen
+        GameObject cross = character.GetComponent<MouseController2D>().crosshair;
+        Vector3 desiredPos = new Vector3(cross.transform.localPosition.x, 0, cross.transform.localPosition.z);
+        if (cross.activeSelf)
+            cross.transform.localPosition = desiredPos;
     }
     public void ScoreDarts(bool hit)
     {
         anims[0].enabled = true;
+        anims[0].transform.parent.localScale = new Vector3(0.3f, 0.3f, 1);
+        Vector3 position = Camera.main.WorldToScreenPoint(new Vector3(character.transform.position.x, character.transform.position.y + 3, 0));
+        anims[0].transform.parent.GetComponent<RectTransform>().position = new Vector3(position.x, position.y, 0);
         switch (hit)
         {
             case true:
@@ -435,10 +451,14 @@ public class GameManager : MonoBehaviour
 
     public void Talk(GameObject obj)
     {
-        obj.transform.GetChild(0).gameObject.SetActive(false);
-        obj.GetComponent<NPC_AI>().Talk();
-        obj.GetComponent<NPC_AI>().canMove = 0;
-        StartCoroutine(Talking(obj));
+        TextBox text = FindObjectOfType<TextBox>();
+        if (text == null)
+        {
+            obj.transform.GetChild(0).gameObject.SetActive(false);
+            obj.GetComponent<NPC_AI>().Talk();
+            obj.GetComponent<NPC_AI>().canMove = 0;
+            StartCoroutine(Talking(obj));
+        }
     }
     public IEnumerator Talking(GameObject obj)
     {
@@ -494,9 +514,54 @@ public class GameManager : MonoBehaviour
         timeLooking = 0;
     }
 
+    void ExitBoard(bool exit)
+    {
+        Vector3 pos;
+        switch (exit)
+        {
+            case false:
+                isLookingAtBoard = true;
+                StartCoroutine(BoardLooking());
+                StartCoroutine(Functions.Fade(f1_UI, 1));
+                StartCoroutine(Functions.Fade(scoreTicketsText.gameObject, 1));
+                StartCoroutine(Functions.Fade(character, 1));
+                character.GetComponent<CharacterController2D>().enabled = false;
+                foreach (GameObject npc in NPCs)
+                {
+                    StartCoroutine(Functions.Fade(npc, 1));
+                    npc.GetComponent<NPC_AI>().canMove = 0;
+                }
+                door[2].gameObject.SetActive(false);
+                pos = new Vector3(noticeBoard.transform.position.x, noticeBoard.transform.position.y, -10);
+                Camera.main.GetComponent<CameraFollow>().enabled = false;
+                StartCoroutine(Functions.Move(Camera.main.transform.position, pos, (value => Camera.main.transform.position = value)));
+                StartCoroutine(Functions.Zoom(Camera.main, -9));
+                break;
+            case true:
+                isLookingAtBoard = false;
+                timeLooking = 0;
+                StartCoroutine(Functions.Fade(f1_UI, 0));
+                StartCoroutine(Functions.Fade(scoreTicketsText.gameObject, 0));
+                StartCoroutine(Functions.Fade(character, 0));
+                //TODO: when moving before completely zoomed out, camera snaps rather than smooths to position 
+                character.GetComponent<CharacterController2D>().enabled = true;
+                foreach (GameObject npc in NPCs)
+                {
+                    StartCoroutine(Functions.Fade(npc, 0));
+                    npc.GetComponent<NPC_AI>().canMove = 1;
+                }
+                door[2].gameObject.SetActive(true);
+                CameraFollow component = Camera.main.GetComponent<CameraFollow>();
+                pos = new Vector3(character.transform.position.x, character.transform.position.y, 0) + component.offset;
+                component.enabled = true;
+                StartCoroutine(Functions.Move(Camera.main.transform.position, pos, (value => Camera.main.transform.position = value)));
+                StartCoroutine(Functions.Zoom(Camera.main, 9));
+                break;
+        }
+    }
+
     void DoAction(string name)
     {
-        print(name);
         switch (name)
         {
             case string a when a.Contains("Balloon"):
@@ -519,10 +584,10 @@ public class GameManager : MonoBehaviour
             anims[currentRoom + 2].speed = 1;
             anims[currentRoom + 2].Play("PauseGameShow", 0, 0);
             paused = true;
-            //Time.timeScale = 0;
-            character.GetComponent<CharacterController2D>().canMove = 0;
+            Time.timeScale = 0;
+            /*character.GetComponent<CharacterController2D>().canMove = 0;
             foreach (GameObject npc in NPCs)
-                npc.GetComponent<NPC_AI>().canMove = 0;
+                npc.GetComponent<NPC_AI>().canMove = 0;*/
         }
         else
         {
@@ -530,10 +595,10 @@ public class GameManager : MonoBehaviour
             anims[currentRoom + 2].speed = -1;
             anims[currentRoom + 2].Play("PauseGameShow", -1, float.NegativeInfinity);
             paused = false;
-            //Time.timeScale = 1;
-            character.GetComponent<CharacterController2D>().canMove = 1;
+            Time.timeScale = 1;
+            /*character.GetComponent<CharacterController2D>().canMove = 1;
             foreach (GameObject npc in NPCs)
-                npc.GetComponent<NPC_AI>().canMove = 1;
+                npc.GetComponent<NPC_AI>().canMove = 1;*/
         }
     }
 
@@ -542,12 +607,13 @@ public class GameManager : MonoBehaviour
         switchScreen.speed = 1;
         switchScreen.Play("MenuSelectOption", 0, 0);
         fade.SetActive(true);
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSecondsRealtime(1);
         StartCoroutine(Functions.Fade(fade, 0));
     }
 
     IEnumerator GameOverDarts()
     {
+        canPause = false;
         anims[1].enabled = true;
         /*yield return StartCoroutine(Functions.WaitFor(() => 
         { anims[0].Play("GameOverMinigame", 0, 0); 
@@ -556,11 +622,22 @@ public class GameManager : MonoBehaviour
         {
             anims[1].Play("ScoreSheetShow", 0, 0);
         }));*/
+        anims[0].transform.parent.transform.localScale = Vector3.one;
+        anims[0].transform.parent.localPosition = Vector3.zero;
         anims[0].Play("GameOverMinigame", 0, 0);
-        yield return new WaitForSeconds(2);
+        anims[1].transform.GetChild(5).gameObject.GetComponent<Text>().text = "0";
+        yield return new WaitForSecondsRealtime(2);
+        Time.timeScale = 0;
         anims[1].speed = 1;
         anims[1].Play("ScoreSheetShow", 0, 0);
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSecondsRealtime(1);
+        for (int i = 0; i <= scoreDarts; i++)
+        {
+            //Play ticket collecting sound
+            anims[1].transform.GetChild(5).gameObject.GetComponent<Text>().text = i.ToString();
+            yield return new WaitForSecondsRealtime(0.3f);
+        }
+        yield return new WaitForSecondsRealtime(0.5f);
         switch (scoreDarts)
         {
             case 0:
@@ -575,6 +652,5 @@ public class GameManager : MonoBehaviour
                 anims[1].Play("ThreeStar", 0, 0);
                 break;
         }
-        anims[1].transform.GetChild(5).gameObject.GetComponent<Text>().text = scoreDarts.ToString();
     }
 }
