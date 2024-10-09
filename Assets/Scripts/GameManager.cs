@@ -288,8 +288,10 @@ public class GameManager : MonoBehaviour
                 PlayAnimation(anims[1], "ScoreSheetShow", true);
                 break;
             case GameButtons.TYPE.pauseBack:
-                Pause();
-                StartCoroutine(SwitchRooms(0));
+                paused = true;
+                Time.timeScale = 0;
+                anims[4].enabled = true;
+                PlayAnimation(anims[4], "WarningShow", false);
                 break;
             case GameButtons.TYPE.replayMini:
                 canPause = true;
@@ -305,6 +307,19 @@ public class GameManager : MonoBehaviour
                 canPause = true;
                 Time.timeScale = 1;
                 StartCoroutine(ExitToMenu());
+                break;
+            case GameButtons.TYPE.pauseBackYes:
+                //get rid of warning and unpause
+                Pause();
+                tickets -= scoreDarts;
+                scoreTicketsText.text = tickets.ToString();
+                PlayAnimation(anims[4], "WarningShow", true);
+                StartCoroutine(SwitchRooms(0));
+                break;
+            case GameButtons.TYPE.pauseBackNo:
+                //get rid of warning but don't unpause
+                print(anims[4].gameObject.name);
+                PlayAnimation(anims[4], "WarningShow", true);
                 break;
         }
     }
