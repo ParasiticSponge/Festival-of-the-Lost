@@ -178,6 +178,7 @@ public class TextBox : MonoBehaviour
     }
     private void Update()
     {
+        gameManager.canPause = true;
         character.canMove = 0;
         //TODO: tidy pyramid of if statements
         if (texts[0] != "I*")
@@ -204,6 +205,7 @@ public class TextBox : MonoBehaviour
         }
         else
         {
+            gameManager.canPause = false;
             textChild.transform.GetChild(1).gameObject.SetActive(false);
             textChild.transform.GetChild(2).gameObject.SetActive(true);
             ProcessString();

@@ -4,7 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
-using UnityEditor.Animations;
+//using UnityEditor.Animations;
 
 public class GameManager : MonoBehaviour
 {
@@ -39,13 +39,16 @@ public class GameManager : MonoBehaviour
     List<GameObject> background = new List<GameObject>();
     List<GameObject> foreground = new List<GameObject>();
     public GameObject doors;
+    public GameObject stars;
     List<Collision2D> door = new List<Collision2D>();
     List<GameObject> NPCs = new List<GameObject>();
+    List<Animator> star = new List<Animator>();
     GameObject mum;
     List<Animator> anims = new List<Animator>();
     //List<BoxCollider2D> door2 = new List<BoxCollider2D>();
     Sprite dart;
-    float dartDistanceFromCam = -2;
+    float dartDistanceFromCam = 2;
+    float charDartDistanceFromCam = -2;
     int currentRoom = 0;
     float initialGravity;
     bool hold;
@@ -58,6 +61,7 @@ public class GameManager : MonoBehaviour
     public bool dialogueExists;
 
     bool mood = false;
+    public bool settings;
 
     public Sprite testingSprite;
     public bool paused;
@@ -117,8 +121,13 @@ public class GameManager : MonoBehaviour
                     break;
             }
         }
+        foreach (Transform child in stars.transform)
+        {
+            if (child.GetComponent<Animator>())
+                star.Add(child.gameObject.GetComponent<Animator>());
+        }
 
-        balloon = balloons[0].GetComponent<SpriteRenderer>().sprite;
+            balloon = balloons[0].GetComponent<SpriteRenderer>().sprite;
         dart = darts[startingDart].GetComponent<SpriteRenderer>().sprite;
         scoreTicketsText.text = tickets.ToString();
     }
@@ -171,12 +180,12 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
 
-        /*TextBox.Text(null, "???", "What is your name?", 0.05f);
+        TextBox.Text(null, "???", "What is your name?", 0.05f);
         TextBox.Text();
-        TextBox.Text(null, "???", "...", 0.2f);
         //TextBox.Text($"Oh! Your name is {character.charName}?", 0.05f, true);
         //I* ouputs the input of the player
-        TextBox.Text(charAppearance, "I*", "Mum? Dad? Where did you go?", 0.02f);*/
+        //TextBox.Text(charAppearance, "I*", "Mum? Dad? Where did you go?", 0.02f);
+        TextBox.Text(mum.GetComponent<NPC_AI>().appearance, mum.GetComponent<NPC_AI>().charName, "Go enjoy the circus I*", 0.02f);
         fade.SetActive(false);
     }
 
@@ -212,6 +221,9 @@ public class GameManager : MonoBehaviour
         {
             //this option brings user back to main circus
             case 0:
+                star[0].Rebind();
+                star[1].Rebind();
+                star[2].Rebind();
                 foreach (Collision2D collider in door) { collider.enabled = true; }
                 switch (currentRoom)
                 {
@@ -244,7 +256,7 @@ public class GameManager : MonoBehaviour
                 Vector3 room = background[currentRoom].transform.position;
                 character.transform.position = new Vector3(room.x, room.y - 12, 0);
                 Vector3 pos = character.transform.localPosition;
-                character.transform.localPosition = new Vector3(pos.x, pos.y, dartDistanceFromCam);
+                character.transform.localPosition = new Vector3(pos.x, pos.y, -2);
 
                 character.GetComponent<CharacterController2D>().enabled = false;
                 character.GetComponent<MouseController2D>().enabled = true;
@@ -318,8 +330,21 @@ public class GameManager : MonoBehaviour
                 break;
             case GameButtons.TYPE.pauseBackNo:
                 //get rid of warning but don't unpause
-                print(anims[4].gameObject.name);
                 PlayAnimation(anims[4], "WarningShow", true);
+                break;
+            case GameButtons.TYPE.settings:
+                anims[5].enabled = true;
+                switch (settings)
+                {
+                    case true:
+                        settings = false;
+                        PlayAnimation(anims[5], "SettingsShow", true);
+                        break;
+                    case false:
+                        settings = true;
+                        PlayAnimation(anims[5], "SettingShow", false);
+                        break;
+                }
                 break;
         }
     }
@@ -343,7 +368,7 @@ public class GameManager : MonoBehaviour
             if (!hold) { Actions.Power.Invoke(i/100); break; }
             powerBar.fillAmount = i/100;
             screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
-            desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, cross.transform.position.z);
+            desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y + 2, cross.transform.position.z);
             if (cross.activeSelf)
                 cross.transform.position = desiredPos;
             yield return null;
@@ -355,7 +380,7 @@ public class GameManager : MonoBehaviour
                 if (!hold) { Actions.Power.Invoke(i / 100); break; }
                 powerBar.fillAmount = i / 100;
                 screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
-                desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, cross.transform.position.z);
+                desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y + 2, cross.transform.position.z);
                 if (cross.activeSelf)
                     cross.transform.position = desiredPos;
                 yield return null;
@@ -378,7 +403,7 @@ public class GameManager : MonoBehaviour
         Vector3 room = background[currentRoom].transform.position;
         character.transform.position = new Vector3(room.x, room.y - 12, 0);
         Vector3 pos = character.transform.localPosition;
-        character.transform.localPosition = new Vector3(pos.x, pos.y, dartDistanceFromCam);
+        character.transform.localPosition = new Vector3(pos.x, pos.y, charDartDistanceFromCam);
 
         character.GetComponent<SpriteRenderer>().sprite = dart;
         character.GetComponent<Animator>().Play("dartIdle");
@@ -413,7 +438,7 @@ public class GameManager : MonoBehaviour
         Vector3 room = background[currentRoom].transform.position;
         character.transform.position = new Vector3(room.x, room.y - 12, 0);
         Vector3 pos = character.transform.localPosition;
-        character.transform.localPosition = new Vector3(pos.x, pos.y, dartDistanceFromCam);
+        character.transform.localPosition = new Vector3(pos.x, pos.y, charDartDistanceFromCam);
         character.GetComponent<Animator>().Play("dartIdle", 0, 0);
 
         //reset y to middle of screen
@@ -628,6 +653,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator GameOverDarts()
     {
+        //TODO: animations should use PlayAnimation() and have ther status active there
         canPause = false;
         anims[1].enabled = true;
         /*yield return StartCoroutine(Functions.WaitFor(() => 
@@ -658,20 +684,35 @@ public class GameManager : MonoBehaviour
             case 0:
                 break;
             case int a when a > 0 && a <= 2:
-                anims[1].Play("OneStar", 0, 0);
+                //anims[1].Play("OneStar", 0, 0);
+                star[0].enabled = true;
+                star[0].Play("StarIndividual", 0, 0);
                 break;
             case int a when a > 2 && a <= 4:
-                anims[1].Play("TwoStar", 0, 0);
+                //anims[1].Play("TwoStar", 0, 0);
+                star[0].enabled = true;
+                star[1].enabled = true;
+                star[0].Play("StarIndividual", 0, 0);
+                yield return new WaitForSecondsRealtime(0.5f);
+                star[1].Play("StarIndividual", 0, 0);
                 break;
             case 5:
-                anims[1].Play("ThreeStar", 0, 0);
+                //anims[1].Play("ThreeStar", 0, 0);
+                star[0].enabled = true;
+                star[1].enabled = true;
+                star[2].enabled = true;
+                star[0].Play("StarIndividual", 0, 0);
+                yield return new WaitForSecondsRealtime(0.5f);
+                star[1].Play("StarIndividual", 0, 0);
+                yield return new WaitForSecondsRealtime(0.5f);
+                star[2].Play("StarIndividual", 0, 0);
                 break;
         }
     }
 
     void PlayAnimation(Animator animator, string name, bool reversed)
     {
-        bool count = false;
+        /*bool count = false;
         for (int i = 0; i < animator.parameterCount; i++)
         {
             if (animator.parameters[i].name == "Speed")
@@ -704,7 +745,7 @@ public class GameManager : MonoBehaviour
             print(state.name);
             state.speedParameterActive = true;
             state.speedParameter = "Speed";
-        }
+        }*/
 
         switch (reversed)
         {

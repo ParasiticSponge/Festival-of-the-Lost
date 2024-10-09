@@ -260,7 +260,10 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Some Cool Animation Intro...
+  m_Text: 'Use up arrow or W to interact with your surroundings...
+
+    Use P to
+    pause...'
 --- !u!222 &391379488
 CanvasRenderer:
   m_ObjectHideFlags: 0
