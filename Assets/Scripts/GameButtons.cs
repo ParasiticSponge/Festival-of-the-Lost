@@ -15,7 +15,8 @@ public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
         exitToMenu,
         pauseBackYes,
         pauseBackNo,
-        settings
+        settings,
+        cross
     }
     public TYPE type;
 

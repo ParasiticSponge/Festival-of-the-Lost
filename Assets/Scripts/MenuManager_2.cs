@@ -25,7 +25,6 @@ public partial class MenuManager_2 : MonoBehaviour
     Text musicNumber;
     Slider sfxSlider;
     Text sfxNumber;
-    Toggle crossToggle;
 
     public static int textBox = 0;
     public static Sprite textBoxColourLight;
@@ -62,9 +61,6 @@ public partial class MenuManager_2 : MonoBehaviour
                 case "RESOLUTION":
                     resolutionBar = child.GetChild(1).gameObject.GetComponent<Dropdown>();
                     break;
-                case "CROSS":
-                    crossToggle = child.GetChild(1).gameObject.GetComponent<Toggle>();
-                    break;
             }
         }
         for (int i = 0; i < scrollContent.transform.childCount; i++)
@@ -84,6 +80,7 @@ public partial class MenuManager_2 : MonoBehaviour
         Actions.Settings += Move;
         //Actions.TextBoxColour += value => textBox = value;
         Actions.TextBoxColour += SetBox;
+        Actions.CrossAssist += CrossAssist;
     }
     private void OnDisable()
     {
@@ -91,6 +88,7 @@ public partial class MenuManager_2 : MonoBehaviour
         Actions.Settings -= Move;
         //Actions.TextBoxColour -= value => textBox = value;
         Actions.TextBoxColour -= SetBox;
+        Actions.CrossAssist -= CrossAssist;
     }
 
     // Start is called before the first frame update
@@ -136,7 +134,6 @@ public partial class MenuManager_2 : MonoBehaviour
         sfxVol = sfxSlider.value;
         sfxNumber.text = (Mathf.RoundToInt(sfxVol * 100)).ToString();
         resolution = resolutionBar.value;
-        crossAssist = crossToggle.isOn;
     }
 
     public void PlayAnimation()
@@ -176,5 +173,18 @@ public partial class MenuManager_2 : MonoBehaviour
         textBox = number;
         textBoxColourLight = boxes[textBox].transform.GetChild(0).gameObject.GetComponent<Image>().sprite;
         textBoxColourDark = boxes[textBox].transform.GetChild(1).gameObject.GetComponent<Image>().sprite;
+    }
+
+    public void CrossAssist()
+    {
+        switch (crossAssist)
+        {
+            case true:
+                crossAssist = false;
+                break;
+            case false:
+                crossAssist = true;
+                break;
+        }
     }
 }

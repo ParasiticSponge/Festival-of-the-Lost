@@ -43,6 +43,7 @@ public class GameManager : MonoBehaviour
     List<Collision2D> door = new List<Collision2D>();
     List<GameObject> NPCs = new List<GameObject>();
     List<Animator> star = new List<Animator>();
+    GameObject retryButton;
     GameObject mum;
     List<Animator> anims = new List<Animator>();
     //List<BoxCollider2D> door2 = new List<BoxCollider2D>();
@@ -127,9 +128,10 @@ public class GameManager : MonoBehaviour
                 star.Add(child.gameObject.GetComponent<Animator>());
         }
 
-            balloon = balloons[0].GetComponent<SpriteRenderer>().sprite;
+        balloon = balloons[0].GetComponent<SpriteRenderer>().sprite;
         dart = darts[startingDart].GetComponent<SpriteRenderer>().sprite;
         scoreTicketsText.text = tickets.ToString();
+        retryButton = anims[1].gameObject.transform.GetChild(0).gameObject;
     }
     private void OnEnable()
     {
@@ -250,22 +252,8 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case 1:
-                ResetDartsGame();
                 currentRoom = 1;
-
-                Vector3 room = background[currentRoom].transform.position;
-                character.transform.position = new Vector3(room.x, room.y - 12, 0);
-                Vector3 pos = character.transform.localPosition;
-                character.transform.localPosition = new Vector3(pos.x, pos.y, -2);
-
-                character.GetComponent<CharacterController2D>().enabled = false;
-                character.GetComponent<MouseController2D>().enabled = true;
-                character.GetComponent<Rigidbody2D>().gravityScale = 0;
-                character.GetComponent<SpriteRenderer>().sprite = initialSprite;
-                character.GetComponent<Animator>().SetBool("dart", true);
-                character.GetComponent<CircleCollider2D>().enabled = false;
-                Camera.main.GetComponent<CameraFollow>().enabled = false;
-                Camera.main.transform.position = new Vector3(room.x, room.y, -10);
+                ResetDartsGame(true);
                 break;
             case 2:
                 currentRoom = 2;
@@ -309,11 +297,11 @@ public class GameManager : MonoBehaviour
                 canPause = true;
                 Time.timeScale = 1;
                 PlayAnimation(anims[1], "ScoreSheetShow", true);
-                ResetDartsGame();
+                ResetDartsGame(false);
                 break;
             case GameButtons.TYPE.resetMini:
                 Pause();
-                ResetDartsGame();
+                ResetDartsGame(true);
                 break;
             case GameButtons.TYPE.exitToMenu:
                 canPause = true;
@@ -339,12 +327,16 @@ public class GameManager : MonoBehaviour
                     case true:
                         settings = false;
                         PlayAnimation(anims[5], "SettingsShow", true);
+                        Pause();
                         break;
                     case false:
                         settings = true;
-                        PlayAnimation(anims[5], "SettingShow", false);
+                        PlayAnimation(anims[5], "SettingsShow", false);
                         break;
                 }
+                break;
+            case GameButtons.TYPE.cross:
+                Actions.CrossAssist.Invoke();
                 break;
         }
     }
@@ -418,8 +410,27 @@ public class GameManager : MonoBehaviour
         if (cross.activeSelf)
             cross.transform.localPosition = desiredPos;
     }
-    public void ResetDartsGame()
+    public void ResetDartsGame(bool fullReset)
     {
+        retryButton.SetActive(true);
+        Vector3 room = background[currentRoom].transform.position;
+        character.transform.position = new Vector3(room.x, room.y - 12, 0);
+        Vector3 pos = character.transform.localPosition;
+        character.transform.localPosition = new Vector3(pos.x, pos.y, charDartDistanceFromCam);
+        character.GetComponent<Animator>().Play("dartIdle", 0, 0);
+
+        character.GetComponent<CharacterController2D>().enabled = false;
+        character.GetComponent<MouseController2D>().enabled = true;
+        character.GetComponent<Rigidbody2D>().gravityScale = 0;
+        character.GetComponent<SpriteRenderer>().sprite = initialSprite;
+        character.GetComponent<Animator>().SetBool("dart", true);
+        character.GetComponent<CircleCollider2D>().enabled = false;
+        Camera.main.GetComponent<CameraFollow>().enabled = false;
+        Camera.main.transform.position = new Vector3(room.x, room.y, -10);
+
+        star[0].Rebind();
+        star[1].Rebind();
+        star[2].Rebind();
         powerBar.fillAmount = 0;
         scoreDarts = 0;
         scoreDartsText.text = scoreDarts.ToString();
@@ -430,16 +441,15 @@ public class GameManager : MonoBehaviour
             darts[i - 1].transform.localPosition = new Vector3(i + 1.5f, -3, dartDistanceFromCam);
             darts[i - 1].GetComponent<SpriteRenderer>().sprite = dart;
         }
-        for (int i = 0; i < balloons.Count; i++)
+        if (fullReset)
         {
-            balloons[i].GetComponent<SpriteRenderer>().sprite = balloon;
-            balloons[i].GetComponent<CircleCollider2D>().enabled = true;
+            for (int i = 0; i < balloons.Count; i++)
+            {
+                balloons[i].GetComponent<SpriteRenderer>().sprite = balloon;
+                balloons[i].GetComponent<Animator>().Rebind();
+                balloons[i].GetComponent<CircleCollider2D>().enabled = true;
+            }
         }
-        Vector3 room = background[currentRoom].transform.position;
-        character.transform.position = new Vector3(room.x, room.y - 12, 0);
-        Vector3 pos = character.transform.localPosition;
-        character.transform.localPosition = new Vector3(pos.x, pos.y, charDartDistanceFromCam);
-        character.GetComponent<Animator>().Play("dartIdle", 0, 0);
 
         //reset y to middle of screen
         GameObject cross = character.GetComponent<MouseController2D>().crosshair;
@@ -461,6 +471,18 @@ public class GameManager : MonoBehaviour
                 scoreDarts++;
                 scoreDartsText.text = scoreDarts.ToString();
                 scoreTicketsText.text = tickets.ToString();
+                int count = 0;
+                for (int i = 0; i < balloons.Count; i++)
+                {
+                    if (balloons[i].GetComponent<CircleCollider2D>().enabled)
+                        count++;
+                }
+                print(count);
+                if (count == 0)
+                {
+                    retryButton.SetActive(false);
+                    StartCoroutine(GameOverDarts());
+                }
                 break;
             case false:
                 if (startingDart < darts.Count)

@@ -24,24 +24,22 @@ public class MouseController2D : MonoBehaviour
     private void OnEnable()
     {
         Actions.Power += PowerMetre;
+        Actions.CrossAssist += CrossAssist;
         rb.velocity = Vector2.zero;
 
         poop = new Vector3(transform.localPosition.x, transform.localPosition.y - 0.4f, transform.localPosition.z);
+        CrossAssist();
     }
     private void OnDisable()
     {
         Actions.Power -= PowerMetre;
+        Actions.CrossAssist -= CrossAssist;
     }
     private void Awake()
     {
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         gameManager = FindObjectOfType<GameManager>();
-
-        Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(Vector3.zero);
-        Vector3 desiredPos = new Vector3(crosshair.transform.localPosition.x, 0, crosshair.transform.localPosition.z);
-        if (crosshair.activeSelf)
-            crosshair.transform.localPosition = desiredPos;
     }
 
     private void Update()
@@ -54,13 +52,8 @@ public class MouseController2D : MonoBehaviour
 
             transform.position = screenToWorld;
 
-            if (MenuManager_2.crossAssist)
-            {
-                if (!crosshair.activeSelf) crosshair.SetActive(true);
+            if (crosshair.activeSelf)
                 crosshair.transform.position = new Vector3(screenToWorld.x, crosshair.transform.position.y, crosshair.transform.position.z);
-            }
-            else
-                crosshair.SetActive(false);
 
             if (Input.GetMouseButtonDown(0))
             {
@@ -105,9 +98,9 @@ public class MouseController2D : MonoBehaviour
         if (!hasExited)
         {
             //do stuff
+            otherCollider.GetComponent<CircleCollider2D>().enabled = false;
             Actions.HitBalloon.Invoke(true);
             otherCollider.GetComponent<Animator>().Play("BalloonPop", 0, 0);
-            otherCollider.GetComponent<CircleCollider2D>().enabled = false;
         }
         else
             Actions.HitBalloon.Invoke(false);
@@ -144,24 +137,6 @@ public class MouseController2D : MonoBehaviour
         yield return null;
         callback(true);
     }*/
-    /*private void OnCollisionEnter2D(Collision2D other)
-    {
-        if (enabled)
-        {
-            if (other.transform.position.z == transform.localPosition.z)
-            {
-                print("COLLISION");
-            }
-        }
-    }*/
-    /*private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (enabled)
-        {
-            otherCollider = other;
-            collisionListener = true;
-        }
-    }*/
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (enabled)
@@ -175,6 +150,23 @@ public class MouseController2D : MonoBehaviour
         if (enabled)
         {
             hasExited = true;
+        }
+    }
+    public void CrossAssist()
+    {
+        switch (MenuManager_2.crossAssist)
+        {
+            case true:
+                crosshair.SetActive(true);
+                Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(Vector3.zero);
+                Vector3 desiredPos = new Vector3(crosshair.transform.localPosition.x, 0, crosshair.transform.localPosition.z);
+                crosshair.transform.localPosition = desiredPos;
+                MenuManager_2.crossAssist = false;
+                break;
+            case false:
+                crosshair.SetActive(false);
+                MenuManager_2.crossAssist = true;
+                break;
         }
     }
 }
