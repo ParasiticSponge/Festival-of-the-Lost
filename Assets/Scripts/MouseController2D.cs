@@ -28,7 +28,6 @@ public class MouseController2D : MonoBehaviour
         rb.velocity = Vector2.zero;
 
         poop = new Vector3(transform.localPosition.x, transform.localPosition.y - 0.4f, transform.localPosition.z);
-        CrossAssist();
     }
     private void OnDisable()
     {
@@ -40,6 +39,7 @@ public class MouseController2D : MonoBehaviour
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         gameManager = FindObjectOfType<GameManager>();
+        CrossAssist();
     }
 
     private void Update()

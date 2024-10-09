@@ -191,7 +191,7 @@ public class TextBox : MonoBehaviour
                 else textChild.transform.GetChild(1).gameObject.SetActive(false);
             }
 
-            if (Input.anyKeyDown && dialogue.Length == texts[0].Length)
+            if (Input.anyKeyDown && !Input.GetKeyDown(KeyCode.Q) && dialogue.Length == texts[0].Length)
             {
                 if (texts.Count > 1)
                 {

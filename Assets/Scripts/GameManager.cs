@@ -9,9 +9,9 @@ using UnityEngine.InputSystem;
 public class GameManager : MonoBehaviour
 {
     public PhysicsManager physics;
+    CharacterController2D controller;
     GameObject character;
     Sprite charAppearance;
-    string charName;
     System.Random random = new System.Random();
 
     public Image powerBar;
@@ -70,9 +70,8 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         character = FindObjectOfType<CharacterController2D>().gameObject;
-        CharacterController2D controller = character.GetComponent<CharacterController2D>();
+        controller = character.GetComponent<CharacterController2D>();
         charAppearance = controller.appearance;
-        charName = controller.charName;
         
         //tentSheet = Resources.LoadAll<Sprite>("Circus_Sheet");
         if (MenuManager_2.textBoxColourLight == null) MenuManager_2.textBoxColourLight = testingSprite;
@@ -205,7 +204,7 @@ public class GameManager : MonoBehaviour
         }
         if (n == 2 && tickets < ticketsToEnterTent)
         {
-            TextBox.Text(charAppearance, charName, "It appears I don't have enough tickets...", 0.02f);
+            TextBox.Text(charAppearance, controller.charName, "It appears I don't have enough tickets...", 0.02f);
             yield break;
         }
         switchScreen.gameObject.SetActive(true);
@@ -230,10 +229,10 @@ public class GameManager : MonoBehaviour
                 switch (currentRoom)
                 {
                     case 1:
-                        character.transform.localPosition = new Vector3(-2.9f, -3.06f, 0);
+                        character.transform.localPosition = new Vector3(-2.9f, -3.06f, -1);
                         break;
                     case 2:
-                        character.transform.localPosition = new Vector3(17, -3.06f, 0);
+                        character.transform.localPosition = new Vector3(17, -3.06f, -1);
                         break;
                 }
                 currentRoom = 0;
@@ -282,6 +281,7 @@ public class GameManager : MonoBehaviour
         switch (type)
         {
             case GameButtons.TYPE.scoreSheetBack:
+                anims[1].enabled = true;
                 canPause = true;
                 Time.timeScale = 1;
                 StartCoroutine(SwitchRooms(0));
@@ -294,6 +294,7 @@ public class GameManager : MonoBehaviour
                 PlayAnimation(anims[4], "WarningShow", false);
                 break;
             case GameButtons.TYPE.replayMini:
+                anims[1].enabled = true;
                 canPause = true;
                 Time.timeScale = 1;
                 PlayAnimation(anims[1], "ScoreSheetShow", true);
@@ -529,7 +530,7 @@ public class GameManager : MonoBehaviour
     IEnumerator Sad()
     {
         yield return new WaitForSeconds(1.5f);
-        TextBox.Text(charAppearance, charName, "Mum? Dad? Where did you go?", 0.02f);
+        TextBox.Text(charAppearance, controller.charName, "Mum? Dad? Where did you go?", 0.02f);
     }
 
     //TODO: could use DoAction to check if textbox is not there
@@ -544,13 +545,13 @@ public class GameManager : MonoBehaviour
                 switch (number)
                 {
                     case 0:
-                        TextBox.Text(charAppearance, charName, "I didn't come here to look at paper all day!", 0.02f);
+                        TextBox.Text(charAppearance, controller.charName, "I didn't come here to look at paper all day!", 0.02f);
                         break;
                     case 1:
-                        TextBox.Text(charAppearance, charName, "The board is filled with many things...", 0.02f);
+                        TextBox.Text(charAppearance, controller.charName, "The board is filled with many things...", 0.02f);
                         break;
                     case 2:
-                        TextBox.Text(charAppearance, charName, "I should get going", 0.02f);
+                        TextBox.Text(charAppearance, controller.charName, "I should get going", 0.02f);
                         break;
                 }
                 dialogueExists = true;
@@ -701,6 +702,10 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSecondsRealtime(0.3f);
         }
         yield return new WaitForSecondsRealtime(0.5f);
+
+        //parent animator affects scaling of children, so disable parent aninator
+        anims[1].enabled = false;
+
         switch (scoreDarts)
         {
             case 0:
@@ -747,13 +752,14 @@ public class GameManager : MonoBehaviour
         if (!count)
         {
             //get controller of animator at runtime
-            AnimatorController controller = (animator.runtimeAnimatorController as AnimatorController);
+            //AnimatorController controller = (animator.runtimeAnimatorController as AnimatorController);
+            var controller = animator.runtimeAnimatorController;
             AnimatorControllerParameter paramater = new AnimatorControllerParameter();
             paramater.name = "Speed";
             paramater.type = AnimatorControllerParameterType.Float;
             paramater.defaultFloat = 1;
             controller.AddParameter(paramater);
-            
+
             ChildAnimatorState[] states = controller.layers[0].stateMachine.states;
             AnimatorState state = states[0].state;
 

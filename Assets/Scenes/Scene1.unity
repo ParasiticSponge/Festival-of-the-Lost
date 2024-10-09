@@ -262,7 +262,7 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: 'Use up arrow or W to interact with your surroundings...
 
-    Use P to
+    Use Q to
     pause...'
 --- !u!222 &391379488
 CanvasRenderer:
