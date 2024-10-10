@@ -10,6 +10,7 @@ public class TextBox : MonoBehaviour
 {
     static string dialogue;
     static string input;
+    static bool destroying;
 
     static GameObject textBox;
     static Animator mask;
@@ -191,8 +192,9 @@ public class TextBox : MonoBehaviour
                 else textChild.transform.GetChild(1).gameObject.SetActive(false);
             }
 
-            if (Input.anyKeyDown && !Input.GetKeyDown(KeyCode.Q) && dialogue.Length == texts[0].Length)
+            if (Input.anyKeyDown && !Input.GetKeyDown(KeyCode.Q) && !destroying && dialogue.Length == texts[0].Length)
             {
+                destroying = true;
                 if (texts.Count > 1)
                 {
                     StartCoroutine(LoadNext());
@@ -258,6 +260,7 @@ public class TextBox : MonoBehaviour
         objects.Remove(objects[0]);
         dialogue = "";
 
+        destroying = false;
         Begin();
     }
     IEnumerator Destroy()
@@ -279,6 +282,7 @@ public class TextBox : MonoBehaviour
         if (objects[0] != null) Actions.FinishTalk.Invoke(objects[0].name);
         objects.Remove(objects[0]);
 
+        destroying = false;
         Destroy(gameObject);
     }
 }

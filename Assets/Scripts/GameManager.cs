@@ -55,6 +55,7 @@ public class GameManager : MonoBehaviour
     bool hold;
     int startingDart;
     GameObject circusTent;
+    int starScore = 0;
 
     GameObject noticeBoard;
     bool isLookingAtBoard;
@@ -281,7 +282,7 @@ public class GameManager : MonoBehaviour
         switch (type)
         {
             case GameButtons.TYPE.scoreSheetBack:
-                anims[1].enabled = true;
+                ReconfigureChildren();
                 canPause = true;
                 Time.timeScale = 1;
                 StartCoroutine(SwitchRooms(0));
@@ -294,7 +295,7 @@ public class GameManager : MonoBehaviour
                 PlayAnimation(anims[4], "WarningShow", false);
                 break;
             case GameButtons.TYPE.replayMini:
-                anims[1].enabled = true;
+                ReconfigureChildren();
                 canPause = true;
                 Time.timeScale = 1;
                 PlayAnimation(anims[1], "ScoreSheetShow", true);
@@ -358,25 +359,43 @@ public class GameManager : MonoBehaviour
         GameObject cross = character.GetComponent<MouseController2D>().crosshair;
         for (float i = 0; i < 101; i++)
         {
-            if (!hold) { Actions.Power.Invoke(i/100); break; }
-            powerBar.fillAmount = i/100;
+            if (!hold)
+            {
+                Actions.Power.Invoke(i / 100);
+                powerBar.fillAmount = i / 100;
+                screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
+                desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, cross.transform.position.z);
+                if (cross.activeSelf)
+                    cross.transform.position = desiredPos;
+                break;
+            }
+            powerBar.fillAmount = i / 100;
             screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
-            desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y + 2, cross.transform.position.z);
+            desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, cross.transform.position.z);
             if (cross.activeSelf)
                 cross.transform.position = desiredPos;
-            yield return null;
+            yield return new WaitForSeconds(0.01f);
         }
         if (hold)
         {
             for (float i = 100; i > -1; i--)
             {
-                if (!hold) { Actions.Power.Invoke(i / 100); break; }
+                if (!hold)
+                {
+                    Actions.Power.Invoke(i / 100);
+                    powerBar.fillAmount = i / 100;
+                    screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
+                    desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, cross.transform.position.z);
+                    if (cross.activeSelf)
+                        cross.transform.position = desiredPos;
+                    break;
+                }
                 powerBar.fillAmount = i / 100;
                 screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
-                desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y + 2, cross.transform.position.z);
+                desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, cross.transform.position.z);
                 if (cross.activeSelf)
                     cross.transform.position = desiredPos;
-                yield return null;
+                yield return new WaitForSeconds(0.01f);
             }
             if (hold) StartCoroutine(PowerBar());
         }
@@ -394,7 +413,7 @@ public class GameManager : MonoBehaviour
         darts[startingDart].GetComponent<SpriteRenderer>().sprite = thrown;
 
         Vector3 room = background[currentRoom].transform.position;
-        character.transform.position = new Vector3(room.x, room.y - 12, 0);
+        character.transform.position = new Vector3(room.x, room.y - 8, 0);
         Vector3 pos = character.transform.localPosition;
         character.transform.localPosition = new Vector3(pos.x, pos.y, charDartDistanceFromCam);
 
@@ -415,7 +434,7 @@ public class GameManager : MonoBehaviour
     {
         retryButton.SetActive(true);
         Vector3 room = background[currentRoom].transform.position;
-        character.transform.position = new Vector3(room.x, room.y - 12, 0);
+        character.transform.position = new Vector3(room.x, room.y - 8, 0);
         Vector3 pos = character.transform.localPosition;
         character.transform.localPosition = new Vector3(pos.x, pos.y, charDartDistanceFromCam);
         character.GetComponent<Animator>().Play("dartIdle", 0, 0);
@@ -439,7 +458,7 @@ public class GameManager : MonoBehaviour
         startingDart = 0;
         for (int i = 1; i < darts.Count + 1; i++)
         {
-            darts[i - 1].transform.localPosition = new Vector3(i + 1.5f, -3, dartDistanceFromCam);
+            darts[i - 1].transform.localPosition = new Vector3(i + 1.5f, -2.5f, dartDistanceFromCam);
             darts[i - 1].GetComponent<SpriteRenderer>().sprite = dart;
         }
         if (fullReset)
@@ -676,19 +695,11 @@ public class GameManager : MonoBehaviour
 
     IEnumerator GameOverDarts()
     {
-        //TODO: animations should use PlayAnimation() and have ther status active there
         canPause = false;
-        anims[1].enabled = true;
-        /*yield return StartCoroutine(Functions.WaitFor(() => 
-        { anims[0].Play("GameOverMinigame", 0, 0); 
-        }));
-        yield return StartCoroutine(Functions.WaitFor(() =>
-        {
-            anims[1].Play("ScoreSheetShow", 0, 0);
-        }));*/
+
         anims[0].transform.parent.transform.localScale = Vector3.one;
         anims[0].transform.parent.localPosition = Vector3.zero;
-        anims[0].Play("GameOverMinigame", 0, 0);
+        PlayAnimation(anims[0], "GameOverMinigame", false);
         anims[1].transform.GetChild(5).gameObject.GetComponent<Text>().text = "0";
         yield return new WaitForSecondsRealtime(2);
         Time.timeScale = 0;
@@ -704,35 +715,35 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.5f);
 
         //parent animator affects scaling of children, so disable parent aninator
+        //disabling animator also resets children state by default, so keep info on disable
+        //anims[1].keepAnimatorStateOnDisable = true;
         anims[1].enabled = false;
 
         switch (scoreDarts)
         {
             case 0:
+                starScore = 0;
                 break;
             case int a when a > 0 && a <= 2:
+                starScore = 1;
                 //anims[1].Play("OneStar", 0, 0);
-                star[0].enabled = true;
-                star[0].Play("StarIndividual", 0, 0);
+                PlayAnimation(star[0], "StarIndividual", false);
                 break;
             case int a when a > 2 && a <= 4:
+                starScore = 2;
                 //anims[1].Play("TwoStar", 0, 0);
-                star[0].enabled = true;
-                star[1].enabled = true;
-                star[0].Play("StarIndividual", 0, 0);
+                PlayAnimation(star[0], "StarIndividual", false);
                 yield return new WaitForSecondsRealtime(0.5f);
-                star[1].Play("StarIndividual", 0, 0);
+                PlayAnimation(star[1], "StarIndividual", false);
                 break;
             case 5:
+                starScore = 3;
                 //anims[1].Play("ThreeStar", 0, 0);
-                star[0].enabled = true;
-                star[1].enabled = true;
-                star[2].enabled = true;
-                star[0].Play("StarIndividual", 0, 0);
+                PlayAnimation(star[0], "StarIndividual", false);
                 yield return new WaitForSecondsRealtime(0.5f);
-                star[1].Play("StarIndividual", 0, 0);
+                PlayAnimation(star[1], "StarIndividual", false);
                 yield return new WaitForSecondsRealtime(0.5f);
-                star[2].Play("StarIndividual", 0, 0);
+                PlayAnimation(star[2], "StarIndividual", false);
                 break;
         }
     }
@@ -774,6 +785,7 @@ public class GameManager : MonoBehaviour
             state.speedParameterActive = true;
             state.speedParameter = "Speed";
         }*/
+        if (!animator.enabled) animator.enabled = true;
 
         switch (reversed)
         {
@@ -786,5 +798,29 @@ public class GameManager : MonoBehaviour
                 animator.Play(name, -1, 1);
                 break;
         }
+    }
+    //TODO: make generic
+    void ReconfigureChildren()
+    {
+        anims[1].enabled = true;
+    }
+    
+    void BrokenFunctions()
+    {
+        /*yield return StartCoroutine(Functions.WaitFor(() => 
+        { anims[0].Play("GameOverMinigame", 0, 0); 
+        }));
+        yield return StartCoroutine(Functions.WaitFor(() =>
+        {
+            anims[1].Play("ScoreSheetShow", 0, 0);
+        }));*/
+    }
+
+    void Insta(float power)
+    {
+        Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * power, 0));
+        GameObject cross = character.GetComponent<MouseController2D>().crosshair;
+        Vector3 desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, -2);
+        //Instantiate(circle, desiredPos, Quaternion.identity);
     }
 }

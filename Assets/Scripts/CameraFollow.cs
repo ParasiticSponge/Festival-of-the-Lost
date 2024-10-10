@@ -10,14 +10,8 @@ public class CameraFollow : MonoBehaviour
     public Vector3 offset = new Vector3(0, 7, -10);
     Vector3 velocity = Vector3.zero;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     // Update is called once per frame
-    void FixedUpdate()
+    void LateUpdate()
     {
         Vector3 desiredPos = target.position + offset;
 
