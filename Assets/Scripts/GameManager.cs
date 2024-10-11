@@ -182,12 +182,12 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
 
-        TextBox.Text(null, "???", "What is your name?", 0.05f);
+        /*TextBox.Text(null, "???", "What is your name?", 0.05f);
         TextBox.Text();
         //TextBox.Text($"Oh! Your name is {character.charName}?", 0.05f, true);
         //I* ouputs the input of the player
         //TextBox.Text(charAppearance, "I*", "Mum? Dad? Where did you go?", 0.02f);
-        TextBox.Text(mum.GetComponent<NPC_AI>().appearance, mum.GetComponent<NPC_AI>().charName, "Go enjoy the circus I*", 0.02f);
+        TextBox.Text(mum.GetComponent<NPC_AI>().appearance, mum.GetComponent<NPC_AI>().charName, "Go enjoy the circus I*", 0.02f);*/
         fade.SetActive(false);
     }
 
@@ -282,7 +282,7 @@ public class GameManager : MonoBehaviour
         switch (type)
         {
             case GameButtons.TYPE.scoreSheetBack:
-                ReconfigureChildren();
+                anims[1].updateMode = AnimatorUpdateMode.UnscaledTime;
                 canPause = true;
                 Time.timeScale = 1;
                 StartCoroutine(SwitchRooms(0));
@@ -295,7 +295,7 @@ public class GameManager : MonoBehaviour
                 PlayAnimation(anims[4], "WarningShow", false);
                 break;
             case GameButtons.TYPE.replayMini:
-                ReconfigureChildren();
+                anims[1].updateMode = AnimatorUpdateMode.UnscaledTime;
                 canPause = true;
                 Time.timeScale = 1;
                 PlayAnimation(anims[1], "ScoreSheetShow", true);
@@ -714,30 +714,24 @@ public class GameManager : MonoBehaviour
         }
         yield return new WaitForSecondsRealtime(0.5f);
 
-        //parent animator affects scaling of children, so disable parent aninator
-        //disabling animator also resets children state by default, so keep info on disable
-        //anims[1].keepAnimatorStateOnDisable = true;
-        anims[1].enabled = false;
+        //parent animator affects scaling of children, so disable change to physics
+        anims[1].updateMode = AnimatorUpdateMode.AnimatePhysics;
 
         switch (scoreDarts)
         {
             case 0:
-                starScore = 0;
                 break;
             case int a when a > 0 && a <= 2:
-                starScore = 1;
                 //anims[1].Play("OneStar", 0, 0);
                 PlayAnimation(star[0], "StarIndividual", false);
                 break;
             case int a when a > 2 && a <= 4:
-                starScore = 2;
                 //anims[1].Play("TwoStar", 0, 0);
                 PlayAnimation(star[0], "StarIndividual", false);
                 yield return new WaitForSecondsRealtime(0.5f);
                 PlayAnimation(star[1], "StarIndividual", false);
                 break;
             case 5:
-                starScore = 3;
                 //anims[1].Play("ThreeStar", 0, 0);
                 PlayAnimation(star[0], "StarIndividual", false);
                 yield return new WaitForSecondsRealtime(0.5f);
@@ -746,6 +740,7 @@ public class GameManager : MonoBehaviour
                 PlayAnimation(star[2], "StarIndividual", false);
                 break;
         }
+        //i set the menu animator back to unscaled time when the user presses the button
     }
 
     void PlayAnimation(Animator animator, string name, bool reversed)
@@ -798,11 +793,6 @@ public class GameManager : MonoBehaviour
                 animator.Play(name, -1, 1);
                 break;
         }
-    }
-    //TODO: make generic
-    void ReconfigureChildren()
-    {
-        anims[1].enabled = true;
     }
     
     void BrokenFunctions()

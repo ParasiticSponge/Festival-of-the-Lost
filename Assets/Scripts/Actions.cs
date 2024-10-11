@@ -21,4 +21,5 @@ public class Actions
     public static Action<string> FinishTalk;
     public static Action Pause;
     public static Action CrossAssist;
+    public static Action<int> starCount;
 }
