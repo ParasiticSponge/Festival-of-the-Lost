@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using static UnityEngine.Rendering.DebugUI;
+using System;
 
 public partial class MenuManager_2 : MonoBehaviour
 {
@@ -30,9 +30,10 @@ public partial class MenuManager_2 : MonoBehaviour
     public static Sprite textBoxColourLight;
     public static Sprite textBoxColourDark;
     public static int resolution;
-    public static float musicVol;
-    public static float sfxVol;
+    public static float musicVol = 1;
+    public static float sfxVol = 1;
     public static bool crossAssist = true;
+    public static bool wiggleCross = true;
 
     [SerializeField] GameObject scrollContent;
     List<GameObject> boxes = new List<GameObject>();
@@ -80,7 +81,7 @@ public partial class MenuManager_2 : MonoBehaviour
         Actions.Settings += Move;
         //Actions.TextBoxColour += value => textBox = value;
         Actions.TextBoxColour += SetBox;
-        Actions.CrossAssist += CrossAssist;
+        Actions.Toggles += SwitchBool;
     }
     private void OnDisable()
     {
@@ -88,7 +89,7 @@ public partial class MenuManager_2 : MonoBehaviour
         Actions.Settings -= Move;
         //Actions.TextBoxColour -= value => textBox = value;
         Actions.TextBoxColour -= SetBox;
-        Actions.CrossAssist -= CrossAssist;
+        Actions.Toggles -= SwitchBool;
     }
 
     // Start is called before the first frame update
@@ -159,12 +160,16 @@ public partial class MenuManager_2 : MonoBehaviour
         switch (isOn)
         {
             case true:
-                StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, left, value => mainMenu.GetComponent<RectTransform>().localPosition = value));
-                StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, centre, value => settings.GetComponent<RectTransform>().localPosition = value));
+                StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, left, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, centre, (value => settings.GetComponent<RectTransform>().localPosition = value)));
+                //StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, left));
+                //StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, centre));
                 break;
             case false:
-                StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, centre, value => mainMenu.GetComponent<RectTransform>().localPosition = value));
-                StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, right, value => settings.GetComponent<RectTransform>().localPosition = value));
+                StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, centre, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, right, (value => settings.GetComponent<RectTransform>().localPosition = value)));
+                //StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, centre));
+                //StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, right));
                 break;
         }
     }
@@ -175,15 +180,16 @@ public partial class MenuManager_2 : MonoBehaviour
         textBoxColourDark = boxes[textBox].transform.GetChild(1).gameObject.GetComponent<Image>().sprite;
     }
 
-    public void CrossAssist()
+    //can't pass ref to actions :(
+    public void SwitchBool(bool condition, Action<bool> OP)
     {
-        switch (crossAssist)
+        switch (condition)
         {
             case true:
-                crossAssist = false;
+                OP.Invoke(false);
                 break;
             case false:
-                crossAssist = true;
+                OP.Invoke(true);
                 break;
         }
     }

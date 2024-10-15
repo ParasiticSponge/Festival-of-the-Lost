@@ -4,6 +4,8 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using System;
+using static Functions;
 //using UnityEditor.Animations;
 
 public class GameManager : MonoBehaviour
@@ -56,6 +58,8 @@ public class GameManager : MonoBehaviour
     int startingDart;
     GameObject circusTent;
     int starScore = 0;
+    GameObject crosshair;
+    Vector3 desiredPos;
 
     GameObject noticeBoard;
     bool isLookingAtBoard;
@@ -73,7 +77,7 @@ public class GameManager : MonoBehaviour
         character = FindObjectOfType<CharacterController2D>().gameObject;
         controller = character.GetComponent<CharacterController2D>();
         charAppearance = controller.appearance;
-        
+
         //tentSheet = Resources.LoadAll<Sprite>("Circus_Sheet");
         if (MenuManager_2.textBoxColourLight == null) MenuManager_2.textBoxColourLight = testingSprite;
         initialSprite = character.gameObject.GetComponent<SpriteRenderer>().sprite;
@@ -128,10 +132,22 @@ public class GameManager : MonoBehaviour
                 star.Add(child.gameObject.GetComponent<Animator>());
         }
 
+        crosshair = character.GetComponent<MouseController2D>().crosshair;
         balloon = balloons[0].GetComponent<SpriteRenderer>().sprite;
         dart = darts[startingDart].GetComponent<SpriteRenderer>().sprite;
         scoreTicketsText.text = tickets.ToString();
         retryButton = anims[1].gameObject.transform.GetChild(0).gameObject;
+        anims[5].transform.GetChild(1).GetChild(1).gameObject.GetComponent<Slider>().value = MenuManager_2.musicVol;
+        anims[5].transform.GetChild(2).GetChild(1).gameObject.GetComponent<Slider>().value = MenuManager_2.sfxVol;
+        anims[5].transform.GetChild(3).GetChild(1).gameObject.GetComponent<Toggle>().isOn = MenuManager_2.crossAssist;
+        anims[5].transform.GetChild(4).GetChild(1).gameObject.GetComponent<Toggle>().isOn = MenuManager_2.wiggleCross;
+    }
+    private void Update()
+    {
+        MenuManager_2.musicVol = anims[5].transform.GetChild(1).GetChild(1).gameObject.GetComponent<Slider>().value;
+        MenuManager_2.sfxVol = anims[5].transform.GetChild(2).GetChild(1).gameObject.GetComponent<Slider>().value;
+        anims[5].transform.GetChild(1).GetChild(2).gameObject.GetComponent<Text>().text = (MenuManager_2.musicVol * 100).ToString();
+        anims[5].transform.GetChild(2).GetChild(2).gameObject.GetComponent<Text>().text = (MenuManager_2.sfxVol * 100).ToString();
     }
     private void OnEnable()
     {
@@ -187,7 +203,8 @@ public class GameManager : MonoBehaviour
         //TextBox.Text($"Oh! Your name is {character.charName}?", 0.05f, true);
         //I* ouputs the input of the player
         //TextBox.Text(charAppearance, "I*", "Mum? Dad? Where did you go?", 0.02f);
-        TextBox.Text(mum.GetComponent<NPC_AI>().appearance, mum.GetComponent<NPC_AI>().charName, "Go enjoy the circus I*", 0.02f);*/
+        TextBox.Text(mum.GetComponent<NPC_AI>().appearance, mum.GetComponent<NPC_AI>().charName, "Go enjoy the circus I*", 0.02f);
+        StartCoroutine(DisableCollisions());*/
         fade.SetActive(false);
     }
 
@@ -338,7 +355,31 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case GameButtons.TYPE.cross:
-                Actions.CrossAssist.Invoke();
+                switch (MenuManager_2.crossAssist)
+                {
+                    case true:
+                        crosshair.SetActive(true);
+                        Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(Vector3.zero);
+                        Vector3 desiredPos = new Vector3(crosshair.transform.localPosition.x, 0, crosshair.transform.localPosition.z);
+                        crosshair.transform.localPosition = desiredPos;
+                        MenuManager_2.crossAssist = false;
+                        break;
+                    case false:
+                        crosshair.SetActive(false);
+                        MenuManager_2.crossAssist = true;
+                        break;
+                }
+                break;
+            case GameButtons.TYPE.wiggle:
+                switch (MenuManager_2.wiggleCross)
+                {
+                    case true:
+                        MenuManager_2.wiggleCross = false;
+                        break;
+                    case false:
+                        MenuManager_2.wiggleCross = true;
+                        break;
+                }
                 break;
         }
     }
@@ -346,34 +387,26 @@ public class GameManager : MonoBehaviour
     {
         hold = true;
         powerBar.gameObject.SetActive(true);
+        timeLooking = 0;
         StartCoroutine(PowerBar());
     }
     public void Release()
     {
+        timeLooking = 0;
         hold = false;
     }
     IEnumerator PowerBar()
     {
-        Vector3 screenToWorld;
-        Vector3 desiredPos;
-        GameObject cross = character.GetComponent<MouseController2D>().crosshair;
         for (float i = 0; i < 101; i++)
         {
             if (!hold)
             {
-                Actions.Power.Invoke(i / 100);
-                powerBar.fillAmount = i / 100;
-                screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
-                desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, cross.transform.position.z);
-                if (cross.activeSelf)
-                    cross.transform.position = desiredPos;
+                Actions.Power.Invoke(desiredPos);
+                //mouseController has x position updated to match mouse, overide this
+                crosshair.transform.position = desiredPos;
                 break;
             }
-            powerBar.fillAmount = i / 100;
-            screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
-            desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, cross.transform.position.z);
-            if (cross.activeSelf)
-                cross.transform.position = desiredPos;
+            WiggleCrosshair(i);
             yield return new WaitForSeconds(0.01f);
         }
         if (hold)
@@ -382,23 +415,53 @@ public class GameManager : MonoBehaviour
             {
                 if (!hold)
                 {
-                    Actions.Power.Invoke(i / 100);
-                    powerBar.fillAmount = i / 100;
-                    screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
-                    desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, cross.transform.position.z);
-                    if (cross.activeSelf)
-                        cross.transform.position = desiredPos;
+                    Actions.Power.Invoke(desiredPos);
+                    crosshair.transform.position = desiredPos;
                     break;
                 }
-                powerBar.fillAmount = i / 100;
-                screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
-                desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, cross.transform.position.z);
-                if (cross.activeSelf)
-                    cross.transform.position = desiredPos;
+                WiggleCrosshair(i);
                 yield return new WaitForSeconds(0.01f);
             }
-            if (hold) StartCoroutine(PowerBar());
         }
+        if (hold) StartCoroutine(PowerBar());
+    }
+
+    void WiggleCrosshair(float i)
+    {
+        int rapidTime = 1;
+        int slowTime = 2;
+       
+        float radius = 0;
+        if (timeLooking <= rapidTime)
+            radius = 3.5f;
+        else if (timeLooking <= rapidTime + slowTime)
+            radius = 0.5f;
+        else
+        {
+            radius = 3.5f;
+            timeLooking = 0;
+        }
+        print(timeLooking);
+
+        //reuse variable for other purposes
+        timeLooking += 0.01f;
+
+        Vector3 screenToWorld;
+
+        powerBar.fillAmount = i / 100;
+        screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
+        //position along bar
+        desiredPos = new Vector3(crosshair.transform.position.x, screenToWorld.y, crosshair.transform.position.z);
+        if (MenuManager_2.wiggleCross)
+        {
+            float randomAngleX = random.Next(721) / 2;
+            float randomAngleY = random.Next(721) / 2;
+            Vector3 randomPosition = new Vector3(Mathf.Cos(randomAngleX) * radius, Mathf.Sin(randomAngleY) * radius, 0);
+            desiredPos = desiredPos + randomPosition;
+        }
+
+        if (crosshair.activeSelf)
+            crosshair.transform.position = desiredPos;
     }
     IEnumerator MoveDart()
     {
@@ -407,6 +470,7 @@ public class GameManager : MonoBehaviour
         screenToWorld.y = darts[startingDart].transform.position.y;
         screenToWorld.z = darts[startingDart].transform.position.z;
         yield return StartCoroutine(Functions.Move(darts[startingDart].transform.position, screenToWorld, (value => darts[startingDart].transform.position = value)));
+        //yield return StartCoroutine(Functions.Move(arg, screenToWorld));
 
         Sprite thrown = character.GetComponent<SpriteRenderer>().sprite;
         darts[startingDart].transform.position = character.transform.position;
@@ -591,6 +655,20 @@ public class GameManager : MonoBehaviour
         timeLooking = 0;
     }
 
+    /*Func<Vector3, Vector3> arg = input =>
+    {
+        Camera.main.transform.position += input;
+        return Camera.main.transform.position;
+    };
+    public delegate Vector3 MethodNameDelegate(ref Vector3 a);*/
+/*    Func<Vector3, Vector3> arg = input =>
+    {
+        return input + value;
+    };
+    public Vector3 Delegate(ref Vector3 a)
+    {
+        return a;
+    }*/
     void ExitBoard(bool exit)
     {
         Vector3 pos;
@@ -612,6 +690,7 @@ public class GameManager : MonoBehaviour
                 pos = new Vector3(noticeBoard.transform.position.x, noticeBoard.transform.position.y, -10);
                 Camera.main.GetComponent<CameraFollow>().enabled = false;
                 StartCoroutine(Functions.Move(Camera.main.transform.position, pos, (value => Camera.main.transform.position = value)));
+                //StartCoroutine(Functions.Move(arg => Camera.main.transform.position = arg, pos));
                 StartCoroutine(Functions.Zoom(Camera.main, -9));
                 break;
             case true:
@@ -632,6 +711,7 @@ public class GameManager : MonoBehaviour
                 pos = new Vector3(character.transform.position.x, character.transform.position.y, 0) + component.offset;
                 component.enabled = true;
                 StartCoroutine(Functions.Move(Camera.main.transform.position, pos, (value => Camera.main.transform.position = value)));
+                //StartCoroutine(Functions.Move(arg, pos));
                 StartCoroutine(Functions.Zoom(Camera.main, 9));
                 break;
         }
@@ -710,12 +790,11 @@ public class GameManager : MonoBehaviour
         {
             //Play ticket collecting sound
             anims[1].transform.GetChild(5).gameObject.GetComponent<Text>().text = i.ToString();
-            yield return new WaitForSecondsRealtime(0.3f);
+            yield return new WaitForSecondsRealtime(0.1f);
         }
-        yield return new WaitForSecondsRealtime(0.5f);
 
         //parent animator affects scaling of children, so disable change to physics
-        anims[1].updateMode = AnimatorUpdateMode.AnimatePhysics;
+        //anims[1].updateMode = AnimatorUpdateMode.AnimatePhysics;
 
         switch (scoreDarts)
         {
@@ -812,5 +891,19 @@ public class GameManager : MonoBehaviour
         GameObject cross = character.GetComponent<MouseController2D>().crosshair;
         Vector3 desiredPos = new Vector3(cross.transform.position.x, screenToWorld.y, -2);
         //Instantiate(circle, desiredPos, Quaternion.identity);
+    }
+
+    IEnumerator DisableCollisions()
+    {
+        TextBox text = FindObjectOfType<TextBox>();
+        while (text != null)
+        {
+            foreach (GameObject child in NPCs)
+            {
+                child.transform.GetChild(0).gameObject.SetActive(false);
+            }
+            text = FindObjectOfType<TextBox>();
+            yield return null;
+        }
     }
 }

@@ -13,13 +13,14 @@ public class Actions
     public static Action<GameButtons.TYPE> Back;
     public static Action Hold;
     public static Action Release;
-    public static Action<float> Power;
+    //public static Action<float> Power;
+    public static Action<Vector3> Power;
     public static Action<bool> HitBalloon;
     public static Action<GameObject> Talk;
     public static Action<bool> Settings;
     public static Action<int> TextBoxColour;
     public static Action<string> FinishTalk;
     public static Action Pause;
-    public static Action CrossAssist;
+    public static Action<bool, Action<bool>> Toggles;
     public static Action<int> starCount;
 }

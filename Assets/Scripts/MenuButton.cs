@@ -19,7 +19,8 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
         BOXOPTION4,
         MENU,
         SFX_TEST,
-        CROSS
+        CROSS,
+        WIGGLE
     }
     public TYPE type;
     public Vector2 position;
@@ -74,7 +75,10 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
                 Actions.MenuBeginSound.Invoke();
                 break;
             case TYPE.CROSS:
-                Actions.CrossAssist.Invoke();
+                Actions.Toggles.Invoke(MenuManager_2.crossAssist, (value => MenuManager_2.crossAssist = value));
+                break;
+            case TYPE.WIGGLE:
+                Actions.Toggles.Invoke(MenuManager_2.wiggleCross, (value => MenuManager_2.wiggleCross = value));
                 break;
         }
     }
