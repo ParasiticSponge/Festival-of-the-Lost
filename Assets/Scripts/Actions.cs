@@ -23,4 +23,5 @@ public class Actions
     public static Action Pause;
     public static Action<bool, Action<bool>> Toggles;
     public static Action<int> starCount;
+    public static Action<int> BalloonType;
 }

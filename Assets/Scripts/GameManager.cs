@@ -157,6 +157,7 @@ public class GameManager : MonoBehaviour
         Actions.Back += showUI;
         Actions.Hold += Hold;
         Actions.Release += Release;
+        Actions.BalloonType += value => { tickets += value; scoreDarts += value; };
         Actions.HitBalloon += ScoreDarts;
         Actions.Talk += Talk;
         Actions.FinishTalk += DoAction;
@@ -169,6 +170,7 @@ public class GameManager : MonoBehaviour
         Actions.Back -= showUI;
         Actions.Hold -= Hold;
         Actions.Release -= Release;
+        Actions.BalloonType -= value => { tickets += value; scoreDarts += value; };
         Actions.HitBalloon -= ScoreDarts;
         Actions.Talk -= Talk;
         Actions.FinishTalk -= DoAction;
@@ -551,8 +553,7 @@ public class GameManager : MonoBehaviour
         {
             case true:
                 anims[0].Play("Nice", 0, 0);
-                tickets++;
-                scoreDarts++;
+                //Making sure BalloonType in mouseController was invoked before HitBalloon which calls this function
                 scoreDartsText.text = scoreDarts.ToString();
                 scoreTicketsText.text = tickets.ToString();
                 int count = 0;

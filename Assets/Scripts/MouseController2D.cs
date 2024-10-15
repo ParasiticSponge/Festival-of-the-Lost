@@ -105,6 +105,7 @@ public class MouseController2D : MonoBehaviour
         {
             //do stuff
             otherCollider.GetComponent<CircleCollider2D>().enabled = false;
+            Actions.BalloonType.Invoke((int)otherCollider.GetComponent<BalloonType>().type);
             Actions.HitBalloon.Invoke(true);
             otherCollider.GetComponent<Animator>().Play("BalloonPop", 0, 0);
         }
