@@ -62,6 +62,8 @@ public class NPC_AI : MonoBehaviour
     public List<int> dialogueKeys = new List<int>();
     //public Dictionary<int, string> keyDialogue = new Dictionary<int, string>();
 
+    bool walk = true;
+
     private void Awake()
     {
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
@@ -77,6 +79,8 @@ public class NPC_AI : MonoBehaviour
             OnCrouchEvent = new BoolEvent();
 
         initialPos = transform.position;
+        if (gameObject.name.Contains("NPU"))
+            walk = false;
     }
     private void OnEnable()
     {
@@ -85,12 +89,15 @@ public class NPC_AI : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        //used for textboxes when they interupt the AI walk cycle
-        animator.SetFloat("velocity", Mathf.Abs(0));
-        if (canMove == 1)
+        if (walk)
         {
-            animator.SetFloat("velocity", Mathf.Abs(horizontal));
-            Move(horizontal * Time.fixedDeltaTime * runSpeed, false, jump);
+            //used for textboxes when they interupt the AI walk cycle
+            animator.SetFloat("velocity", Mathf.Abs(0));
+            if (canMove == 1)
+            {
+                animator.SetFloat("velocity", Mathf.Abs(horizontal));
+                Move(horizontal * Time.fixedDeltaTime * runSpeed, false, jump);
+            }
         }
         Grounded();
         //fix later
@@ -286,7 +293,7 @@ public class NPC_AI : MonoBehaviour
         for (int i = 0; i < dialogueKeys.Count; i++)
         {
             if (dialogueKeys[i] == currentDial)
-                TextBox.Text(appearance, charName, dialogue[i], 0.02f, gameObject);
+                TextBox.Text(appearance, charName, dialogue[i], gameManager.textBoxSpeed, gameObject);
         }
         if (currentDial < dialogueKeys[dialogueKeys.Count - 1])
             currentDial++;

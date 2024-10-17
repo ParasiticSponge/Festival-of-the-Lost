@@ -9,15 +9,15 @@ using System;
 
 public partial class MenuManager_2 : MonoBehaviour
 {
-    public Vector3 position;
-
-    public GameObject mainMenu;
-    public GameObject settings;
+    public GameObject canvas;
+    public Animator maskCanvas;
+    GameObject mainMenu;
+    GameObject settings;
 
     PointerEventData pointerEventData;
-    public EventSystem eventSystem;
+    EventSystem eventSystem;
     GameObject selected;
-    public List<Animator> animator;
+    List<Animator> animator = new List<Animator>();
     public AudioSource audioSource;
 
     Dropdown resolutionBar;
@@ -43,6 +43,14 @@ public partial class MenuManager_2 : MonoBehaviour
 
     private void Awake()
     {
+        mainMenu = canvas.transform.GetChild(0).gameObject;
+        settings = canvas.transform.GetChild(1).gameObject;
+        eventSystem = EventSystem.current;
+
+        animator.Add(maskCanvas);
+        animator.Add(canvas.GetComponent<Animator>());
+        animator.Add(mainMenu.transform.GetChild(6).GetComponent<Animator>());
+
         foreach (Transform child in settings.transform)
         {
             switch (child.name)
@@ -147,6 +155,7 @@ public partial class MenuManager_2 : MonoBehaviour
         animator[1].enabled = true;
         animator[1].Play("HideMenuUI");
         animator[1].Play("OpenGate");
+        animator[2].Play("OpenCircus");
         yield return new WaitForSeconds(2f);
         animator[0].Play("MenuSelectOption");
         yield return new WaitForSeconds(1f);

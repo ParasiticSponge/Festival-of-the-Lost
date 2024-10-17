@@ -25,7 +25,7 @@ public class Functions : MonoBehaviour
             yield return null;
         }
     }
-    public static float Loop(float time, float factor, float offset)
+    public static float Loop(float time, float start, float max)
     {
         //example
         // 0 % 3 = 0. 0 * 3 = 0.
@@ -34,7 +34,19 @@ public class Functions : MonoBehaviour
         // 3 % 3 = 0. 0 * 3 = 0
         // 4 % 3 = 0.3r. 0.3r * 3 = 1
         // 5 % 3 = 0.6r. 0.6r * 3 = 2
-        return ((time % factor) * factor) + offset;
+        //return ((time % factor) * factor) + offset;
+        //different approach
+        return (time % (max-start)) + start;
+    }
+    public static float Oscillate(float time, float start, float max)
+    {
+        float d = max * 2;
+        float value = Loop(time, start, d);
+        if (value >= max)
+        {
+            value = -(value) + d;
+        }
+        return value;
     }
     public static IEnumerator Zoom(Camera camera, float zoom)
     {

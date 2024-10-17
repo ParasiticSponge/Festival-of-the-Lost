@@ -6,9 +6,9 @@ public class BalloonType : MonoBehaviour
 {
     public enum TYPE
     {
-        small = 1,
+        large = 1,
         medium,
-        large
+        small
     }
     public TYPE type;
 }
