@@ -226,13 +226,13 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
 
-        /*TextBox.Text(null, "???", "What is your name?", 0.05f);
+        TextBox.Text(null, "???", "What is your name?", 0.05f);
         TextBox.Text();
         //TextBox.Text($"Oh! Your name is {character.charName}?", 0.05f, true);
         //I* ouputs the input of the player
         //TextBox.Text(charAppearance, "I*", "Mum? Dad? Where did you go?", textBoxSpeed);
         TextBox.Text(mum.GetComponent<NPC_AI>().appearance, mum.GetComponent<NPC_AI>().charName, "Go enjoy the circus I*", textBoxSpeed);
-        StartCoroutine(DisableCollisions());*/
+        StartCoroutine(DisableCollisions());
         fade.SetActive(false);
     }
 
@@ -728,13 +728,14 @@ public class GameManager : MonoBehaviour
     }*/
     void ExitBoard(bool exit)
     {
+        print(isLookingAtBoard);
         Vector3 pos;
         switch (exit)
         {
             case false:
                 isLookingAtBoard = true;
                 StartCoroutine(BoardLooking());
-                StartCoroutine(Functions.Fade(f1_UI.transform.GetChild(0).gameObject, 1));
+                StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 1));
                 StartCoroutine(Functions.Fade(scoreTicketsText.gameObject, 1));
                 StartCoroutine(Functions.Fade(character, 1));
                 character.GetComponent<CharacterController2D>().enabled = false;
@@ -753,7 +754,7 @@ public class GameManager : MonoBehaviour
             case true:
                 isLookingAtBoard = false;
                 timeLooking = 0;
-                StartCoroutine(Functions.Fade(f1_UI.transform.GetChild(0).gameObject, 0));
+                StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 0));
                 StartCoroutine(Functions.Fade(scoreTicketsText.gameObject, 0));
                 StartCoroutine(Functions.Fade(character, 0));
                 //TODO: when moving before completely zoomed out, camera snaps rather than smooths to position 
