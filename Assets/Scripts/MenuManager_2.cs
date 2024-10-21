@@ -163,9 +163,9 @@ public partial class MenuManager_2 : MonoBehaviour
     }
     public void Move(bool isOn)
     {
-        Vector3 left = new Vector3(-700, 0, 0);
+        Vector3 left = new Vector3(-1920, 0, 0);
         Vector3 centre = new Vector3(0, 0, 0);
-        Vector3 right = new Vector3(700, 0, 0);
+        Vector3 right = new Vector3(1920, 0, 0);
         switch (isOn)
         {
             case true:

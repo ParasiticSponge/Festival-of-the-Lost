@@ -6,11 +6,14 @@ public class Rotate : MonoBehaviour
 {
     float speed = 8;
     float direction = -1;
-    RectTransform rect;
+    Transform rect;
     // Start is called before the first frame update
     void Start()
     {
-        rect = GetComponent<RectTransform>();
+        if (GetComponent<RectTransform>())
+            rect = GetComponent<RectTransform>();
+        else
+            rect = transform;
     }
 
     // Update is called once per frame

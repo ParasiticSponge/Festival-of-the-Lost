@@ -40,12 +40,14 @@ public class Functions : MonoBehaviour
     }
     public static float Oscillate(float time, float start, float max)
     {
-        float d = max * 2;
+        float length = max - start;
+        float d = length + max;
         float value = Loop(time, start, d);
         if (value >= max)
         {
-            value = -(value) + d;
+            value = -(value) + length;
         }
+        print(value);
         return value;
     }
     public static IEnumerator Zoom(Camera camera, float zoom)
