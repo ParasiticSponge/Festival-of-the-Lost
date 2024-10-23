@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Rotate : MonoBehaviour
 {
+    public float startingAngle = 0;
     float speed = 8;
     float direction = -1;
     Transform rect;
@@ -21,7 +22,7 @@ public class Rotate : MonoBehaviour
     {
         float angle = Functions.Loop(Time.timeSinceLevelLoad * speed, 0, 360);
 
-        rect.localRotation = Quaternion.Euler(0, 0, angle * direction);
+        rect.localRotation = Quaternion.Euler(0, 0, angle * direction + startingAngle);
         //rect.localRotation = Functions.Quat(angle * direction, 2);
     }
 }

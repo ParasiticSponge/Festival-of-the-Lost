@@ -39,6 +39,12 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: UIBack
+    uniqueID: 1379760765
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: UIFront
+    uniqueID: 1431058273
     locked: 0

@@ -47,9 +47,12 @@ public partial class MenuManager_2 : MonoBehaviour
         settings = canvas.transform.GetChild(1).gameObject;
         eventSystem = EventSystem.current;
 
+        //mask
         animator.Add(maskCanvas);
+        //gate
         animator.Add(canvas.GetComponent<Animator>());
-        animator.Add(mainMenu.transform.GetChild(6).GetComponent<Animator>());
+        //circus
+        animator.Add(mainMenu.transform.GetChild(10).GetComponent<Animator>());
 
         foreach (Transform child in settings.transform)
         {

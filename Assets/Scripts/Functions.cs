@@ -36,18 +36,17 @@ public class Functions : MonoBehaviour
         // 5 % 3 = 0.6r. 0.6r * 3 = 2
         //return ((time % factor) * factor) + offset;
         //different approach
-        return (time % (max-start)) + start;
+        return (time % max) + start;
     }
     public static float Oscillate(float time, float start, float max)
     {
         float length = max - start;
-        float d = length + max;
+        float d = length * 2;
         float value = Loop(time, start, d);
         if (value >= max)
         {
-            value = -(value) + length;
+            value = -((value-(start + max)) - length);
         }
-        print(value);
         return value;
     }
     public static IEnumerator Zoom(Camera camera, float zoom)

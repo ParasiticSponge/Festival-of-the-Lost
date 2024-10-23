@@ -168,10 +168,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 732779881}
+  rotation: {x: -25, y: 25}
   length: 17.5
   startingAngle: 90
   startingTime: 50
   offset: {x: 0, y: 0}
+  swing: 1
+  rotate: 1
+  blink: 0
+  startingTimeBlink: 0
 --- !u!212 &11765369
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3030,10 +3035,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 732779881}
+  rotation: {x: -25, y: 25}
   length: 17.5
   startingAngle: 225
   startingTime: 75
   offset: {x: 0, y: 0}
+  swing: 1
+  rotate: 1
+  blink: 0
+  startingTimeBlink: 0
 --- !u!212 &287349229
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -5002,10 +5012,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 732779881}
+  rotation: {x: -25, y: 25}
   length: 17.5
   startingAngle: 180
   startingTime: 0
   offset: {x: 0, y: 0}
+  swing: 1
+  rotate: 1
+  blink: 0
+  startingTimeBlink: 0
 --- !u!212 &601470720
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -5252,8 +5267,8 @@ Transform:
   m_GameObject: {fileID: 666586178}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 18.31, y: -1.93, z: 0.5}
-  m_LocalScale: {x: 0.30704042, y: 0.30704042, z: 0.30704042}
+  m_LocalPosition: {x: 37.28, y: 0.96, z: 0.5}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.30704042}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1570719026}
@@ -5299,8 +5314,8 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 98706230b8ee2b546b10ede2d9425466, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 6f1e1cadf1184f04b9c1c4c45e1119f7, type: 3}
+  m_Color: {r: 0.17254902, g: 0, b: 0.18431373, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -6338,6 +6353,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5de2372021a3728459268ea2d82718d7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  startingAngle: 0
 --- !u!1 &737000434
 GameObject:
   m_ObjectHideFlags: 0
@@ -9821,10 +9837,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 732779881}
+  rotation: {x: -25, y: 25}
   length: 17.5
   startingAngle: 45
   startingTime: 75
   offset: {x: 0, y: 0}
+  swing: 1
+  rotate: 1
+  blink: 0
+  startingTimeBlink: 0
 --- !u!212 &1119920523
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -10154,10 +10175,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 732779881}
+  rotation: {x: -25, y: 25}
   length: 17.5
   startingAngle: 315
   startingTime: 25
   offset: {x: 0, y: 0}
+  swing: 1
+  rotate: 1
+  blink: 0
+  startingTimeBlink: 0
 --- !u!212 &1149864143
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -12210,10 +12236,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 732779881}
+  rotation: {x: -25, y: 25}
   length: 17.5
   startingAngle: 0
   startingTime: 0
   offset: {x: 0, y: 0}
+  swing: 1
+  rotate: 1
+  blink: 0
+  startingTimeBlink: 0
 --- !u!212 &1471843679
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -13839,7 +13870,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -13906,10 +13937,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 732779881}
+  rotation: {x: -25, y: 25}
   length: 17.5
   startingAngle: 270
   startingTime: 50
   offset: {x: 0, y: 0}
+  swing: 1
+  rotate: 1
+  blink: 0
+  startingTimeBlink: 0
 --- !u!212 &1615089323
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -17893,10 +17929,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 732779881}
+  rotation: {x: -25, y: 25}
   length: 17.5
   startingAngle: 135
   startingTime: 25
   offset: {x: 0, y: 0}
+  swing: 1
+  rotate: 1
+  blink: 0
+  startingTimeBlink: 0
 --- !u!212 &1991714077
 SpriteRenderer:
   m_ObjectHideFlags: 0
