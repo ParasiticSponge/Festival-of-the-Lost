@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using System;
 using static Functions;
+using UnityEngine.Rendering.Universal;
 //using UnityEditor.Animations;
 
 public class GameManager : MonoBehaviour
@@ -23,6 +24,7 @@ public class GameManager : MonoBehaviour
     CharacterController2D controller;
     GameObject character;
     Sprite charAppearance;
+    GameObject boss;
     System.Random random = new System.Random();
     // ---------------------NPCS------------------------
     List<GameObject> NPCs = new List<GameObject>();
@@ -48,16 +50,23 @@ public class GameManager : MonoBehaviour
     List<GameObject> background = new List<GameObject>();
     List<GameObject> foreground = new List<GameObject>();
     // ---------------------LEVEL1------------------------
+    public Sprite darkBg;
+    List<Light2D> lights = new List<Light2D>();
     GameObject f1_UI;
     GameObject circusTent;
     public GameObject doors;
     List<Collision2D> door = new List<Collision2D>();
+    List<SpriteRenderer> trees = new List<SpriteRenderer>();
+    Sprite treeStump1;
     GameObject noticeBoard;
     bool isLookingAtBoard;
+    [SerializeField] bool hasLookedAtBoard;
     float timeLooking;
     [SerializeField] int tickets = 0;
     int ticketsToEnterTent = 10;
     Text scoreTicketsText;
+    bool waitingForCart;
+    bool ridingCart;
     // ---------------------LEVEL2------------------------
     GameObject f2_UI;
     GameObject stars;
@@ -78,8 +87,15 @@ public class GameManager : MonoBehaviour
     float rapidTime;
     float slowTime;
     // ---------------------LEVEL3------------------------
-    Text dartCountText;
-    int pocketDarts = 0;
+    GameObject f3_UI;
+    GameObject bow;
+    Text countDartsText;
+    [SerializeField] int pocketDarts = 0;
+    bool centrePlatform;
+    GameObject bossPlatform;
+    Image powerBarBoss;
+    Image bossHealthBar;
+    float bossHealth;
 
     private void Awake()
     {
@@ -90,32 +106,60 @@ public class GameManager : MonoBehaviour
 
         //tentSheet = Resources.LoadAll<Sprite>("Circus_Sheet");
         if (MenuManager_2.textBoxColourLight == null) MenuManager_2.textBoxColourLight = testingSprite;
-        GameObject f1 = foregrounds.transform.GetChild(0).gameObject;
-        GameObject f2 = foregrounds.transform.GetChild(1).gameObject;
 
-        foreach (Transform t1 in f1.transform)
+        foreach (Transform child in backgrounds.transform)
+            background.Add(child.gameObject);
+        foreach (Transform child in foregrounds.transform)
+            foreground.Add(child.gameObject);
+
+        foreground[2].SetActive(true);
+        boss = FindObjectOfType<Boss>().gameObject;
+        foreground[2].SetActive(false);
+
+        foreach (Transform t1 in foreground[0].transform)
         {
-            if (t1.gameObject.name.Contains("Tent"))
+            if (t1.name.Contains("Tent"))
                 circusTent = t1.gameObject;
-            if (t1.gameObject.name.Contains("NoticeBoard"))
+            if (t1.name.Contains("NoticeBoard"))
                 noticeBoard = t1.gameObject;
-            if (t1.gameObject.name.Contains("NPC"))
+            if (t1.name.Contains("NPC"))
             {
                 NPCs.Add(t1.gameObject);
-                if (t1.gameObject.name.Contains("Mum"))
+                if (t1.name.Contains("Mum"))
                     mum = t1.gameObject;
             }
-            if (t1.gameObject.GetComponent<Canvas>())
+            if (t1.GetComponent<Canvas>())
                 f1_UI = t1.gameObject;
+            if (t1.name.Contains("Lights"))
+            {
+                foreach (Transform child in t1)
+                    lights.Add(child.gameObject.GetComponent<Light2D>());
+            }
+            if (t1.name.Contains("Trees"))
+            {
+                foreach (Transform child in t1)
+                {
+                    trees.Add(child.GetComponent<SpriteRenderer>());
+                    if (child.name.Contains("TreeStump1"))
+                        treeStump1 = child.GetComponent<SpriteRenderer>().sprite;
+                }
+            }
         }
-        foreach (Transform t2 in f2.transform)
+        foreach (Transform t2 in foreground[1].transform)
         {
-            if (t2.gameObject.name.Contains("Balloon"))
+            if (t2.name.Contains("Balloon"))
                 balloons.Add(t2.gameObject);
-            if (t2.gameObject.name.Contains("ThrowDart"))
+            if (t2.name.Contains("ThrowDart"))
                 darts.Add(t2.gameObject);
-            if (t2.gameObject.GetComponent<Canvas>())
+            if (t2.GetComponent<Canvas>())
                 f2_UI = t2.gameObject;
+        }
+        foreach (Transform t3 in foreground[2].transform)
+        {
+            if (t3.name.Contains("Platform"))
+                bossPlatform = t3.gameObject;
+            if (t3.GetComponent<Canvas>())
+                f3_UI = t3.gameObject;
         }
         foreach (Transform t in doors.transform)
         {
@@ -124,7 +168,7 @@ public class GameManager : MonoBehaviour
         }
         foreach (Transform child in canvas.transform.GetChild(0))
         {
-            if (child.gameObject.name == "GameOver")
+            if (child.name == "GameOver")
                 anims.Add(child.GetChild(0).gameObject.GetComponent<Animator>());
             if (child.GetComponent<Animator>())
                 anims.Add(child.gameObject.GetComponent<Animator>());
@@ -154,12 +198,14 @@ public class GameManager : MonoBehaviour
         crosshair = character.GetComponent<MouseController2D>().crosshair;
         balloon = balloons[0].GetComponent<SpriteRenderer>().sprite;
         dart = darts[startingDart].GetComponent<SpriteRenderer>().sprite;
-
-        scoreDartsText = f2_UI.transform.GetChild(0).GetChild(0).gameObject.GetComponent<Text>();
-        powerBar = f2_UI.transform.GetChild(1).GetChild(0).gameObject.GetComponent<Image>();
+        bow = character.transform.GetChild(2).gameObject;
 
         scoreTicketsText = UI.transform.GetChild(0).GetChild(0).gameObject.GetComponent<Text>();
-        dartCountText = UI.transform.GetChild(0).GetChild(1).gameObject.GetComponent<Text>();
+        countDartsText = UI.transform.GetChild(0).GetChild(1).gameObject.GetComponent<Text>();
+        scoreDartsText = f2_UI.transform.GetChild(0).GetChild(0).gameObject.GetComponent<Text>();
+        powerBar = f2_UI.transform.GetChild(1).GetChild(0).gameObject.GetComponent<Image>();
+        powerBarBoss = f3_UI.transform.GetChild(0).GetChild(0).gameObject.GetComponent<Image>();
+        bossHealthBar = f3_UI.transform.GetChild(1).GetChild(0).gameObject.GetComponent<Image>();
 
         scoreTicketsText.text = tickets.ToString();
         retryButton = anims[1].gameObject.transform.GetChild(0).gameObject;
@@ -167,6 +213,9 @@ public class GameManager : MonoBehaviour
         anims2[3].transform.GetChild(2).GetChild(1).gameObject.GetComponent<Slider>().value = MenuManager_2.sfxVol;
         anims2[3].transform.GetChild(3).GetChild(1).gameObject.GetComponent<Toggle>().isOn = MenuManager_2.crossAssist;
         anims2[3].transform.GetChild(4).GetChild(1).gameObject.GetComponent<Toggle>().isOn = MenuManager_2.wiggleCross;
+
+        //global volume
+        foreground[4].SetActive(false);
     }
     private void Update()
     {
@@ -188,6 +237,8 @@ public class GameManager : MonoBehaviour
         Actions.Talk += Talk;
         Actions.FinishTalk += DoAction;
         Actions.Pause += Pause;
+        Actions.RideCart += RideCart;
+        Actions.BulletHit += BulletHit;
     }
     private void OnDisable()
     {
@@ -201,24 +252,18 @@ public class GameManager : MonoBehaviour
         Actions.Talk -= Talk;
         Actions.FinishTalk -= DoAction;
         Actions.Pause -= Pause;
+        Actions.RideCart -= RideCart;
+        Actions.BulletHit -= BulletHit;
     }
     // Start is called before the first frame update
     void Start()
     {
         initialGravity = character.GetComponent<Rigidbody2D>().gravityScale;
-        foreach (Transform child in backgrounds.transform)
-        {
-            background.Add(child.gameObject);
-        }
-        foreach (Transform child in foregrounds.transform)
-        {
-            foreground.Add(child.gameObject);
-        }
 
         switchScreen.gameObject.SetActive(false);
         masks[1].SetActive(false);
         fade.SetActive(true);
-        StartCoroutine(Functions.Fade(fade, 1));
+        StartCoroutine(Functions.Fade(fade, 1, 0, 1));
         StartCoroutine(Intro());
     }
 
@@ -226,7 +271,7 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
 
-        TextBox.Text(null, "???", "What is your name?", 0.05f);
+        TextBox.Text(null, "???", "What is your name?", textBoxSpeed);
         TextBox.Text();
         //TextBox.Text($"Oh! Your name is {character.charName}?", 0.05f, true);
         //I* ouputs the input of the player
@@ -243,32 +288,11 @@ public class GameManager : MonoBehaviour
 
     IEnumerator SwitchRooms(int n)
     {
-        if (n == 3)
-        {
-            ExitBoard(isLookingAtBoard);
-            yield break;
-        }
-        if (n == 2 && tickets < ticketsToEnterTent)
-        {
-            TextBox.Text(charAppearance, controller.charName, "It appears I don't have enough tickets...", textBoxSpeed);
-            yield break;
-        }
-        switchScreen.gameObject.SetActive(true);
-        masks[1].SetActive(true);
-        character.GetComponent<MouseController2D>().fire = true;
-        switchScreen.speed = 1;
-        switchScreen.Play("MenuSelectOption", 0, 0);
-        foreach (Collision2D collider in door) { collider.enabled = false; }
-
-        yield return new WaitForSeconds(1);
-        UI.SetActive(true);
-        Camera.main.GetComponent<CameraFollow>().enabled = true;
-        background[currentRoom].SetActive(false);
-        foreground[currentRoom].SetActive(false);
         switch (n)
         {
             //this option brings user back to main circus
             case 0:
+                yield return StartCoroutine(Transition());
                 star[0].Rebind();
                 star[1].Rebind();
                 star[2].Rebind();
@@ -276,7 +300,7 @@ public class GameManager : MonoBehaviour
                 switch (currentRoom)
                 {
                     case 1:
-                        character.transform.localPosition = new Vector3(-2.9f, -3.06f, -1);
+                        character.transform.localPosition = new Vector3(18.7f, -3.06f, -1);
                         break;
                     case 2:
                         character.transform.localPosition = new Vector3(17, -3.06f, -1);
@@ -291,23 +315,49 @@ public class GameManager : MonoBehaviour
                 Camera.main.GetComponent<CameraFollow>().enabled = true;
                 if (tickets >= ticketsToEnterTent && !mood)
                 {
+                    mood = true;
                     Destroy(mum);
                     physics.UpdateCollision();
                     NPCs.Remove(mum);
+                    ChangeMood();
                     StartCoroutine(Sad());
                 }
                 break;
             case 1:
+                yield return StartCoroutine(Transition());
                 currentRoom = 1;
+                //default layer mask
+                character.GetComponent<SpriteRenderer>().sortingLayerName = "Default";
                 UI.SetActive(false);
                 ResetDartsGame(true);
                 break;
             case 2:
+                if (!hasLookedAtBoard)
+                {
+                    TextBox.Text(charAppearance, controller.charName, "The flyer says: 'Go check the notice board!'...", textBoxSpeed);
+                    yield break;
+                }
+                else if (tickets < ticketsToEnterTent)
+                {
+                    TextBox.Text(charAppearance, controller.charName, "It appears I don't have enough tickets...", textBoxSpeed);
+                    yield break;
+                }
+                yield return StartCoroutine(Transition());
+                character.GetComponent<SpriteRenderer>().sortingLayerName = "Default";
                 currentRoom = 2;
                 tickets -= ticketsToEnterTent;
                 scoreTicketsText.text = tickets.ToString();
-                character.transform.localPosition = new Vector3(0, -33.5f, 0);
+                character.transform.localPosition = new Vector3(0, -33.5f, -1);
+                controller.canJump = true;
+                character.GetComponent<BossDartController>().enabled = true;
+                Vector3 component = Camera.main.GetComponent<CameraFollow>().offset;
+                Camera.main.transform.position = new Vector3(character.transform.position.x + component.x, character.transform.position.y + component.y, Camera.main.transform.position.z);
+                Camera.main.GetComponent<CameraFollow>().enabled = false;
+                StartCoroutine(SetupBossFight());
                 break;
+            case 3:
+                ExitBoard(isLookingAtBoard);
+                yield break;
         }
         switchScreen.StartPlayback();
         switchScreen.speed = -1;
@@ -319,6 +369,22 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1);
         switchScreen.gameObject.SetActive(false);
         masks[1].SetActive(false);
+    }
+    IEnumerator Transition()
+    {
+        switchScreen.gameObject.SetActive(true);
+        masks[1].SetActive(true);
+        character.GetComponent<MouseController2D>().fire = true;
+        switchScreen.speed = 1;
+        switchScreen.Play("MenuSelectOption", 0, 0);
+        foreach (Collision2D collider in door) { collider.enabled = false; }
+
+        yield return new WaitForSeconds(1);
+        //UIFront layer mask
+        character.GetComponent<SpriteRenderer>().sortingLayerName = "UIFront";
+        UI.SetActive(true);
+        background[currentRoom].SetActive(false);
+        foreground[currentRoom].SetActive(false);
     }
     public void DoorAnim(GameObject obj, bool visible)
     {
@@ -418,6 +484,7 @@ public class GameManager : MonoBehaviour
     {
         hold = true;
         powerBar.gameObject.SetActive(true);
+        powerBarBoss.gameObject.SetActive(true);
         timeLooking = 0;
         //number from 0.5 to 1
         rapidTime = (random.Next(2) / 2) + 0.5f;
@@ -436,7 +503,10 @@ public class GameManager : MonoBehaviour
         {
             if (!hold)
             {
-                Actions.Power.Invoke(desiredPos);
+                if (currentRoom == 1)
+                    Actions.Power.Invoke(desiredPos);
+                if (currentRoom == 2)
+                    Bow(i);
                 //mouseController has x position updated to match mouse, overide this
                 crosshair.transform.position = desiredPos;
                 break;
@@ -450,7 +520,10 @@ public class GameManager : MonoBehaviour
             {
                 if (!hold)
                 {
-                    Actions.Power.Invoke(desiredPos);
+                    if (currentRoom == 1)
+                        Actions.Power.Invoke(desiredPos);
+                    if (currentRoom == 2)
+                        Bow(i);
                     crosshair.transform.position = desiredPos;
                     break;
                 }
@@ -477,7 +550,6 @@ public class GameManager : MonoBehaviour
             timeLooking = 0;
             slowTime = (random.Next(4) / 2) + 1;
         }
-        print(timeLooking);
 
         //reuse variable for other purposes
         timeLooking += 0.01f;
@@ -485,6 +557,7 @@ public class GameManager : MonoBehaviour
         Vector3 screenToWorld;
 
         powerBar.fillAmount = i / 100;
+        powerBarBoss.fillAmount = i / 100;
         screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
         //position along bar
         desiredPos = new Vector3(crosshair.transform.position.x, screenToWorld.y, crosshair.transform.position.z);
@@ -598,7 +671,6 @@ public class GameManager : MonoBehaviour
                     if (balloons[i].GetComponent<CircleCollider2D>().enabled)
                         count++;
                 }
-                print(count);
                 if (count == 0)
                 {
                     retryButton.SetActive(false);
@@ -613,11 +685,6 @@ public class GameManager : MonoBehaviour
                     else anims[0].Play("Missed", 0, 0);
                 }
                 break;
-        }
-
-        if (tickets >= ticketsToEnterTent)
-        {
-            circusTent.GetComponent<SpriteRenderer>().sprite = tentSheet[1];
         }
 
         if (startingDart < darts.Count)
@@ -653,6 +720,8 @@ public class GameManager : MonoBehaviour
     }
     IEnumerator Sad()
     {
+        circusTent.GetComponent<SpriteRenderer>().sprite = tentSheet[1];
+
         yield return new WaitForSeconds(1.5f);
         TextBox.Text(NPCs[1].GetComponent<NPC_AI>().appearance, NPCs[1].GetComponent<NPC_AI>().charName, "Wow, nice job kiddo! Here, take some darts as a souvenir", textBoxSpeed);
 
@@ -664,13 +733,37 @@ public class GameManager : MonoBehaviour
         //Play animation
         anims[0].Play("Aquire", 0, 0);
         pocketDarts = 5;
-        dartCountText.text = pocketDarts.ToString();
+        countDartsText.text = pocketDarts.ToString();
 
         yield return new WaitForSeconds(2.5f);
         TextBox.Text(charAppearance, controller.charName, "Thanks!", textBoxSpeed);
         TextBox.Text(charAppearance, controller.charName, "...", textBoxSpeed);
         TextBox.Text(charAppearance, controller.charName, "Mum? Dad? Where did you go?", textBoxSpeed);
-        mood = true;
+    }
+    public void ChangeMood()
+    {
+        fade.SetActive(true);
+        StartCoroutine(moodyFade());
+        //other static stuff
+        background[0].gameObject.GetComponent<SpriteRenderer>().sprite = darkBg;
+        foreach (Light2D child in lights)
+            child.color = Color.red;
+        foreach (SpriteRenderer child in trees)
+        {
+            if (child.gameObject.name.Contains("TreeWhole"))
+                child.sprite = treeStump1;
+        }
+
+        foreground[4].SetActive(false);
+    }
+    IEnumerator moodyFade()
+    {
+        if (mood)
+        {
+            yield return StartCoroutine(Functions.Fade(fade, fade.GetComponent<Image>().color.a, 0.2f, 0.2f));
+            yield return StartCoroutine(Functions.Fade(fade, fade.GetComponent<Image>().color.a, 0, 0.2f));
+            StartCoroutine(moodyFade());
+        }
     }
 
     //TODO: could use DoAction to check if textbox is not there
@@ -728,20 +821,20 @@ public class GameManager : MonoBehaviour
     }*/
     void ExitBoard(bool exit)
     {
-        print(isLookingAtBoard);
         Vector3 pos;
         switch (exit)
         {
             case false:
                 isLookingAtBoard = true;
+                hasLookedAtBoard = true;
                 StartCoroutine(BoardLooking());
-                StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 1));
-                StartCoroutine(Functions.Fade(scoreTicketsText.gameObject, 1));
-                StartCoroutine(Functions.Fade(character, 1));
+                StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 1, 0, 1));
+                StartCoroutine(Functions.Fade(scoreTicketsText.gameObject, 1, 0, 1));
+                StartCoroutine(Functions.Fade(character, 1, 0, 1));
                 character.GetComponent<CharacterController2D>().enabled = false;
                 foreach (GameObject npc in NPCs)
                 {
-                    StartCoroutine(Functions.Fade(npc, 1));
+                    StartCoroutine(Functions.Fade(npc, 1, 0, 1));
                     npc.GetComponent<NPC_AI>().canMove = 0;
                 }
                 door[2].gameObject.SetActive(false);
@@ -754,14 +847,14 @@ public class GameManager : MonoBehaviour
             case true:
                 isLookingAtBoard = false;
                 timeLooking = 0;
-                StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 0));
-                StartCoroutine(Functions.Fade(scoreTicketsText.gameObject, 0));
-                StartCoroutine(Functions.Fade(character, 0));
+                StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 0, 1, 1));
+                StartCoroutine(Functions.Fade(scoreTicketsText.gameObject, 0, 1, 1));
+                StartCoroutine(Functions.Fade(character, 0, 1, 1));
                 //TODO: when moving before completely zoomed out, camera snaps rather than smooths to position 
                 character.GetComponent<CharacterController2D>().enabled = true;
                 foreach (GameObject npc in NPCs)
                 {
-                    StartCoroutine(Functions.Fade(npc, 0));
+                    StartCoroutine(Functions.Fade(npc, 0, 1, 1));
                     npc.GetComponent<NPC_AI>().canMove = 1;
                 }
                 door[2].gameObject.SetActive(true);
@@ -781,6 +874,13 @@ public class GameManager : MonoBehaviour
         {
             case string a when a.Contains("Balloon"):
                 StartCoroutine(SwitchRooms(1));
+                break;
+            case string a when a.Contains("Wheel"):
+                if (!ridingCart && !waitingForCart)
+                {
+                    waitingForCart = true;
+                    controller.canMove = 0;
+                }
                 break;
         }
     }
@@ -828,7 +928,7 @@ public class GameManager : MonoBehaviour
         switchScreen.Play("MenuSelectOption", 0, 0);
         fade.SetActive(true);
         yield return new WaitForSecondsRealtime(1);
-        StartCoroutine(Functions.Fade(fade, 0));
+        StartCoroutine(Functions.Fade(fade, 0, 1, 1));
     }
 
     IEnumerator GameOverDarts()
@@ -838,7 +938,7 @@ public class GameManager : MonoBehaviour
         anims[0].transform.parent.transform.localScale = Vector3.one;
         anims[0].transform.parent.localPosition = Vector3.zero;
         PlayAnimation(anims[0], "GameOverMinigame", false);
-        anims[1].transform.GetChild(5).gameObject.GetComponent<Text>().text = "0";
+        anims[1].transform.GetChild(4).gameObject.GetComponent<Text>().text = "0";
         yield return new WaitForSecondsRealtime(2);
         Time.timeScale = 0;
         anims[1].speed = 1;
@@ -847,7 +947,7 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i <= scoreDarts; i++)
         {
             //Play ticket collecting sound
-            anims[1].transform.GetChild(5).gameObject.GetComponent<Text>().text = i.ToString();
+            anims[1].transform.GetChild(4).gameObject.GetComponent<Text>().text = i.ToString();
             yield return new WaitForSecondsRealtime(0.1f);
         }
 
@@ -963,5 +1063,96 @@ public class GameManager : MonoBehaviour
             text = FindObjectOfType<TextBox>();
             yield return null;
         }
+    }
+    //alternatively setup a trigger boxCollider2D and invoke an action to begin boss fight
+    IEnumerator SetupBossFight()
+    {
+        while (!centrePlatform)
+        {
+            if (character.transform.localPosition.x >= -1 && character.transform.localPosition.x <= 1)
+                centrePlatform = true;
+            yield return null;
+        }
+        StartCoroutine(BeginBossFight());
+    }
+
+    //TODO: find more efficient way
+    IEnumerator BeginBossFight()
+    {
+        boss.GetComponent<Animator>().Play("fall", 0, 0);
+        yield return new WaitForSeconds(2f);
+        boss.transform.localPosition = new Vector3(boss.transform.localPosition.x, 9, boss.transform.localPosition.z);
+        Vector3 backPos = background[2].transform.localPosition + new Vector3(0, -3.8f, 0);
+        Vector3 platPos = bossPlatform.transform.localPosition + new Vector3(0, 1.6f, 0);
+        Vector3 bossPos = boss.transform.localPosition + new Vector3(0, -4.7f, 0);
+        Vector3 groundPos = foreground[2].transform.GetChild(0).localPosition + new Vector3(0, -3.8f, 0);
+        StartCoroutine(Functions.Move(background[2].transform.localPosition, backPos, value => background[2].transform.localPosition = value));
+        StartCoroutine(Functions.Move(bossPlatform.transform.localPosition, platPos, value => bossPlatform.transform.localPosition = value));
+        StartCoroutine(Functions.Move(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
+        StartCoroutine(Functions.Move(foreground[2].transform.GetChild(0).localPosition, groundPos, value => foreground[2].transform.GetChild(0).localPosition = value));
+        yield return new WaitForSeconds(1);
+        boss.GetComponent<Animator>().Play("idle", 0, 0);
+    }
+
+    public void RideCart(GameObject cart)
+    {
+        if (waitingForCart)
+        {
+            ridingCart = true;
+            character.GetComponent<Rigidbody2D>().gravityScale = 0;
+            mum.GetComponent<NPC_AI>().canMove = 0;
+            character.transform.parent = cart.transform;
+            character.GetComponent<SpriteRenderer>().sortingLayerName = "Default";
+            character.transform.localRotation = Quaternion.identity;
+            character.transform.localPosition = new Vector3(0, -3.5f, 0);
+            waitingForCart = false;
+            StartCoroutine(RideTime());
+        }
+        if (ridingCart && timeLooking > 45)
+        {
+            ridingCart = false;
+            character.GetComponent<Rigidbody2D>().gravityScale = controller.gravity;
+            character.transform.rotation = Quaternion.identity;
+            mum.GetComponent<NPC_AI>().canMove = 1;
+            controller.canMove = 1;
+            character.transform.parent = backgrounds.transform.parent.parent;
+            character.GetComponent<SpriteRenderer>().sortingLayerName = "UIFront";
+            character.transform.localPosition = new Vector3(character.transform.localPosition.x, character.transform.localPosition.y, -1);
+            timeLooking = 0;
+        }
+    }
+    IEnumerator RideTime()
+    {
+        while (ridingCart)
+        {
+            timeLooking += Time.deltaTime;
+            print(timeLooking);
+            yield return null;
+        }
+    }
+
+    void Bow(float power)
+    {
+        if (currentRoom == 2 && pocketDarts > 0)
+        {
+            pocketDarts--;
+            countDartsText.text = pocketDarts.ToString();
+            GameObject go = new();
+            SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
+            Rigidbody2D rigid = go.AddComponent<Rigidbody2D>();
+            Bullet bullet = go.AddComponent<Bullet>();
+            BoxCollider2D collider = go.AddComponent<BoxCollider2D>();
+            go.transform.position = character.transform.position;
+            go.transform.localRotation = bow.transform.rotation;
+            renderer.sprite = dart;
+            rigid.velocity = go.transform.up * (power/2);
+            collider.size = new Vector2(2, 3);
+            Destroy(go, 5);
+        }
+    }
+
+    void BulletHit(float damage)
+    {
+        bossHealthBar.fillAmount = bossHealthBar.fillAmount - (damage/100);
     }
 }

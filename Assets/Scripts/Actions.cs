@@ -15,6 +15,7 @@ public class Actions
     public static Action Release;
     //public static Action<float> Power;
     public static Action<Vector3> Power;
+    public static Action<float> Bow;
     public static Action<bool> HitBalloon;
     public static Action<GameObject> Talk;
     public static Action<bool> Settings;
@@ -24,4 +25,6 @@ public class Actions
     public static Action<bool, Action<bool>> Toggles;
     public static Action<int> starCount;
     public static Action<int> BalloonType;
+    public static Action<GameObject> RideCart;
+    public static Action<float> BulletHit;
 }

@@ -22,6 +22,7 @@ public class FerrisCart : MonoBehaviour
     public bool rotate = true;
     public bool blink = false;
     public float startingTimeBlink = 0;
+    public bool invokeObject;
 
     Transform rect;
     Color spriteColour;
@@ -77,6 +78,11 @@ public class FerrisCart : MonoBehaviour
             float loop = Functions.Oscillate((Time.timeSinceLevelLoad * rockSpeed) + startingTimeBlink, 0, 10);
             color.a = loop;
             GetComponent<Light2D>().intensity = loop;
+        }
+        if (invokeObject)
+        {
+            if (transform.localPosition.x >= 0 && transform.localPosition.x <= 1 && transform.localPosition.y < 0)
+                Actions.RideCart.Invoke(gameObject);
         }
     }
 }

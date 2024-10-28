@@ -35,7 +35,7 @@ public class CharacterController2D : NPC_AI
 		//horizontal = Input.GetAxisRaw("Horizontal") * runSpeed;
 		horizontal *= canMove;
 
-        if (Input.GetKey(KeyCode.Space) && canMove == 1)
+        if (Input.GetKey(KeyCode.Space) && canMove == 1 && canJump == true)
         {
             jump = true;
             animator.SetBool("jump", jump);

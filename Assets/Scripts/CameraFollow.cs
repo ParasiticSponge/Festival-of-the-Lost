@@ -14,6 +14,7 @@ public class CameraFollow : MonoBehaviour
     void LateUpdate()
     {
         Vector3 desiredPos = target.position + offset;
+        desiredPos.z = -10;
 
         //smooth movement
         //Vector3 smoothedPos = Vector3.Lerp(transform.position, desiredPos, smoothSpeed);

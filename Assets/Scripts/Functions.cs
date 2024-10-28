@@ -8,15 +8,15 @@ using Unity.VisualScripting;
 public class Functions : MonoBehaviour
 {
     //0 = fadeIn, 1 = fadeOut
-    public static IEnumerator Fade(GameObject image, int fadeIn)
+    public static IEnumerator Fade(GameObject image, float start, float stop, float speed)
     {
         Color c = new Color(0, 0, 0);
         if (image.transform.GetComponent<Image>()) c = image.transform.GetComponent<Image>().color;
         if (image.transform.GetComponent<Text>()) c = image.transform.GetComponent<Text>().color;
         if (image.transform.GetComponent<SpriteRenderer>()) c = image.transform.GetComponent<SpriteRenderer>().color;
         //if fadeIn is 0, increment upwards, otherwise reverse it.
-        float increment = fadeIn == 0 ? 1 : -1;
-        for (float alpha = fadeIn; fadeIn == 0 ? alpha <= 1 : alpha >= 0; alpha += (increment * Time.deltaTime))
+        float increment = stop >= start ? 1 : -1;
+        for (float alpha = start; stop >= start ? alpha <= stop : alpha >= stop; alpha += (increment * Time.deltaTime * speed))
         {
             c.a = alpha;
             if (image.transform.GetComponent<Image>()) image.transform.GetComponent<Image>().color = c;

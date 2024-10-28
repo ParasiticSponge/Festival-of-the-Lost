@@ -21,9 +21,9 @@ public class IntroManager : MonoBehaviour
 
     IEnumerator Intro()
     {
-        yield return StartCoroutine(Functions.Fade(text, 0));
+        yield return StartCoroutine(Functions.Fade(text, 0, 1, 1));
         yield return new WaitForSeconds(2);
-        yield return StartCoroutine(Functions.Fade(text, 1));
+        yield return StartCoroutine(Functions.Fade(text, 1, 0, 1));
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 }

@@ -15,7 +15,7 @@ TagManager:
   - 
   - 
   - Player
-  - 
+  - NPC
   - 
   - 
   - 
@@ -41,6 +41,9 @@ TagManager:
   m_SortingLayers:
   - name: UIBack
     uniqueID: 1379760765
+    locked: 0
+  - name: UIFlora
+    uniqueID: 2094412799
     locked: 0
   - name: Default
     uniqueID: 0
