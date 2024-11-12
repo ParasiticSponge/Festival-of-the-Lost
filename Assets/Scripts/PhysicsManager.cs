@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.TextCore.Text;
 
 public class PhysicsManager : MonoBehaviour
 {
@@ -12,15 +13,17 @@ public class PhysicsManager : MonoBehaviour
     float count = 0;
     private void Awake()
     {
-        character = FindObjectOfType<CharacterController2D>();
         //boxCollision = FindObjectsOfType<BoxCollider2D>();
         circCollision = FindObjectsOfType<CircleCollider2D>();
         collision = FindObjectsOfType<Collision2D>();
+        character = FindObjectOfType<CharacterController2D>();
     }
     // Update is called once per frame
     public void UpdateCollision()
     {
         circCollision = FindObjectsOfType<CircleCollider2D>();
+        foreach(CircleCollider2D circle in circCollision)
+            print(circle.gameObject.name);
     }
     void Update()
     {

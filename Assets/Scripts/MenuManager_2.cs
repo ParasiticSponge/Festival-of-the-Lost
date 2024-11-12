@@ -6,6 +6,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System;
+using System.Linq;
+using static UnityEngine.UI.Image;
 
 public partial class MenuManager_2 : MonoBehaviour
 {
@@ -37,6 +39,9 @@ public partial class MenuManager_2 : MonoBehaviour
 
     [SerializeField] GameObject scrollContent;
     List<GameObject> boxes = new List<GameObject>();
+
+    GameObject ferrisBase;
+    List<FerrisCart> carts = new List<FerrisCart>();
 
     GameObject border;
     GameObject selection;
@@ -85,6 +90,8 @@ public partial class MenuManager_2 : MonoBehaviour
         resolution = resolutionBar.value;
         textBoxColourLight = boxes[textBox].transform.GetChild(0).gameObject.GetComponent<Image>().sprite;
         textBoxColourDark = boxes[textBox].transform.GetChild(1).gameObject.GetComponent<Image>().sprite;
+        carts = FindObjectsOfType<FerrisCart>().ToList();
+        ferrisBase = GameObject.FindGameObjectWithTag("ferrisBase");
     }
     private void OnEnable()
     {
@@ -174,12 +181,14 @@ public partial class MenuManager_2 : MonoBehaviour
             case true:
                 StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, left, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
                 StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, centre, (value => settings.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(FerrisCartMove(left));
                 //StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, left));
                 //StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, centre));
                 break;
             case false:
                 StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, centre, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
                 StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, right, (value => settings.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(FerrisCartMove(centre));
                 //StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, centre));
                 //StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, right));
                 break;
@@ -203,6 +212,21 @@ public partial class MenuManager_2 : MonoBehaviour
             case false:
                 OP.Invoke(true);
                 break;
+        }
+    }
+
+    IEnumerator FerrisCartMove(Vector3 target)
+    {
+        while (mainMenu.GetComponent<RectTransform>().localPosition != target)
+        {
+            foreach (var cart in carts)
+            {
+                if (ferrisBase.GetComponent<RectTransform>())
+                    cart.TargetOrigin = ferrisBase.GetComponent<RectTransform>().transform.position;
+                else
+                    cart.TargetOrigin = ferrisBase.transform.position;
+            }
+            yield return null;
         }
     }
 }

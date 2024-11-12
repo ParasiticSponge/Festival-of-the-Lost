@@ -9,6 +9,7 @@ public class FerrisCart : MonoBehaviour
 {
     public GameObject target;
     Vector3 targetOrigin;
+    public Vector3 TargetOrigin { get { return targetOrigin; } set { targetOrigin = value; } }
 
     float speed = 8;
     float rockSpeed = 10;

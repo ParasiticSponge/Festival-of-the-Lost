@@ -27,4 +27,6 @@ public class Actions
     public static Action<int> BalloonType;
     public static Action<GameObject> RideCart;
     public static Action<float> BulletHit;
+    public static Action<int> BossPhase;
+    public static Action<GameObject> FoundPlushie;
 }

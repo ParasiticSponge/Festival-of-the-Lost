@@ -5,6 +5,15 @@ TagManager:
   serializedVersion: 2
   tags:
   - door
+  - ferrisBase
+  - ParkBench
+  - PopcornCart
+  - Plushie
+  - BalloonGame
+  - BalloonBackground
+  - Noticeboard
+  - PlushieStand
+  - Tickets
   layers:
   - Default
   - TransparentFX
@@ -12,14 +21,14 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - GlowUI
   - 
   - Player
   - NPC
+  - Boss
   - 
   - 
-  - 
-  - 
+  - Post Processing
   - 
   - 
   - 

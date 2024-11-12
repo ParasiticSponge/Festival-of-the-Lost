@@ -7,6 +7,7 @@ using UnityEngine.InputSystem;
 using System;
 using static Functions;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.InputSystem.HID;
 //using UnityEditor.Animations;
 
 public class GameManager : MonoBehaviour
@@ -21,8 +22,8 @@ public class GameManager : MonoBehaviour
     int stage = 0;
     bool mood = false;
     // ------------------CHARACTER---------------------
-    CharacterController2D controller;
-    GameObject character;
+    protected CharacterController2D controller;
+    protected GameObject character;
     Sprite charAppearance;
     GameObject boss;
     System.Random random = new System.Random();
@@ -35,6 +36,7 @@ public class GameManager : MonoBehaviour
     GameObject fade;
     public GameObject textBoxPrefab;
     public Sprite testingSprite;
+    public Sprite testingSpriteDark;
     public float textBoxSpeed = 0.005f;
     bool dialogueExists;
     public Animator switchScreen;
@@ -48,7 +50,7 @@ public class GameManager : MonoBehaviour
     public GameObject backgrounds;
     public GameObject foregrounds;
     List<GameObject> background = new List<GameObject>();
-    List<GameObject> foreground = new List<GameObject>();
+    protected List<GameObject> foreground = new List<GameObject>();
     // ---------------------LEVEL1------------------------
     public Sprite darkBg;
     List<Light2D> lights = new List<Light2D>();
@@ -67,6 +69,8 @@ public class GameManager : MonoBehaviour
     Text scoreTicketsText;
     bool waitingForCart;
     bool ridingCart;
+    int plushiesFound = 0;
+    float[,] plushiePos = { {-5.5f, 4}, {-1.833f, 4}, {1.834f, 4}, {5.5f, 4} };
     // ---------------------LEVEL2------------------------
     GameObject f2_UI;
     GameObject stars;
@@ -96,6 +100,9 @@ public class GameManager : MonoBehaviour
     Image powerBarBoss;
     Image bossHealthBar;
     float bossHealth;
+    // -------------------SPRITE LIST----------------------
+    public List<Sprite> darkSprites = new List<Sprite>();
+    public List<SpriteRenderer> lightSprites = new List<SpriteRenderer>();
 
     private void Awake()
     {
@@ -105,7 +112,11 @@ public class GameManager : MonoBehaviour
         charAppearance = controller.appearance;
 
         //tentSheet = Resources.LoadAll<Sprite>("Circus_Sheet");
-        if (MenuManager_2.textBoxColourLight == null) MenuManager_2.textBoxColourLight = testingSprite;
+        if (MenuManager_2.textBoxColourLight == null)
+        {
+            MenuManager_2.textBoxColourLight = testingSprite;
+            MenuManager_2.textBoxColourDark = testingSpriteDark;
+        }
 
         foreach (Transform child in backgrounds.transform)
             background.Add(child.gameObject);
@@ -213,9 +224,29 @@ public class GameManager : MonoBehaviour
         anims2[3].transform.GetChild(2).GetChild(1).gameObject.GetComponent<Slider>().value = MenuManager_2.sfxVol;
         anims2[3].transform.GetChild(3).GetChild(1).gameObject.GetComponent<Toggle>().isOn = MenuManager_2.crossAssist;
         anims2[3].transform.GetChild(4).GetChild(1).gameObject.GetComponent<Toggle>().isOn = MenuManager_2.wiggleCross;
+        anims[1].transform.GetChild(4).gameObject.GetComponent<Text>().text = tickets.ToString();
 
         //global volume
         foreground[4].SetActive(false);
+
+        darkSprites.Add(Resources.Load<Sprite>("Images/Misc/BenchDark"));
+        darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/PopcornDark"));
+        darkSprites.Add(Resources.Load<Sprite>("Images/Backgrounds/BalloonBackDark"));
+        darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/BalloonDark"));
+        darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/NoticeDark"));
+        darkSprites.Add(Resources.Load<Sprite>(""));
+        darkSprites.Add(Resources.Load<Sprite>("Images/UI/Design/Ticket_and_Dart_Display_Board"));
+        darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/Circus_Dark_Version_curtain_opened"));
+
+        background[1].SetActive(true);
+        lightSprites.Add(GameObject.FindGameObjectWithTag("ParkBench").GetComponent<SpriteRenderer>());
+        lightSprites.Add(GameObject.FindGameObjectWithTag("PopcornCart").GetComponent<SpriteRenderer>());
+        lightSprites.Add(GameObject.FindGameObjectWithTag("BalloonBackground").GetComponent<SpriteRenderer>());
+        lightSprites.Add(GameObject.FindGameObjectWithTag("BalloonGame").GetComponent<SpriteRenderer>());
+        lightSprites.Add(GameObject.FindGameObjectWithTag("Noticeboard").GetComponent<SpriteRenderer>());
+        lightSprites.Add(GameObject.FindGameObjectWithTag("PlushieStand").GetComponent<SpriteRenderer>());
+        lightSprites.Add(GameObject.FindGameObjectWithTag("Tickets").GetComponent<SpriteRenderer>());
+        background[1].SetActive(false);
     }
     private void Update()
     {
@@ -239,6 +270,8 @@ public class GameManager : MonoBehaviour
         Actions.Pause += Pause;
         Actions.RideCart += RideCart;
         Actions.BulletHit += BulletHit;
+        Actions.BossPhase += BossPhase;
+        Actions.FoundPlushie += FoundPlushie;
     }
     private void OnDisable()
     {
@@ -254,6 +287,8 @@ public class GameManager : MonoBehaviour
         Actions.Pause -= Pause;
         Actions.RideCart -= RideCart;
         Actions.BulletHit -= BulletHit;
+        Actions.BossPhase -= BossPhase;
+        Actions.FoundPlushie -= FoundPlushie;
     }
     // Start is called before the first frame update
     void Start()
@@ -276,7 +311,7 @@ public class GameManager : MonoBehaviour
         //TextBox.Text($"Oh! Your name is {character.charName}?", 0.05f, true);
         //I* ouputs the input of the player
         //TextBox.Text(charAppearance, "I*", "Mum? Dad? Where did you go?", textBoxSpeed);
-        TextBox.Text(mum.GetComponent<NPC_AI>().appearance, mum.GetComponent<NPC_AI>().charName, "Go enjoy the circus I*", textBoxSpeed);
+        TextBox.Text(mum.GetComponent<NPC_AI>().appearance, mum.GetComponent<NPC_AI>().charName, "We finally made it to the circus. Go play some minigames I*. The minigames are probably rigged so if you're having trouble, be sure to press ESCAPE and change some of the settings!", textBoxSpeed);
         StartCoroutine(DisableCollisions());
         fade.SetActive(false);
     }
@@ -312,16 +347,11 @@ public class GameManager : MonoBehaviour
                 character.GetComponent<MouseController2D>().enabled = false;
                 character.GetComponent<Animator>().SetBool("dart", false);
                 character.GetComponent<CircleCollider2D>().enabled = true;
+
+                character.GetComponent<BoxCollider2D>().offset = new Vector2(0, 0);
+                character.GetComponent<BoxCollider2D>().size = new Vector2(0.6f, 1.6f);
+
                 Camera.main.GetComponent<CameraFollow>().enabled = true;
-                if (tickets >= ticketsToEnterTent && !mood)
-                {
-                    mood = true;
-                    Destroy(mum);
-                    physics.UpdateCollision();
-                    NPCs.Remove(mum);
-                    ChangeMood();
-                    StartCoroutine(Sad());
-                }
                 break;
             case 1:
                 yield return StartCoroutine(Transition());
@@ -359,12 +389,23 @@ public class GameManager : MonoBehaviour
                 ExitBoard(isLookingAtBoard);
                 yield break;
         }
-        switchScreen.StartPlayback();
-        switchScreen.speed = -1;
-        switchScreen.Play("MenuSelectOption", -1, float.NegativeInfinity);
 
         background[currentRoom].SetActive(true);
         foreground[currentRoom].SetActive(true);
+        if (n == 0 && tickets >= ticketsToEnterTent && !mood)
+        {
+            mood = true;
+            Destroy(mum);
+            NPCs.Remove(mum);
+            ChangeMood();
+            StartCoroutine(Sad());
+            yield return null;
+            physics.UpdateCollision();
+        }
+
+        switchScreen.StartPlayback();
+        switchScreen.speed = -1;
+        switchScreen.Play("MenuSelectOption", -1, float.NegativeInfinity);
 
         yield return new WaitForSeconds(1);
         switchScreen.gameObject.SetActive(false);
@@ -617,6 +658,10 @@ public class GameManager : MonoBehaviour
         character.GetComponent<Rigidbody2D>().gravityScale = 0;
         character.GetComponent<Animator>().SetBool("dart", true);
         character.GetComponent<CircleCollider2D>().enabled = false;
+
+        character.GetComponent<BoxCollider2D>().offset = new Vector2(0, -0.03451007f);
+        character.GetComponent<BoxCollider2D>().size = new Vector2(0.06f, 0.07310224f);
+
         Camera.main.GetComponent<CameraFollow>().enabled = false;
         Camera.main.transform.position = new Vector3(room.x, room.y, -10);
 
@@ -720,7 +765,7 @@ public class GameManager : MonoBehaviour
     }
     IEnumerator Sad()
     {
-        circusTent.GetComponent<SpriteRenderer>().sprite = tentSheet[1];
+        //circusTent.GetComponent<SpriteRenderer>().sprite = tentSheet[1];
 
         yield return new WaitForSeconds(1.5f);
         TextBox.Text(NPCs[1].GetComponent<NPC_AI>().appearance, NPCs[1].GetComponent<NPC_AI>().charName, "Wow, nice job kiddo! Here, take some darts as a souvenir", textBoxSpeed);
@@ -753,8 +798,17 @@ public class GameManager : MonoBehaviour
             if (child.gameObject.name.Contains("TreeWhole"))
                 child.sprite = treeStump1;
         }
+        MenuManager_2.textBoxColourLight = MenuManager_2.textBoxColourDark;
 
-        foreground[4].SetActive(false);
+        //mum npc removed so -1 in array
+        NPCs[4].GetComponent<Animator>().Play("BoyPointDarkAnim");
+
+        for (int i = 0; i < lightSprites.Count; i++)
+            lightSprites[i].sprite = darkSprites[i];
+
+        circusTent.GetComponent<SpriteRenderer>().sprite = darkSprites[2];
+
+        foreground[4].SetActive(true);
     }
     IEnumerator moodyFade()
     {
@@ -831,11 +885,12 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 1, 0, 1));
                 StartCoroutine(Functions.Fade(scoreTicketsText.gameObject, 1, 0, 1));
                 StartCoroutine(Functions.Fade(character, 1, 0, 1));
-                character.GetComponent<CharacterController2D>().enabled = false;
+                controller.canMove = 0;
+                //character.GetComponent<CharacterController2D>().enabled = false;
                 foreach (GameObject npc in NPCs)
                 {
                     StartCoroutine(Functions.Fade(npc, 1, 0, 1));
-                    npc.GetComponent<NPC_AI>().canMove = 0;
+                    if (npc.GetComponent<NPC_AI>()) npc.GetComponent<NPC_AI>().canMove = 0;
                 }
                 door[2].gameObject.SetActive(false);
                 pos = new Vector3(noticeBoard.transform.position.x, noticeBoard.transform.position.y, -10);
@@ -851,11 +906,12 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(Functions.Fade(scoreTicketsText.gameObject, 0, 1, 1));
                 StartCoroutine(Functions.Fade(character, 0, 1, 1));
                 //TODO: when moving before completely zoomed out, camera snaps rather than smooths to position 
-                character.GetComponent<CharacterController2D>().enabled = true;
+                controller.canMove = 1;
+                //character.GetComponent<CharacterController2D>().enabled = true;
                 foreach (GameObject npc in NPCs)
                 {
                     StartCoroutine(Functions.Fade(npc, 0, 1, 1));
-                    npc.GetComponent<NPC_AI>().canMove = 1;
+                    if (npc.GetComponent<NPC_AI>()) npc.GetComponent<NPC_AI>().canMove = 1;
                 }
                 door[2].gameObject.SetActive(true);
                 CameraFollow component = Camera.main.GetComponent<CameraFollow>();
@@ -938,16 +994,17 @@ public class GameManager : MonoBehaviour
         anims[0].transform.parent.transform.localScale = Vector3.one;
         anims[0].transform.parent.localPosition = Vector3.zero;
         PlayAnimation(anims[0], "GameOverMinigame", false);
-        anims[1].transform.GetChild(4).gameObject.GetComponent<Text>().text = "0";
+        //anims[1].transform.GetChild(4).gameObject.GetComponent<Text>().text = "0";
         yield return new WaitForSecondsRealtime(2);
         Time.timeScale = 0;
         anims[1].speed = 1;
         PlayAnimation(anims[1], "ScoreSheetShow", false);
         yield return new WaitForSecondsRealtime(1);
+        float temp = tickets - scoreDarts;
         for (int i = 0; i <= scoreDarts; i++)
         {
             //Play ticket collecting sound
-            anims[1].transform.GetChild(4).gameObject.GetComponent<Text>().text = i.ToString();
+            anims[1].transform.GetChild(4).gameObject.GetComponent<Text>().text = (temp + i).ToString();
             yield return new WaitForSecondsRealtime(0.1f);
         }
 
@@ -1058,7 +1115,8 @@ public class GameManager : MonoBehaviour
         {
             foreach (GameObject child in NPCs)
             {
-                child.transform.GetChild(0).gameObject.SetActive(false);
+                if (child.transform.childCount > 0) 
+                    child.transform.GetChild(0).gameObject.SetActive(false);
             }
             text = FindObjectOfType<TextBox>();
             yield return null;
@@ -1104,7 +1162,8 @@ public class GameManager : MonoBehaviour
             character.transform.parent = cart.transform;
             character.GetComponent<SpriteRenderer>().sortingLayerName = "Default";
             character.transform.localRotation = Quaternion.identity;
-            character.transform.localPosition = new Vector3(0, -3.5f, 0);
+            character.transform.localPosition = new Vector3(0, -3.5f, 1);
+            controller.enabled = false;
             waitingForCart = false;
             StartCoroutine(RideTime());
         }
@@ -1118,6 +1177,7 @@ public class GameManager : MonoBehaviour
             character.transform.parent = backgrounds.transform.parent.parent;
             character.GetComponent<SpriteRenderer>().sortingLayerName = "UIFront";
             character.transform.localPosition = new Vector3(character.transform.localPosition.x, character.transform.localPosition.y, -1);
+            controller.enabled = true;
             timeLooking = 0;
         }
     }
@@ -1146,7 +1206,13 @@ public class GameManager : MonoBehaviour
             go.transform.localRotation = bow.transform.rotation;
             renderer.sprite = dart;
             rigid.velocity = go.transform.up * (power/2);
-            collider.size = new Vector2(2, 3);
+            collider.size = new Vector2(0.2f, 0.3f);
+            collider.offset = new Vector2(0, 0.1f);
+            LayerMask mask = LayerMask.GetMask("Player", "Default");
+            rigid.excludeLayers += mask;
+            collider.excludeLayers += mask;
+            
+            
             Destroy(go, 5);
         }
     }
@@ -1154,5 +1220,28 @@ public class GameManager : MonoBehaviour
     void BulletHit(float damage)
     {
         bossHealthBar.fillAmount = bossHealthBar.fillAmount - (damage/100);
+    }
+
+    void BossPhase(int phase)
+    {
+        switch (phase)
+        {
+            case 1:
+                boss.GetComponent<Animator>().Play("");
+                break;
+            case 2:
+                boss.GetComponent<Animator>().Play("");
+                break;
+        }
+    }
+
+    void FoundPlushie(GameObject plushie)
+    {
+        Destroy(plushie.transform.GetChild(0).gameObject);
+        //plushie stand
+        plushie.transform.parent = lightSprites[5].gameObject.transform;
+        plushie.transform.localPosition = new Vector3(plushiePos[plushiesFound, 0], plushiePos[plushiesFound, 1], plushie.transform.localPosition.z);
+        plushiesFound++;
+        print("move");
     }
 }

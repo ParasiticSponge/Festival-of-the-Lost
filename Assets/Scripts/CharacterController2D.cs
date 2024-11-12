@@ -7,9 +7,9 @@ using System;
 
 public class CharacterController2D : NPC_AI
 {
-    public bool enter;
     public int doorNum;
-	public bool talk;
+	public int choice = 0;
+	public bool enter;
 
 	private GameObject talkingTo;
 
@@ -54,25 +54,40 @@ public class CharacterController2D : NPC_AI
 	{
 		if (enabled)
 		{
-			if (talk) Actions.Talk.Invoke(talkingTo);
+			switch (choice)
+			{
+				case 1:
+					Actions.Talk.Invoke(talkingTo);
+					break;
+				case 2:
+					Actions.FoundPlushie.Invoke(talkingTo);
+					break;
+			}
+			if (enter)
+				Actions.EnterRoom.Invoke(doorNum);
 		}
-        if (enter) Actions.EnterRoom.Invoke(doorNum);
     }
     private void OnTriggerEnter2D(Collider2D other)
 	{
 		if (enabled)
 		{
-			if (Int32.TryParse(other.gameObject.name, out int i))
+			/*if (Int32.TryParse(other.gameObject.name, out int i))
 			{
 				Actions.isOverDoor.Invoke(other.gameObject, true);
-                doorNum = i;
-                enter = true;
+				print("entered");
+				enter = true;
+			}*/
+			if (other.CompareTag("Plushie"))
+			{
+                if (other.transform.childCount > 0) Actions.isOverDoor.Invoke(other.gameObject, true);
+                talkingTo = other.gameObject;
+				choice = 2;
 			}
 			else
 			{
                 Actions.isOverDoor.Invoke(other.gameObject, true);
                 talkingTo = other.gameObject;
-                talk = true;
+				choice = 1;
 			}
 		}
 	}
@@ -80,15 +95,21 @@ public class CharacterController2D : NPC_AI
 	{
 		if (enabled)
 		{
-			if (Int32.TryParse(other.gameObject.name, out int i))
+			/*if (Int32.TryParse(other.gameObject.name, out int i))
 			{
 				Actions.isOverDoor.Invoke(other.gameObject, false);
+				print("exited");
 				enter = false;
-			}
-			else
+			}*/
+            if (other.CompareTag("Plushie"))
+            {
+                if (other.transform.childCount > 0) Actions.isOverDoor.Invoke(other.gameObject, false);
+                choice = 0;
+            }
+            else
 			{
                 Actions.isOverDoor.Invoke(other.gameObject, false);
-                talk = false;
+				choice = 0;
 			}
 		}
 	}

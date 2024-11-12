@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Boss : MonoBehaviour
 {
+    [SerializeField] float maxHealth = 100;
     [SerializeField] float health = 100;
     public float GetHealth() => health;
     private void OnEnable()
@@ -19,7 +20,12 @@ public class Boss : MonoBehaviour
     {
         print(damage);
         health -= damage;
+  
         if (health <= 0)
             Destroy(gameObject);
+        else if (health <= maxHealth / 3)
+            Actions.BossPhase.Invoke(2);
+        else if (health <= maxHealth / 3 * 2)
+            Actions.BossPhase.Invoke(3);
     }
 }
