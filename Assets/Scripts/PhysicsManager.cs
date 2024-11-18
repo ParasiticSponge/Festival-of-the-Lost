@@ -22,8 +22,7 @@ public class PhysicsManager : MonoBehaviour
     public void UpdateCollision()
     {
         circCollision = FindObjectsOfType<CircleCollider2D>();
-        foreach(CircleCollider2D circle in circCollision)
-            print(circle.gameObject.name);
+        character = FindObjectOfType<CharacterController2D>();
     }
     void Update()
     {

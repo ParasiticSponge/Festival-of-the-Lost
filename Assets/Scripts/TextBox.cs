@@ -11,6 +11,7 @@ public class TextBox : MonoBehaviour
     static string dialogue;
     static string input;
     static bool destroying;
+    static bool typed;
 
     static GameObject textBox;
     static Animator mask;
@@ -37,7 +38,7 @@ public class TextBox : MonoBehaviour
 
     public static void Text(Sprite image, string speaker, string text, float speed, GameObject obj)
     {
-        textBox = FindObjectOfType<GameManager>().textBoxPrefab;
+        textBox = Resources.Load<GameObject>("TextVisor");
         canvas = FindObjectOfType<Canvas>();
         speakers.Add(speaker);
         texts.Add(text);
@@ -57,7 +58,7 @@ public class TextBox : MonoBehaviour
     }
     public static void Text(Sprite image, string speaker, string text, float speed)
     {
-        textBox = FindObjectOfType<GameManager>().textBoxPrefab;
+        textBox = Resources.Load<GameObject>("TextVisor");
         canvas = FindObjectOfType<Canvas>();
         speakers.Add(speaker);
         texts.Add(text);
@@ -77,7 +78,7 @@ public class TextBox : MonoBehaviour
     }
     public static void Text(Sprite image, string speaker, string text, float speed, float intensity)
     {
-        textBox = FindObjectOfType<GameManager>().textBoxPrefab;
+        textBox = Resources.Load<GameObject>("TextVisor");
         canvas = FindObjectOfType<Canvas>();
         speakers.Add(speaker);
         texts.Add(text);
@@ -97,7 +98,7 @@ public class TextBox : MonoBehaviour
     }
     public static void Text()
     {
-        textBox = FindObjectOfType<GameManager>().textBoxPrefab;
+        textBox = Resources.Load<GameObject>("TextVisor");
         canvas = FindObjectOfType<Canvas>();
         speakers.Add("");
         texts.Add("I*");
@@ -179,8 +180,8 @@ public class TextBox : MonoBehaviour
     }
     private void Update()
     {
-        gameManager.canPause = true;
-        character.canMove = 0;
+        if (gameManager != null) gameManager.canPause = true;
+        if (character != null) character.canMove = 0;
         //TODO: tidy pyramid of if statements
         if (texts[0] != "I*")
         {
@@ -194,6 +195,7 @@ public class TextBox : MonoBehaviour
 
             if (Input.anyKeyDown && !destroying && dialogue.Length == texts[0].Length)
             {
+                Actions.ClickedDialogue.Invoke();
                 destroying = true;
                 if (texts.Count > 1)
                 {
@@ -207,7 +209,7 @@ public class TextBox : MonoBehaviour
         }
         else
         {
-            gameManager.canPause = false;
+            if (gameManager != null) gameManager.canPause = false;
             textChild.transform.GetChild(1).gameObject.SetActive(false);
             textChild.transform.GetChild(2).gameObject.SetActive(true);
             ProcessString();
@@ -217,6 +219,8 @@ public class TextBox : MonoBehaviour
     void ProcessString()
     {
         imageChild.GetComponent<Image>().color = Color.clear;
+
+        if (!typed) dialogue = "Type here...";
         foreach (char c in Input.inputString)
         {
             if (c == '\b') // has backspace/delete been pressed?
@@ -228,15 +232,23 @@ public class TextBox : MonoBehaviour
             }
             else if ((c == '\n') || (c == '\r')) // enter/return
             {
-                Actions.Input.Invoke(dialogue);
-                input = dialogue;
-                if (texts.Count > 1)
+                if (typed)
                 {
-                    StartCoroutine(LoadNext());
+                    Actions.Input.Invoke(dialogue);
+                    input = dialogue;
+                    if (texts.Count > 1)
+                    {
+                        StartCoroutine(LoadNext());
+                    }
                 }
             }
             else
             {
+                if (!typed)
+                {
+                    typed = true;
+                    dialogue = "";
+                }
                 dialogue += c;
             }
         }
@@ -259,6 +271,7 @@ public class TextBox : MonoBehaviour
         appearances.Remove(appearances[0]);
         objects.Remove(objects[0]);
         dialogue = "";
+        typed = false;
 
         destroying = false;
         Begin();
@@ -275,8 +288,9 @@ public class TextBox : MonoBehaviour
         intensities.Remove(intensities[0]);
         appearances.Remove(appearances[0]);
         dialogue = "";
+        typed = false;
 
-        character.canMove = 1;
+        if (character != null) character.canMove = 1;
         mask.gameObject.SetActive(false);
 
         if (objects[0] != null) Actions.FinishTalk.Invoke(objects[0].name);

@@ -29,4 +29,6 @@ public class Actions
     public static Action<float> BulletHit;
     public static Action<int> BossPhase;
     public static Action<GameObject> FoundPlushie;
+    public static Action ClickedDialogue;
+    public static Action<int> ChooseCharacter;
 }

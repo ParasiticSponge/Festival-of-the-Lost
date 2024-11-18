@@ -14,6 +14,8 @@ TagManager:
   - Noticeboard
   - PlushieStand
   - Tickets
+  - TrappedParents
+  - LionCage
   layers:
   - Default
   - TransparentFX
@@ -59,4 +61,7 @@ TagManager:
     locked: 0
   - name: UIFront
     uniqueID: 1431058273
+    locked: 0
+  - name: Boss
+    uniqueID: 405417047
     locked: 0

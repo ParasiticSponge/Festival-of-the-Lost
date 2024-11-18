@@ -59,25 +59,31 @@ public partial class MenuManager_2 : MonoBehaviour
         //circus
         animator.Add(mainMenu.transform.GetChild(10).GetComponent<Animator>());
 
-        foreach (Transform child in settings.transform)
+        foreach (Transform s in settings.transform)
         {
-            switch (child.name)
+            if (s.name == "Options")
             {
-                case "MUSIC":
-                    musicSlider = child.GetChild(1).gameObject.GetComponent<Slider>();
-                    musicNumber = child.GetChild(2).gameObject.GetComponent<Text>();
-                    break;
-                case "SFX":
-                    sfxSlider = child.GetChild(1).gameObject.GetComponent<Slider>();
-                    sfxNumber = child.GetChild(2).gameObject.GetComponent<Text>();
-                    break;
-                case "Scroll":
-                    border = child.GetChild(0).GetChild(0).gameObject;
-                    selection = child.GetChild(0).GetChild(2).gameObject;
-                    break;
-                case "RESOLUTION":
-                    resolutionBar = child.GetChild(1).gameObject.GetComponent<Dropdown>();
-                    break;
+                foreach (Transform child in s)
+                {
+                    switch (child.name)
+                    {
+                        case "MUSIC":
+                            musicSlider = child.GetChild(1).gameObject.GetComponent<Slider>();
+                            musicNumber = child.GetChild(2).gameObject.GetComponent<Text>();
+                            break;
+                        case "SFX":
+                            sfxSlider = child.GetChild(1).gameObject.GetComponent<Slider>();
+                            sfxNumber = child.GetChild(2).gameObject.GetComponent<Text>();
+                            break;
+                        case "Scroll":
+                            border = child.GetChild(0).GetChild(0).gameObject;
+                            selection = child.GetChild(0).GetChild(2).gameObject;
+                            break;
+                        case "RESOLUTION":
+                            resolutionBar = child.GetChild(1).gameObject.GetComponent<Dropdown>();
+                            break;
+                    }
+                }
             }
         }
         for (int i = 0; i < scrollContent.transform.childCount; i++)
@@ -144,9 +150,6 @@ public partial class MenuManager_2 : MonoBehaviour
             }
         }
 
-        border.transform.position = boxes[textBox].transform.position;
-        selection.transform.position = boxes[textBox].transform.position;
-
         audioSource.volume = musicSlider.value;
         musicVol = musicSlider.value;
         musicNumber.text = (Mathf.RoundToInt(musicVol*100)).ToString();
@@ -179,15 +182,15 @@ public partial class MenuManager_2 : MonoBehaviour
         switch (isOn)
         {
             case true:
-                StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, left, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
-                StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, centre, (value => settings.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(Functions.MoveCubic(mainMenu.GetComponent<RectTransform>().localPosition, left, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(Functions.MoveCubic(settings.GetComponent<RectTransform>().localPosition, centre, (value => settings.GetComponent<RectTransform>().localPosition = value)));
                 StartCoroutine(FerrisCartMove(left));
                 //StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, left));
                 //StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, centre));
                 break;
             case false:
-                StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, centre, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
-                StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, right, (value => settings.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(Functions.MoveCubic(mainMenu.GetComponent<RectTransform>().localPosition, centre, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(Functions.MoveCubic(settings.GetComponent<RectTransform>().localPosition, right, (value => settings.GetComponent<RectTransform>().localPosition = value)));
                 StartCoroutine(FerrisCartMove(centre));
                 //StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, centre));
                 //StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, right));
@@ -199,6 +202,9 @@ public partial class MenuManager_2 : MonoBehaviour
         textBox = number;
         textBoxColourLight = boxes[textBox].transform.GetChild(0).gameObject.GetComponent<Image>().sprite;
         textBoxColourDark = boxes[textBox].transform.GetChild(1).gameObject.GetComponent<Image>().sprite;
+
+        border.transform.position = boxes[textBox].transform.position;
+        selection.transform.position = boxes[textBox].transform.position;
     }
 
     //can't pass ref to actions :(

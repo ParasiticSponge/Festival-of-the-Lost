@@ -17,7 +17,8 @@ public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
         pauseBackNo,
         settings,
         cross,
-        wiggle
+        wiggle,
+        PAUSE
     }
     public TYPE type;
 

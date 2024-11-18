@@ -23,7 +23,6 @@ public class Bullet : MonoBehaviour
         if (!entered && !collision.gameObject.GetComponent<CharacterController2D>())
         {
             Actions.BulletHit.Invoke(damage);
-            print("hit");
             entered = true;
         }
     }

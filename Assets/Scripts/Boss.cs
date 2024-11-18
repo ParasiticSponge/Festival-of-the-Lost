@@ -18,7 +18,6 @@ public class Boss : MonoBehaviour
     // Start is called before the first frame update
     void TakeDamage(float damage)
     {
-        print(damage);
         health -= damage;
   
         if (health <= 0)
