@@ -108,7 +108,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   state: 1
-  appearance: {fileID: 21300000, guid: 16996ad694a72be46be9ff16d0b9b259, type: 3}
+  appearance: {fileID: 21300000, guid: 7a3deba3ff6978f4690a121624d74a36, type: 3}
   charName: 
   gameManager: {fileID: 0}
   canMove: 1
@@ -491,7 +491,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 1.48, z: 1}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
+  m_LocalScale: {x: 0.3, y: -0.3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6333232134538807229}

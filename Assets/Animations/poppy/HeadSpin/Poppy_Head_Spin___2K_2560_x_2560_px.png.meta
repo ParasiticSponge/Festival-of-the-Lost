@@ -1,0 +1,460 @@
+fileFormatVersion: 2
+guid: 97d46a307c4899e448fffc925ed9d064
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 41
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_0
+      rect:
+        serializedVersion: 2
+        x: 470
+        y: 1974
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b4fe9e034032d044597d9affbc52cfac
+      internalID: 587034841
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_3
+      rect:
+        serializedVersion: 2
+        x: 925
+        y: 1974
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 671cd58667b4ea644911ed4ed1075f94
+      internalID: 912711505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_7
+      rect:
+        serializedVersion: 2
+        x: 1379
+        y: 1974
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 03415f2dc27fff046915ca9f6eafdf3d
+      internalID: -248059628
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_11
+      rect:
+        serializedVersion: 2
+        x: 1834
+        y: 1974
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a7b85cfd0af8bb84ebad995487408c09
+      internalID: 1688026044
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_22
+      rect:
+        serializedVersion: 2
+        x: 470
+        y: 1319
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a20499d2bd1030549bf83d9eaaadc117
+      internalID: 1555251270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_26
+      rect:
+        serializedVersion: 2
+        x: 925
+        y: 1319
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32a728928080efe49bc858e2315bddfe
+      internalID: 1559397089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_30
+      rect:
+        serializedVersion: 2
+        x: 1379
+        y: 1318
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52c2501f2e5bdd9429dfae996e105883
+      internalID: 526718807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_34
+      rect:
+        serializedVersion: 2
+        x: 1834
+        y: 1319
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4a50993af5439ca459808d6b67378c71
+      internalID: 1433666980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_39
+      rect:
+        serializedVersion: 2
+        x: 470
+        y: 665
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32e445255e328bd4fac35aa738880c86
+      internalID: -1634694766
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_42
+      rect:
+        serializedVersion: 2
+        x: 925
+        y: 665
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7231d7cf104867e4db7300d82ac15710
+      internalID: 1832225889
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_44
+      rect:
+        serializedVersion: 2
+        x: 1379
+        y: 665
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e80ab682cdbfdd0429aa441bcd49bc6e
+      internalID: -2127641492
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_48
+      rect:
+        serializedVersion: 2
+        x: 1834
+        y: 665
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea82a04060009fb43bf3d8138de10417
+      internalID: 152186015
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Poppy_Head_Spin___2K_2560_x_2560_px_58
+      rect:
+        serializedVersion: 2
+        x: 470
+        y: 12
+        width: 244
+        height: 521
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8ca6877a6cd45384392c478549ce1e5e
+      internalID: 989471445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      Poppy_Head_Spin___2K_2560_x_2560_px_0: 587034841
+      Poppy_Head_Spin___2K_2560_x_2560_px_1: 640082797
+      Poppy_Head_Spin___2K_2560_x_2560_px_10: -2147034595
+      Poppy_Head_Spin___2K_2560_x_2560_px_11: 1688026044
+      Poppy_Head_Spin___2K_2560_x_2560_px_12: -1012911897
+      Poppy_Head_Spin___2K_2560_x_2560_px_13: -1364595632
+      Poppy_Head_Spin___2K_2560_x_2560_px_14: 2010946293
+      Poppy_Head_Spin___2K_2560_x_2560_px_15: 1295926764
+      Poppy_Head_Spin___2K_2560_x_2560_px_16: 1111428056
+      Poppy_Head_Spin___2K_2560_x_2560_px_17: 380823322
+      Poppy_Head_Spin___2K_2560_x_2560_px_18: 151945952
+      Poppy_Head_Spin___2K_2560_x_2560_px_19: 921436877
+      Poppy_Head_Spin___2K_2560_x_2560_px_2: -749406654
+      Poppy_Head_Spin___2K_2560_x_2560_px_20: -373507761
+      Poppy_Head_Spin___2K_2560_x_2560_px_21: 2051518014
+      Poppy_Head_Spin___2K_2560_x_2560_px_22: 1555251270
+      Poppy_Head_Spin___2K_2560_x_2560_px_23: -243851944
+      Poppy_Head_Spin___2K_2560_x_2560_px_24: 453479795
+      Poppy_Head_Spin___2K_2560_x_2560_px_25: 1241715302
+      Poppy_Head_Spin___2K_2560_x_2560_px_26: 1559397089
+      Poppy_Head_Spin___2K_2560_x_2560_px_27: 1034011809
+      Poppy_Head_Spin___2K_2560_x_2560_px_28: 1097680465
+      Poppy_Head_Spin___2K_2560_x_2560_px_29: 1700222024
+      Poppy_Head_Spin___2K_2560_x_2560_px_3: 912711505
+      Poppy_Head_Spin___2K_2560_x_2560_px_30: 526718807
+      Poppy_Head_Spin___2K_2560_x_2560_px_31: 775991790
+      Poppy_Head_Spin___2K_2560_x_2560_px_32: -1134065649
+      Poppy_Head_Spin___2K_2560_x_2560_px_33: 606556592
+      Poppy_Head_Spin___2K_2560_x_2560_px_34: 1433666980
+      Poppy_Head_Spin___2K_2560_x_2560_px_35: -182239088
+      Poppy_Head_Spin___2K_2560_x_2560_px_36: -1130038252
+      Poppy_Head_Spin___2K_2560_x_2560_px_37: 1291008050
+      Poppy_Head_Spin___2K_2560_x_2560_px_38: -1617138709
+      Poppy_Head_Spin___2K_2560_x_2560_px_39: -1634694766
+      Poppy_Head_Spin___2K_2560_x_2560_px_4: 1715860773
+      Poppy_Head_Spin___2K_2560_x_2560_px_40: 865190083
+      Poppy_Head_Spin___2K_2560_x_2560_px_41: -1077538039
+      Poppy_Head_Spin___2K_2560_x_2560_px_42: 1832225889
+      Poppy_Head_Spin___2K_2560_x_2560_px_43: 89407695
+      Poppy_Head_Spin___2K_2560_x_2560_px_44: -2127641492
+      Poppy_Head_Spin___2K_2560_x_2560_px_45: 1963814935
+      Poppy_Head_Spin___2K_2560_x_2560_px_46: -286541565
+      Poppy_Head_Spin___2K_2560_x_2560_px_47: -709245365
+      Poppy_Head_Spin___2K_2560_x_2560_px_48: 152186015
+      Poppy_Head_Spin___2K_2560_x_2560_px_49: 1161917073
+      Poppy_Head_Spin___2K_2560_x_2560_px_5: 51468093
+      Poppy_Head_Spin___2K_2560_x_2560_px_50: -509856513
+      Poppy_Head_Spin___2K_2560_x_2560_px_51: -1196583806
+      Poppy_Head_Spin___2K_2560_x_2560_px_52: 1471109004
+      Poppy_Head_Spin___2K_2560_x_2560_px_53: 235696139
+      Poppy_Head_Spin___2K_2560_x_2560_px_54: 815753952
+      Poppy_Head_Spin___2K_2560_x_2560_px_55: -265624456
+      Poppy_Head_Spin___2K_2560_x_2560_px_56: 323010238
+      Poppy_Head_Spin___2K_2560_x_2560_px_57: 2025922649
+      Poppy_Head_Spin___2K_2560_x_2560_px_58: 989471445
+      Poppy_Head_Spin___2K_2560_x_2560_px_59: 360252883
+      Poppy_Head_Spin___2K_2560_x_2560_px_6: 292291013
+      Poppy_Head_Spin___2K_2560_x_2560_px_7: -248059628
+      Poppy_Head_Spin___2K_2560_x_2560_px_8: -496393261
+      Poppy_Head_Spin___2K_2560_x_2560_px_9: -1656611843
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

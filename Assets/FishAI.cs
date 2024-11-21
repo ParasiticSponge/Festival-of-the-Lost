@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UIElements;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 public class FishAI : MonoBehaviour
 {
@@ -20,7 +20,7 @@ public class FishAI : MonoBehaviour
         bass = 3,
         clown = 5
     }
-    public STATES state = STATES.idle;
+    public STATES state = STATES.idleSwim;
     public TYPE type;
 
     Vector3 initialPos;
@@ -33,8 +33,8 @@ public class FishAI : MonoBehaviour
     public GameManager gameManager;
     GameObject character;
 
-    public float swimSpeed = 20;
-    public float gravity = 3;
+    public float swimSpeed = 0.1f;
+    public float gravity = 0;
 
     protected Animator animator;
     [Range(0, .3f)][SerializeField] protected float m_MovementSmoothing = .05f;   // How much to smooth out the movement
@@ -48,7 +48,7 @@ public class FishAI : MonoBehaviour
     private void Awake()
     {
         m_Rigidbody2D = GetComponent<Rigidbody2D>();
-        m_Rigidbody2D.gravityScale = gravity;
+        //m_Rigidbody2D.gravityScale = gravity;
         animator = GetComponent<Animator>();
         gameManager = FindObjectOfType<GameManager>();
         character = FindObjectOfType<CharacterController2D>().gameObject;
@@ -79,12 +79,30 @@ public class FishAI : MonoBehaviour
     private IEnumerator Swim()
     {
         position = Functions.Around(initialPos, wanderRange);
+        //position = new Vector3(-200, -140, 0);
         Vector3 vector = position - transform.position;
         float distance = vector.magnitude;
-        float angle = Mathf.Atan2(position.y, position.x);
-        transform.localRotation = Quaternion.Euler(0, 0, angle);
 
-        while (distance > 0)
+        Vector3 normalized = vector.normalized;
+        float angle = Mathf.Atan2(normalized.y, normalized.x) * Mathf.Rad2Deg;
+        if (angle >= -90 && angle <= 90)
+        {
+            Vector3 theScale = transform.localScale;
+            theScale.x = -1;
+            transform.localScale = theScale;
+            transform.Rotate(0, 0, angle);
+            print(angle);
+        }
+        else
+        {
+            Vector3 theScale = transform.localScale;
+            theScale.x = 1;
+            transform.localScale = theScale;
+            transform.Rotate(0, 0, 180 - angle);
+            print(180 - angle);
+        }
+
+        while (distance > 0.1f)
         {
             vector = position - transform.position;
             distance = vector.magnitude;
@@ -96,12 +114,14 @@ public class FishAI : MonoBehaviour
         }
 
         //Switch();
+        initialPos = transform.position;
         StartCoroutine(Idle());
     }
     private IEnumerator Idle()
     {
+        print("idle");
         //3-5
-        int waitTime = random.Next(1, 4);
+        int waitTime = random.Next(1, 2);
         yield return new WaitForSeconds(waitTime);
 
         Switch();
@@ -131,10 +151,18 @@ public class FishAI : MonoBehaviour
         yield return null;
     }
 
-    /*private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter2D(UnityEngine.Collision2D collision)
     {
         //position = vector.normalized * magnitude;
         //y = y/-1
         //x = x/y but 0 needs to be 1
-    }*/
+
+        if (collision.gameObject.GetComponent<TemporaryEdgeDetection>())
+        {
+            Vector3 vector = (position - transform.position).normalized;
+            Vector2 reflected2D = Functions.ReflectionVector(collision.gameObject.GetComponent<TemporaryEdgeDetection>().normal, vector);
+            Vector3 reflected = new Vector3(reflected2D.x, reflected2D.y, 0);
+            position = transform.localPosition + reflected;
+        }
+    }
 }
