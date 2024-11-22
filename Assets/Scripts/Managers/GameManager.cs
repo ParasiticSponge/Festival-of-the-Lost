@@ -1451,7 +1451,7 @@ public class GameManager : MonoBehaviour
 
         character.GetComponent<BossDartController>().enabled = true;
         PlayAnimation(boss.GetComponent<Animator>(), "headSpin", false);
-        StartCoroutine(FallingDarts());
+        StartCoroutine(FallingDarts(false));
     }
     IEnumerator PhaseThree()
     {
@@ -1469,6 +1469,7 @@ public class GameManager : MonoBehaviour
         character.GetComponent<BossDartController>().enabled = true;
         PlayAnimation(boss.GetComponent<Animator>(), "headSpin", false);
         //juggole head
+        StartCoroutine(FallingDarts(true));
     }
     IEnumerator BossDeath()
     {
@@ -1495,7 +1496,7 @@ public class GameManager : MonoBehaviour
         StartCoroutine(Functions.MoveCubic(bossPlatform.transform.localPosition, platPos, value => bossPlatform.transform.localPosition = value));
         StartCoroutine(Functions.MoveCubic(foreground[2].transform.GetChild(0).localPosition, groundPos, value => foreground[2].transform.GetChild(0).localPosition = value));
     }
-    IEnumerator FallingDarts()
+    IEnumerator FallingDarts(bool hard)
     {
         while (bossPhase <= 3)
         {
@@ -1504,38 +1505,63 @@ public class GameManager : MonoBehaviour
             PlayAnimation(boss.GetComponent<Animator>(), "Spin", false);
             float initialX = boss.transform.localPosition.x;
             //boss goes to centre
-            Vector3 bossPos = boss.transform.localPosition + new Vector3(0, -6f, 0);
+            Vector3 bossPos = boss.transform.localPosition + new Vector3(0, -9, 0);
             yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
             boss.transform.localPosition = new Vector3(0, boss.transform.localPosition.y, boss.transform.localPosition.z);
-            bossPos = boss.transform.localPosition + new Vector3(0, 6f, 0);
+            bossPos = boss.transform.localPosition + new Vector3(0, 9, 0);
             yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
 
             boss.GetComponent<Animator>().Play("removeHead", 0, 0);
             yield return new WaitForSeconds(CurrentClipLength(boss.GetComponent<Animator>()));
             boss.GetComponent<Animator>().Play("getItems", 0, 0);
+            yield return new WaitForSeconds(CurrentClipLength(boss.GetComponent<Animator>()));
+            yield return new WaitForSeconds(1);
+            boss.GetComponent<Animator>().Play("juggleHeadTran");
+            yield return new WaitForSeconds(0.2f);
+            boss.GetComponent<Animator>().Play("juggleHead");
 
             float time = 0;
             bool init = false;
             while (time <= 15)
             {
-                if (Mathf.Floor(time) % 2 == 0 && init == false)
+                if (!hard)
                 {
-                    init = true;
-                    Instantiate(fallingDart, foreground[2].transform);
+                    if (Mathf.Floor(time) % 2 == 0 && init == false)
+                    {
+                        init = true;
+                        Instantiate(fallingDart, foreground[2].transform);
+                    }
+                    if ((Mathf.Floor(time) - 1) % 2 == 0)
+                        init = false;
                 }
-                if ((Mathf.Floor(time) - 1) % 2 == 0)
-                    init = false;
+                else
+                {
+                    if (Mathf.Floor(time) % 2 == 0 && init == false)
+                    {
+                        init = true;
+                        Instantiate(fallingDart, foreground[2].transform);
+                        Instantiate(fallingDart, foreground[2].transform);
+                    }
+                    if ((Mathf.Floor(time) - 1) % 2 == 0)
+                    {
+                        init = false;
+                        Instantiate(fallingDart, foreground[2].transform);
+                        Instantiate(fallingDart, foreground[2].transform);
+                    }
+                }
                 time += Time.deltaTime;
                 yield return null;
             }
 
             //boss goes back
-            bossPos = boss.transform.localPosition + new Vector3(0, -6f, 0);
+            bossPos = boss.transform.localPosition + new Vector3(0, -9, 0);
             yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
             boss.transform.localPosition = new Vector3(initialX, boss.transform.localPosition.y, boss.transform.localPosition.z);
-            bossPos = boss.transform.localPosition + new Vector3(0, 6f, 0);
+            bossPos = boss.transform.localPosition + new Vector3(0, 9, 0);
             yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
 
+            PlayAnimation(boss.GetComponent<Animator>(), "juggleHeadTran", true);
+            yield return new WaitForSeconds(0.2f);
             PlayAnimation(boss.GetComponent<Animator>(), "getItems", true);
             yield return new WaitForSeconds(CurrentClipLength(boss.GetComponent<Animator>()));
             PlayAnimation(boss.GetComponent<Animator>(), "removeHead", true);
@@ -1550,8 +1576,6 @@ public class GameManager : MonoBehaviour
                     PlayAnimation(boss.GetComponent<Animator>(), "headSpin", false);
                     break;
             }
-
-            StartCoroutine(FallingDarts());
         }
     }
 
