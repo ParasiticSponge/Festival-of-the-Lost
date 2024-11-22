@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.TextCore.Text;
+using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 public class MouseController2D : MonoBehaviour
 {
@@ -43,23 +44,37 @@ public class MouseController2D : MonoBehaviour
     {
         if (!fire && !gameManager.paused)
         {
-            Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-            screenToWorld.y = transform.position.y;
-            screenToWorld.z = transform.position.z;
-
-            transform.position = screenToWorld;
-
-            if (crosshair.activeSelf)
-                crosshair.transform.position = new Vector3(screenToWorld.x, crosshair.transform.position.y, crosshair.transform.position.z);
-
-            if (Input.GetMouseButtonDown(0))
+            if (Application.platform != RuntimePlatform.Android)
             {
-                //StartCoroutine(Move(transform.position, poop));
-                Actions.Hold.Invoke();
+                Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                screenToWorld.y = transform.position.y;
+                screenToWorld.z = transform.position.z;
+
+                transform.position = screenToWorld;
+
+                if (crosshair.activeSelf)
+                    crosshair.transform.position = new Vector3(screenToWorld.x, crosshair.transform.position.y, crosshair.transform.position.z);
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    //StartCoroutine(Move(transform.position, poop));
+                    Actions.Hold.Invoke();
+                }
+                if (Input.GetMouseButtonUp(0))
+                {
+                    Actions.Release.Invoke();
+                }
             }
-            if (Input.GetMouseButtonUp(0))
+            else
             {
-                Actions.Release.Invoke();
+                if (UnityEngine.Input.touchCount > 0)
+                {
+                    Vector3 touchPosition = UnityEngine.Input.GetTouch(0).position;
+                    touchPosition.y = transform.position.y;
+                    touchPosition.z = transform.position.z;
+
+                    transform.position = touchPosition;
+                }
             }
         }
     }

@@ -15,6 +15,8 @@ using UnityEngine.Rendering.PostProcessing;
 public class GameManager : MonoBehaviour
 {
     // ------------------MANAGEMENT---------------------
+    public Transform environment;
+    List<Volume> volume = new List<Volume>();
     PhysicsManager physics;
     float initialGravity;
     public bool paused;
@@ -48,8 +50,6 @@ public class GameManager : MonoBehaviour
     List<Animator> anims = new List<Animator>();
     List<Animator> anims2 = new List<Animator>();
     GameObject retryButton;
-    Volume vignette;
-
     [SerializeField] Sprite[] tentSheet;
     // ---------------------LEVEL------------------------
     public GameObject backgrounds;
@@ -84,6 +84,7 @@ public class GameManager : MonoBehaviour
     List<GameObject> balloons = new List<GameObject>();
     Sprite balloon;
     Image powerBar;
+    GameObject dartsPowerBttnPhone;
     List<GameObject> darts = new List<GameObject>();
     Sprite dart;
     public int scoreDarts = 0;
@@ -113,9 +114,27 @@ public class GameManager : MonoBehaviour
     public List<Sprite> darkSprites = new List<Sprite>();
     public List<SpriteRenderer> lightSprites = new List<SpriteRenderer>();
 
+    public enum TEST
+    {
+        none,
+        outside,
+        balloons,
+        fish,
+        boss
+    }
+    public TEST test = TEST.none;
     private void Awake()
     {
-        vignette = FindObjectOfType<Volume>();
+        foreach (Transform child in environment)
+        {
+            if (child.GetComponent<Volume>())
+            {
+                volume.Add(child.GetComponent<Volume>());
+                child.gameObject.SetActive(false);
+            }
+        }
+        volume[1].gameObject.SetActive(true);
+
         physics = gameObject.GetComponent<PhysicsManager>();
         character = FindObjectOfType<CharacterController2D>().gameObject;
         controller = character.GetComponent<CharacterController2D>();
@@ -136,7 +155,7 @@ public class GameManager : MonoBehaviour
         foreground[2].SetActive(true);
         boss = FindObjectOfType<Boss>().gameObject;
         foreground[2].SetActive(false);
-
+        foreground[1].SetActive(true);
         foreach (Transform t1 in foreground[0].transform)
         {
             if (t1.name.Contains("Tent"))
@@ -226,7 +245,6 @@ public class GameManager : MonoBehaviour
         foreach (Transform transform in circusTent.transform)
         {
             flagTickets.Add(transform.GetChild(0).GetComponent<SpriteRenderer>());
-            print(transform.GetChild(0).name);
         }
 
         crosshair = character.GetComponent<MouseController2D>().crosshair;
@@ -236,8 +254,15 @@ public class GameManager : MonoBehaviour
 
         scoreTicketsText = UI.transform.GetChild(0).GetChild(0).gameObject.GetComponent<Text>();
         countDartsText = UI.transform.GetChild(0).GetChild(1).gameObject.GetComponent<Text>();
+
         scoreDartsText = f2_UI.transform.GetChild(0).GetChild(0).gameObject.GetComponent<Text>();
         powerBar = f2_UI.transform.GetChild(1).GetChild(0).GetChild(0).gameObject.GetComponent<Image>();
+        dartsPowerBttnPhone = f2_UI.transform.GetChild(4).gameObject;
+        if (Application.platform == RuntimePlatform.Android)
+            dartsPowerBttnPhone.SetActive(true);
+        else
+            dartsPowerBttnPhone.SetActive(false);
+
         powerBarBoss = f3_UI.transform.GetChild(0).GetChild(0).GetChild(0).gameObject.GetComponent<Image>();
         bossHealthBar = f3_UI.transform.GetChild(1).GetChild(0).GetChild(0).gameObject.GetComponent<Image>();
 
@@ -249,9 +274,6 @@ public class GameManager : MonoBehaviour
         anims2[3].transform.GetChild(4).GetChild(1).gameObject.GetComponent<Toggle>().isOn = MenuManager_2.wiggleCross;
         anims[1].transform.GetChild(4).gameObject.GetComponent<Text>().text = tickets.ToString();
 
-        //deactivate global volume
-        vignette.gameObject.SetActive(false);
-
         darkSprites.Add(Resources.Load<Sprite>("Images/Misc/BenchDark"));
         darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/PopcornDark"));
         darkSprites.Add(Resources.Load<Sprite>("Images/Backgrounds/BalloonBackDark"));
@@ -259,7 +281,8 @@ public class GameManager : MonoBehaviour
         darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/NoticeDark"));
         darkSprites.Add(Resources.Load<Sprite>("Images/Misc/Plushie Stand"));
         darkSprites.Add(Resources.Load<Sprite>("Images/Fauna/LionDark"));
-
+        darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/FOTLGateDark"));
+        darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/FOTLPostDark"));
         darkSprites.Add(Resources.Load<Sprite>("Images/UI/Design/Ticket_and_Dart_Display_Board"));
         darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/Circus_Dark_Version_curtain_opened"));
 
@@ -271,11 +294,14 @@ public class GameManager : MonoBehaviour
         lightSprites.Add(GameObject.FindGameObjectWithTag("Noticeboard").GetComponent<SpriteRenderer>());
         lightSprites.Add(GameObject.FindGameObjectWithTag("PlushieStand").GetComponent<SpriteRenderer>());
         lightSprites.Add(GameObject.FindGameObjectWithTag("LionCage").GetComponent<SpriteRenderer>());
+        lightSprites.Add(GameObject.FindGameObjectWithTag("Gate").GetComponent<SpriteRenderer>());
+        lightSprites.Add(lightSprites[7].transform.GetChild(0).GetComponent<SpriteRenderer>());
         TicketsUI = GameObject.FindGameObjectWithTag("Tickets").GetComponent<Image>();
         background[1].SetActive(false);
 
         fallingDart = Resources.Load<GameObject>("FallingDart");
 
+        foreground[1].SetActive(false);
         foreground[3].SetActive(false);
         background[3].SetActive(false);
 
@@ -335,19 +361,40 @@ public class GameManager : MonoBehaviour
         masks[1].SetActive(false);
         fade.SetActive(true);
         StartCoroutine(Functions.Fade(fade, 1, 0, 1));
-        StartCoroutine(Intro());
+        Test();
+    }
+    void Test()
+    {
+        switch (test)
+        {
+            case TEST.outside:
+                break;
+            case TEST.balloons:
+                break;
+            case TEST.fish:
+                break;
+            case TEST.boss:
+                tickets = 22;
+                scoreTicketsText.text = tickets.ToString();
+                pocketDarts = 22;
+                StartCoroutine(SwitchRooms(2));
+                break;
+            case TEST.none:
+                StartCoroutine(Intro());
+                break;
+        }
     }
 
     IEnumerator Intro()
     {
         yield return new WaitForSeconds(1);
 
-        //TextBox.Text(null, "???", "What is your name?", textBoxSpeed);
-        //TextBox.Text();
+        TextBox.Text(null, "???", "What is your name?", textBoxSpeed);
+        TextBox.Text();
         //TextBox.Text($"Oh! Your name is {character.charName}?", 0.05f, true);
         //I* ouputs the input of the player
         //TextBox.Text(charAppearance, "I*", "Mum? Dad? Where did you go?", textBoxSpeed);
-        //TextBox.Text(mum.GetComponent<NPC_AI>().appearance, mum.GetComponent<NPC_AI>().charName, "We finally made it to the circus. Go play some minigames I*. The minigames are probably rigged so if you're having trouble, be sure to press ESCAPE and change some of the settings!", textBoxSpeed);
+        TextBox.Text(mum.GetComponent<NPC_AI>().appearance, mum.GetComponent<NPC_AI>().charName, "We finally made it to the circus. Go play some minigames I*. The minigames are probably rigged so if you're having trouble, be sure to press ESCAPE and change some of the settings!", textBoxSpeed);
 
         StartCoroutine(DisableCollisions());
         fade.SetActive(false);
@@ -966,12 +1013,12 @@ public class GameManager : MonoBehaviour
         {
             lightSprites[i].sprite = darkSprites[i];
         }
-        TicketsUI.sprite = darkSprites[7];
-        circusTent.GetComponent<SpriteRenderer>().sprite = darkSprites[8];
+        TicketsUI.sprite = darkSprites[darkSprites.Count - 2];
+        circusTent.GetComponent<SpriteRenderer>().sprite = darkSprites[darkSprites.Count - 1];
         NPCs[6].GetComponent<Animator>().Play("GirlEatDarkAnim");
         NPCs[7].GetComponent<Animator>().Play("BoyPointDarkAnim");
 
-        vignette.gameObject.SetActive(true);
+        volume[0].gameObject.SetActive(true);
     }
     IEnumerator moodyFade()
     {
@@ -1116,14 +1163,12 @@ public class GameManager : MonoBehaviour
                 if (!paused)
                 {
                     PlayAnimation(anims2[0], "PauseGameShow", false);
-                    paused = true;
-                    Time.timeScale = 0;
+                    StartCoroutine(PauseTrue());
                 }
                 else
                 {
                     PlayAnimation(anims2[0], "PauseGameShow", true);
-                    paused = false;
-                    Time.timeScale = 1;
+                    StartCoroutine(PauseFalse());
                 }
                 break;
             case 1:
@@ -1131,16 +1176,42 @@ public class GameManager : MonoBehaviour
                 if (!paused)
                 {
                     PlayAnimation(anims2[1], "PauseMinigameShow", false);
-                    paused = true;
-                    Time.timeScale = 0;
+                    StartCoroutine(PauseTrue());
                 }
                 else
                 {
                     PlayAnimation(anims2[1], "PauseMinigameShow", true);
-                    paused = false;
-                    Time.timeScale = 1;
+                    StartCoroutine(PauseFalse());
                 }
                 break;
+        }
+    }
+    IEnumerator PauseTrue()
+    {
+        paused = true;
+        Time.timeScale = 0;
+        UnityEngine.Rendering.Universal.ColorAdjustments colour;
+        volume[1].profile.TryGet(out colour);
+        bool check = colour.saturation.value < 0;
+        float increment = check ? 1 : -1;
+        for (float i = colour.saturation.value; check ? i <= 0 : i >= -100; i += increment)
+        {
+            colour.saturation.value = i;
+            yield return null;
+        }
+    }
+    IEnumerator PauseFalse()
+    {
+        paused = false;
+        Time.timeScale = 1;
+        UnityEngine.Rendering.Universal.ColorAdjustments colour;
+        volume[1].profile.TryGet(out colour);
+        bool check = colour.saturation.value < 0;
+        float increment = check ? 1 : -1;
+        for (float i = colour.saturation.value; check ? i <= 0 : i >= -100; i += increment)
+        {
+            colour.saturation.value = i;
+            yield return null;
         }
     }
 
@@ -1380,6 +1451,7 @@ public class GameManager : MonoBehaviour
 
         character.GetComponent<BossDartController>().enabled = true;
         PlayAnimation(boss.GetComponent<Animator>(), "headSpin", false);
+        StartCoroutine(FallingDarts());
     }
     IEnumerator PhaseThree()
     {
@@ -1427,14 +1499,15 @@ public class GameManager : MonoBehaviour
     {
         while (bossPhase <= 3)
         {
-            yield return new WaitForSeconds(10);
+            yield return new WaitForSeconds(7);
 
+            PlayAnimation(boss.GetComponent<Animator>(), "Spin", false);
             float initialX = boss.transform.localPosition.x;
             //boss goes to centre
-            Vector3 bossPos = boss.transform.localPosition + new Vector3(0, -5f, 0);
+            Vector3 bossPos = boss.transform.localPosition + new Vector3(0, -6f, 0);
             yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
-            boss.transform.localPosition = new Vector3(0, boss.transform.position.y, boss.transform.position.z);
-            bossPos = boss.transform.localPosition + new Vector3(0, 5f, 0);
+            boss.transform.localPosition = new Vector3(0, boss.transform.localPosition.y, boss.transform.localPosition.z);
+            bossPos = boss.transform.localPosition + new Vector3(0, 6f, 0);
             yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
 
             boss.GetComponent<Animator>().Play("removeHead", 0, 0);
@@ -1442,21 +1515,25 @@ public class GameManager : MonoBehaviour
             boss.GetComponent<Animator>().Play("getItems", 0, 0);
 
             float time = 0;
+            bool init = false;
             while (time <= 15)
             {
-                if (time % 2 == 0)
+                if (Mathf.Floor(time) % 2 == 0 && init == false)
                 {
-                    Instantiate(fallingDart);
+                    init = true;
+                    Instantiate(fallingDart, foreground[2].transform);
                 }
-                time += 0.01f;
+                if ((Mathf.Floor(time) - 1) % 2 == 0)
+                    init = false;
+                time += Time.deltaTime;
                 yield return null;
             }
 
             //boss goes back
-            bossPos = boss.transform.localPosition + new Vector3(0, -5f, 0);
+            bossPos = boss.transform.localPosition + new Vector3(0, -6f, 0);
             yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
-            boss.transform.localPosition = new Vector3(initialX, boss.transform.position.y, boss.transform.position.z);
-            bossPos = boss.transform.localPosition + new Vector3(0, 5f, 0);
+            boss.transform.localPosition = new Vector3(initialX, boss.transform.localPosition.y, boss.transform.localPosition.z);
+            bossPos = boss.transform.localPosition + new Vector3(0, 6f, 0);
             yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
 
             PlayAnimation(boss.GetComponent<Animator>(), "getItems", true);
@@ -1480,7 +1557,6 @@ public class GameManager : MonoBehaviour
 
     void BulletHit(float damage)
     {
-        print("dmg");
         bossHealthBar.fillAmount = bossHealthBar.fillAmount - (damage / 100);
     }
 
@@ -1534,7 +1610,6 @@ public class GameManager : MonoBehaviour
         while (ridingCart)
         {
             timeLooking += Time.deltaTime;
-            print(timeLooking);
             yield return null;
         }
     }

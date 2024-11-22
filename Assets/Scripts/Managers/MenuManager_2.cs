@@ -35,7 +35,7 @@ public partial class MenuManager_2 : MonoBehaviour
     public static float musicVol = 1;
     public static float sfxVol = 1;
     public static bool crossAssist = true;
-    public static bool wiggleCross = true;
+    public static bool wiggleCross = false;
 
     [SerializeField] GameObject scrollContent;
     List<GameObject> boxes = new List<GameObject>();

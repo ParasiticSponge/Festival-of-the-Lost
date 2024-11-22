@@ -12,7 +12,7 @@ public class CharacterController2D : NPC_AI
     public int doorNum;
 	public int choice = 0;
 	public bool enter;
-	int health = 100;
+	[SerializeField] int health = 100;
 
 	private GameObject talkingTo;
 	List<Collider2D> collisions = new List<Collider2D>();
@@ -20,6 +20,7 @@ public class CharacterController2D : NPC_AI
 	//references to buttons
 	private PlayerInput playerInput;
 	private InputAction touchPress;
+	private InputAction keyboardPress;
 
 
 	Vector3 touchPosition;
@@ -28,17 +29,20 @@ public class CharacterController2D : NPC_AI
         Actions.Input += GetName;
 		//touchPress.performed += OnTouchBegin;
 		touchPress.canceled += OnTouchExit;
+		keyboardPress.canceled += OnTouchExit;
 	}
     private void OnDisable()
     {
         Actions.Input -= GetName;
 		//touchPress.performed -= OnTouchBegin;
-		touchPress.canceled += OnTouchExit;
-	}
+		touchPress.canceled -= OnTouchExit;
+        keyboardPress.canceled -= OnTouchExit;
+    }
     private void Awake()
 	{
 		playerInput = GetComponent<PlayerInput>();
 		touchPress = playerInput.actions["Touch"];
+		keyboardPress = playerInput.actions["Move"];
 
 		gameManager = FindObjectOfType<GameManager>();
 		m_Rigidbody2D = GetComponent<Rigidbody2D>();
@@ -147,7 +151,7 @@ public class CharacterController2D : NPC_AI
 	{
 		horizontal = input.Get<Vector2>().x * runSpeed;
 	}
-	private void OnEnter(InputValue input)
+    private void OnEnter(InputValue input)
 	{
 		if (enabled)
 		{
@@ -172,21 +176,16 @@ public class CharacterController2D : NPC_AI
     }
 	private void OnTouch(InputValue input)
 	{
-        touchPosition = Touchscreen.current.position.ReadValue();
+		touchPosition = Touchscreen.current.position.ReadValue();
 
-        float width = Screen.width / 3;
+		float width = Screen.width / 3;
 		if (touchPosition.x > width * 2)
 			horizontal = 1 * runSpeed;
 		else if (touchPosition.x < width)
 			horizontal = -1 * runSpeed;
 		else
 			OnEnter(input);
-
     }
-	private void OnTouchBegin(InputAction.CallbackContext input)
-	{
-		print("touching");
-	}
     private void OnTouchExit(InputAction.CallbackContext input)
 	{
 		horizontal = 0;

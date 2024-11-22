@@ -18,13 +18,22 @@ public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
         settings,
         cross,
         wiggle,
-        PAUSE
+        PAUSE,
+        Power
     }
     public TYPE type;
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        Actions.Back.Invoke(type);
+        switch (type)
+        {
+            case TYPE.Power:
+                Actions.Release.Invoke();
+                break;
+            case TYPE a when a != TYPE.Power:
+                Actions.Back.Invoke(type);
+                break;
+        }
         /*switch (type)
         {
             case TYPE.back:
@@ -34,5 +43,11 @@ public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
     }
     public void OnPointerDown(PointerEventData eventData)
     {
+        switch (type)
+        {
+            case TYPE.Power:
+                Actions.Hold.Invoke();
+                break;
+        }
     }
 }

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5066567926459687490}
   - component: {fileID: 65738233769654504}
   - component: {fileID: 7935552035919589188}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: FallingDart
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -120,7 +120,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.12238076}
+  m_Offset: {x: 0, y: 1.045}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -166,6 +166,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a15450001750e7643af2f5871cf59706, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  horizontal:
+  - -4.5
+  - 4.5
 --- !u!50 &7935552035919589188
 Rigidbody2D:
   serializedVersion: 4

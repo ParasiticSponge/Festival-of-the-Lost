@@ -16,6 +16,7 @@ TagManager:
   - Tickets
   - TrappedParents
   - LionCage
+  - Gate
   layers:
   - Default
   - TransparentFX
