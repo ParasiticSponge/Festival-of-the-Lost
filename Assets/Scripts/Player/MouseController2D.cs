@@ -100,7 +100,6 @@ public class MouseController2D : MonoBehaviour
         fire = true;
 
         Vector3 desiredPos = new Vector3(amount.x, amount.y, transform.position.z);
-        print(desiredPos);
         StartCoroutine(Move(transform.position, desiredPos));
     }
     IEnumerator Move(Vector3 a, Vector3 b)

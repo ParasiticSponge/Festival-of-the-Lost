@@ -31,4 +31,6 @@ public class Actions
     public static Action<GameObject> FoundPlushie;
     public static Action ClickedDialogue;
     public static Action<int> ChooseCharacter;
+    public static Action<FishAI.TYPE> Reel;
+    public static Action missedReel;
 }

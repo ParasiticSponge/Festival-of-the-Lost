@@ -43,6 +43,8 @@ public class FishAI : MonoBehaviour
     protected bool m_FacingRight = false;  // For determining which way the player is currently facing.
     protected Vector3 m_Velocity = Vector3.zero;
 
+    float distance;
+    public bool hooked;
     bool swim = true;
 
     private void Awake()
@@ -70,10 +72,6 @@ public class FishAI : MonoBehaviour
             case STATES.idle:
                 StartCoroutine(Idle());
                 break;
-            case STATES.follow:
-                StartCoroutine(Follow(character.transform.position, 10));
-                break;
-
         }
     }
     private IEnumerator Swim()
@@ -81,7 +79,7 @@ public class FishAI : MonoBehaviour
         position = Functions.Around(initialPos, wanderRange);
         //position = new Vector3(-200, -140, 0);
         Vector3 vector = position - transform.position;
-        float distance = vector.magnitude;
+        distance = vector.magnitude;
 
         Vector3 normalized = vector.normalized;
         float angle = Mathf.Atan2(normalized.y, normalized.x) * Mathf.Rad2Deg;
@@ -91,7 +89,6 @@ public class FishAI : MonoBehaviour
             theScale.x = -1;
             transform.localScale = theScale;
             transform.Rotate(0, 0, angle);
-            print(angle);
         }
         else
         {
@@ -99,7 +96,6 @@ public class FishAI : MonoBehaviour
             theScale.x = 1;
             transform.localScale = theScale;
             transform.Rotate(0, 0, 180 - angle);
-            print(180 - angle);
         }
 
         while (distance > 0.1f)
@@ -119,7 +115,6 @@ public class FishAI : MonoBehaviour
     }
     private IEnumerator Idle()
     {
-        print("idle");
         //3-5
         int waitTime = random.Next(1, 2);
         yield return new WaitForSeconds(waitTime);
@@ -137,18 +132,27 @@ public class FishAI : MonoBehaviour
         transform.localScale = theScale;
     }
 
-    private IEnumerator Follow(Vector3 target, float edge)
+    private IEnumerator Follow(GameObject target)
     {
-        /*Vector3 distance = (target - transform.position);
+        Vector3 distance = (target.transform.position - transform.position);
         float magnitude = distance.magnitude;
 
-        horizontal = Mathf.Sign(distance.x) * 1 * runSpeed;
-        if (magnitude <= edge)
-            horizontal = 0;
-        yield return null;
-        Switch();*/
-        //Physics2D.IsTouchingLayers(collider, layer);
-        yield return null;
+        while (magnitude > 0.1f)
+        {
+            if (character.GetComponent<RodController>().hasFish && !hooked) 
+            {
+                StartCoroutine(Swim());
+                yield break; 
+            }
+            distance = (target.transform.position - transform.position);
+            magnitude = distance.magnitude;
+            transform.position += distance.normalized * swimSpeed;
+            yield return null;
+        }
+        StopAllCoroutines();
+        hooked = true;
+        transform.parent = target.transform;
+        Actions.Reel.Invoke(type);
     }
 
     private void OnCollisionEnter2D(UnityEngine.Collision2D collision)
@@ -159,10 +163,41 @@ public class FishAI : MonoBehaviour
 
         if (collision.gameObject.GetComponent<TemporaryEdgeDetection>())
         {
-            Vector3 vector = (position - transform.position).normalized;
-            Vector2 reflected2D = Functions.ReflectionVector(collision.gameObject.GetComponent<TemporaryEdgeDetection>().normal, vector);
-            Vector3 reflected = new Vector3(reflected2D.x, reflected2D.y, 0);
-            position = transform.localPosition + reflected;
+            Vector3 vector = (position - transform.position);
+            Vector2 vector2D = new Vector2(vector.x, vector.y);
+            Vector2 normal = collision.gameObject.GetComponent<TemporaryEdgeDetection>().normal;
+            Vector2 reflection = Functions.ReflectionVector(normal, vector2D);
+            Vector3 reflection3D = new Vector3(reflection.x, reflection.y, 0);
+            print(reflection3D);
+
+            position = (transform.position + reflection3D);
         }
     }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.name == "Bobber")
+        {
+            StopAllCoroutines();
+            state = STATES.follow;
+            StartCoroutine(Follow(collision.gameObject));
+        }
+    }
+
+    /*IEnumerator countdown()
+    {
+        for (float timer = 5; timer >= 0; timer -= Time.deltaTime)
+        {
+            if (secondChanceUsed)
+            {
+                win();
+                secondChanceUsed = false;
+                yield break;
+            }
+            yield return null;
+        }
+        enableLooseUI();
+        disablePreLooseUI();
+        updateTotalPoints();
+        pointsystem.resetLocalscore();
+    }*/
 }

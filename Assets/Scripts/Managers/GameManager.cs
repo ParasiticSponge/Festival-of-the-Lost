@@ -84,7 +84,7 @@ public class GameManager : MonoBehaviour
     List<GameObject> balloons = new List<GameObject>();
     Sprite balloon;
     Image powerBar;
-    GameObject dartsPowerBttnPhone;
+    GameObject powerBttnPhone;
     List<GameObject> darts = new List<GameObject>();
     Sprite dart;
     public int scoreDarts = 0;
@@ -110,6 +110,16 @@ public class GameManager : MonoBehaviour
     public int bossPhase = 1;
     List<GameObject> bossLights = new List<GameObject>();
     GameObject fallingDart;
+    // --------------------LEVEL 4-------------------------
+    GameObject f4_UI;
+    Image powerBarFish;
+    Transform fishes;
+    GameObject bobber;
+    int misses = 0;
+    int tries = 0;
+    public int scoreFish = 0;
+    Text scoreFishText;
+    GameObject fishReelUI;
     // -------------------SPRITE LIST----------------------
     public List<Sprite> darkSprites = new List<Sprite>();
     public List<SpriteRenderer> lightSprites = new List<SpriteRenderer>();
@@ -209,6 +219,21 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
+        foreach (Transform t4 in foreground[3].transform)
+        {
+            if (t4.GetComponent<Canvas>())
+                f4_UI = t4.gameObject;
+            if (t4.name == "Bobber")
+                bobber = t4.gameObject;
+            if (t4.name == "Fishes")
+                fishes = t4;
+            if (t4.name == "FishReelUI")
+            {
+                fishReelUI = t4.gameObject;
+                fishReelUI.SetActive(false);
+            }
+        }
+
         foreach (Transform t in doors.transform)
         {
             door.Add(t.GetComponent<Collision2D>());
@@ -257,14 +282,22 @@ public class GameManager : MonoBehaviour
 
         scoreDartsText = f2_UI.transform.GetChild(0).GetChild(0).gameObject.GetComponent<Text>();
         powerBar = f2_UI.transform.GetChild(1).GetChild(0).GetChild(0).gameObject.GetComponent<Image>();
-        dartsPowerBttnPhone = f2_UI.transform.GetChild(4).gameObject;
+        powerBttnPhone = f2_UI.transform.GetChild(4).gameObject;
         if (Application.platform == RuntimePlatform.Android)
-            dartsPowerBttnPhone.SetActive(true);
+            powerBttnPhone.SetActive(true);
         else
-            dartsPowerBttnPhone.SetActive(false);
+            powerBttnPhone.SetActive(false);
 
         powerBarBoss = f3_UI.transform.GetChild(0).GetChild(0).GetChild(0).gameObject.GetComponent<Image>();
         bossHealthBar = f3_UI.transform.GetChild(1).GetChild(0).GetChild(0).gameObject.GetComponent<Image>();
+
+        scoreFishText = f4_UI.transform.GetChild(0).GetChild(0).gameObject.GetComponent<Text>();
+        powerBarFish = f4_UI.transform.GetChild(1).GetChild(0).GetChild(0).gameObject.GetComponent<Image>();
+        powerBttnPhone = f4_UI.transform.GetChild(4).gameObject;
+        if (Application.platform == RuntimePlatform.Android)
+            powerBttnPhone.SetActive(true);
+        else
+            powerBttnPhone.SetActive(false);
 
         scoreTicketsText.text = tickets.ToString();
         retryButton = anims[1].gameObject.transform.GetChild(0).gameObject;
@@ -333,6 +366,8 @@ public class GameManager : MonoBehaviour
         Actions.BossPhase += BossPhase;
         Actions.FoundPlushie += FoundPlushie;
         Actions.ClickedDialogue += () => { dialoguesClicked++; };
+        Actions.Reel += BeginReeling;
+        Actions.missedReel += () => { misses++; };
     }
     private void OnDisable()
     {
@@ -351,6 +386,8 @@ public class GameManager : MonoBehaviour
         Actions.BossPhase -= BossPhase;
         Actions.FoundPlushie -= FoundPlushie;
         Actions.ClickedDialogue -= () => { dialoguesClicked++; };
+        Actions.Reel += BeginReeling;
+        Actions.missedReel -= () => { misses++; };
     }
     // Start is called before the first frame update
     void Start()
@@ -372,6 +409,7 @@ public class GameManager : MonoBehaviour
             case TEST.balloons:
                 break;
             case TEST.fish:
+                StartCoroutine(SwitchRooms(4));
                 break;
             case TEST.boss:
                 tickets = 22;
@@ -431,9 +469,9 @@ public class GameManager : MonoBehaviour
                 currentRoom = 0;
                 character.GetComponent<Rigidbody2D>().gravityScale = initialGravity;
                 character.GetComponent<CharacterController2D>().enabled = true;
-                character.GetComponent<MouseController2D>().enabled = false;
                 character.GetComponent<Animator>().SetBool("dart", false);
                 character.GetComponent<CircleCollider2D>().enabled = true;
+                character.GetComponent<BoxCollider2D>().enabled = true;
 
                 character.GetComponent<BoxCollider2D>().offset = new Vector2(0, 0);
                 character.GetComponent<BoxCollider2D>().size = new Vector2(0.6f, 1.6f);
@@ -527,6 +565,11 @@ public class GameManager : MonoBehaviour
         switchScreen.speed = 1;
         switchScreen.Play("MenuSelectOption", 0, 0);
         foreach (Collision2D collider in door) { collider.enabled = false; }
+
+        character.GetComponent<BossDartController>().enabled = false;
+        character.GetComponent<CharacterController2D>().enabled = false;
+        character.GetComponent<MouseController2D>().enabled = false;
+        character.GetComponent<RodController>().enabled = false;
 
         yield return new WaitForSeconds(1);
         //UIFront layer mask
@@ -636,6 +679,7 @@ public class GameManager : MonoBehaviour
     {
         hold = true;
         powerBar.gameObject.SetActive(true);
+        powerBarFish.gameObject.SetActive(true);
         powerBarBoss.gameObject.SetActive(true);
         timeLooking = 0;
         //number from 0.5 to 1
@@ -659,6 +703,8 @@ public class GameManager : MonoBehaviour
                     Actions.Power.Invoke(desiredPos);
                 if (currentRoom == 2)
                     Bow(i);
+                if (currentRoom == 3)
+                    CastRod(i);
                 //mouseController has x position updated to match mouse, overide this
                 crosshair.transform.position = desiredPos;
                 break;
@@ -676,6 +722,8 @@ public class GameManager : MonoBehaviour
                         Actions.Power.Invoke(desiredPos);
                     if (currentRoom == 2)
                         Bow(i);
+                    if (currentRoom == 3)
+                        CastRod(i);
                     crosshair.transform.position = desiredPos;
                     break;
                 }
@@ -707,12 +755,13 @@ public class GameManager : MonoBehaviour
         timeLooking += 0.01f;
 
         Vector3 screenToWorld;
-
         powerBar.fillAmount = i / 100;
+        powerBarFish.fillAmount = i / 100;
         powerBarBoss.fillAmount = i / 100;
         screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * powerBar.fillAmount, 0));
         //position along bar
         desiredPos = new Vector3(crosshair.transform.position.x, screenToWorld.y, crosshair.transform.position.z);
+
         if (MenuManager_2.wiggleCross)
         {
             float randomAngleX = random.Next(721) / 2;
@@ -764,11 +813,11 @@ public class GameManager : MonoBehaviour
         character.transform.localPosition = new Vector3(pos.x, pos.y, charDartDistanceFromCam);
         character.GetComponent<Animator>().Play("dartIdle", 0, 0);
 
-        character.GetComponent<CharacterController2D>().enabled = false;
         character.GetComponent<MouseController2D>().enabled = true;
         character.GetComponent<Rigidbody2D>().gravityScale = 0;
         character.GetComponent<Animator>().SetBool("dart", true);
         character.GetComponent<CircleCollider2D>().enabled = false;
+        character.GetComponent<BoxCollider2D>().enabled = true;
 
         character.GetComponent<BoxCollider2D>().offset = new Vector2(0, -0.03451007f);
         character.GetComponent<BoxCollider2D>().size = new Vector2(0.06f, 0.07310224f);
@@ -852,54 +901,97 @@ public class GameManager : MonoBehaviour
             StartCoroutine(GameOverDarts());
         }
     }
-    public void ResetFishingGame(bool fullReset)
+    void Bow(float power)
     {
-        retryButton.SetActive(true);
-        Vector3 room = background[currentRoom].transform.position;
-        character.transform.position = new Vector3(room.x, room.y - 8, 0);
-        Vector3 pos = character.transform.localPosition;
-        character.transform.localPosition = new Vector3(pos.x, pos.y, charDartDistanceFromCam);
-        character.GetComponent<Animator>().Play("rodIdle", 0, 0);
-
-        character.GetComponent<CharacterController2D>().enabled = false;
-        character.GetComponent<Animator>().SetBool("rod", true);
-        character.GetComponent<Rigidbody2D>().gravityScale = 0;
-        character.GetComponent<CircleCollider2D>().enabled = false;
-
-/*        character.GetComponent<BoxCollider2D>().offset = new Vector2(0, -0.03451007f);
-        character.GetComponent<BoxCollider2D>().size = new Vector2(0.06f, 0.07310224f);*/
-
-        Camera.main.GetComponent<CameraFollow>().enabled = false;
-        Camera.main.transform.position = new Vector3(room.x, room.y, -10);
-
-        star[0].Rebind();
-        star[1].Rebind();
-        star[2].Rebind();
-        powerBar.fillAmount = 0;
-        scoreDarts = 0;
-        scoreDartsText.text = scoreDarts.ToString();
-        character.GetComponent<MouseController2D>().fire = false;
-        startingDart = 0;
-        for (int i = 1; i < darts.Count + 1; i++)
+        if (currentRoom == 2 && pocketDarts > 0)
         {
-            darts[i - 1].transform.localPosition = new Vector3(i + 1.5f, -2.5f, dartDistanceFromCam);
-            darts[i - 1].GetComponent<SpriteRenderer>().sprite = dart;
+            pocketDarts--;
+            countDartsText.text = pocketDarts.ToString();
+            GameObject go = new();
+            SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
+            Rigidbody2D rigid = go.AddComponent<Rigidbody2D>();
+            Bullet bullet = go.AddComponent<Bullet>();
+            BoxCollider2D collider = go.AddComponent<BoxCollider2D>();
+            go.transform.position = character.transform.position;
+            go.transform.localRotation = bow.transform.rotation;
+            renderer.sprite = dart;
+            renderer.sortingLayerName = "Boss";
+            rigid.velocity = go.transform.up * (power / 2);
+            collider.size = new Vector2(0.2f, 0.3f);
+            collider.offset = new Vector2(0, 0.1f);
+            LayerMask mask = LayerMask.GetMask("Player", "Default");
+            rigid.excludeLayers += mask;
+            collider.excludeLayers += mask;
+
+
+            Destroy(go, 5);
         }
-        if (fullReset)
+    }
+    void CastRod(float power)
+    {
+        Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * (power / 100), 0));
+        Vector3 origin = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0));
+        Vector3 vector = screenToWorld - origin;
+        Vector2 vector2 = new Vector2(vector.x, vector.y);
+
+        Vector3 mouseToWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3 mouse = mouseToWorld - character.transform.position;
+
+        float angle = Mathf.Atan2(mouse.y, mouse.x) * Mathf.Rad2Deg - 90;
+        Vector2 rotation = Functions.RotateVector2(vector2, angle);
+        vector = new Vector3(rotation.x, rotation.y, 0);
+
+        desiredPos = (character.transform.position + vector);
+        bobber.transform.position = desiredPos;
+
+    }
+    public void BeginReeling(FishAI.TYPE type)
+    {
+        StartCoroutine(FishMinigame(type));
+    }
+    IEnumerator FishMinigame(FishAI.TYPE type)
+    {
+        character.GetComponent<RodController>().hasFish = true;
+        character.GetComponent<RodController>().fire = true;
+
+        Transform fish = bobber.transform.GetChild(0);
+        Vector3 vector = bobber.transform.position - character.transform.position;
+        float magnitude = vector.magnitude;
+        fishReelUI.SetActive(true);
+        while (magnitude > 0.1)
         {
-            for (int i = 0; i < balloons.Count; i++)
+            vector = bobber.transform.position - character.transform.position;
+            magnitude = vector.magnitude;
+
+            //fish moves away
+            if (tries != misses)
             {
-                balloons[i].GetComponent<SpriteRenderer>().sprite = balloon;
-                balloons[i].GetComponent<Animator>().Rebind();
-                balloons[i].GetComponent<CircleCollider2D>().enabled = true;
+                tries++;
+                Vector3 lift = new Vector3(0, 2, 0);
+                fishReelUI.SetActive(false);
+                yield return StartCoroutine(Functions.Move(bobber.transform.position, lift, value => bobber.transform.position = value, 1));
+                fishReelUI.SetActive(true);
+            }
+            if (tries >= 3)
+            {
+                fish.GetComponent<FishAI>().hooked = false;
+                character.GetComponent<RodController>().hasFish = false;
+                bobber.transform.localPosition = new Vector3(0, -5, -2);
+                fish.parent = fishes;
+                fishReelUI.SetActive(false);
+                character.GetComponent<RodController>().fire = false;
+                yield break;
             }
         }
 
-        //reset y to middle of screen
-        GameObject cross = character.GetComponent<MouseController2D>().crosshair;
-        Vector3 desiredPos = new Vector3(cross.transform.localPosition.x, 0, cross.transform.localPosition.z);
-        if (cross.activeSelf)
-            cross.transform.localPosition = desiredPos;
+        scoreFish += (int)type;
+        tickets += (int)type;
+        scoreTicketsText.text = tickets.ToString();
+        Destroy(fish.gameObject);
+    }
+    public void ResetFishingGame(bool fullReset)
+    {
+        scoreFish = 0;
     }
     public void ScoreFish(bool hit)
     {
@@ -1149,7 +1241,7 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case string a when a.Contains("Fish"):
-                //StartCoroutine(SwitchRooms(4));
+                StartCoroutine(SwitchRooms(4));
                 break;
         }
     }
@@ -1451,7 +1543,7 @@ public class GameManager : MonoBehaviour
 
         character.GetComponent<BossDartController>().enabled = true;
         PlayAnimation(boss.GetComponent<Animator>(), "headSpin", false);
-        StartCoroutine(FallingDarts(false));
+        StartCoroutine(FallingDarts(false, 2));
     }
     IEnumerator PhaseThree()
     {
@@ -1469,7 +1561,7 @@ public class GameManager : MonoBehaviour
         character.GetComponent<BossDartController>().enabled = true;
         PlayAnimation(boss.GetComponent<Animator>(), "headSpin", false);
         //juggole head
-        StartCoroutine(FallingDarts(true));
+        StartCoroutine(FallingDarts(true, 3));
     }
     IEnumerator BossDeath()
     {
@@ -1496,11 +1588,11 @@ public class GameManager : MonoBehaviour
         StartCoroutine(Functions.MoveCubic(bossPlatform.transform.localPosition, platPos, value => bossPlatform.transform.localPosition = value));
         StartCoroutine(Functions.MoveCubic(foreground[2].transform.GetChild(0).localPosition, groundPos, value => foreground[2].transform.GetChild(0).localPosition = value));
     }
-    IEnumerator FallingDarts(bool hard)
+    IEnumerator FallingDarts(bool hard, int phase)
     {
-        while (bossPhase <= 3)
+        while (bossPhase <= phase)
         {
-            yield return new WaitForSeconds(7);
+            yield return new WaitForSeconds(10);
 
             PlayAnimation(boss.GetComponent<Animator>(), "Spin", false);
             float initialX = boss.transform.localPosition.x;
@@ -1540,13 +1632,10 @@ public class GameManager : MonoBehaviour
                     {
                         init = true;
                         Instantiate(fallingDart, foreground[2].transform);
-                        Instantiate(fallingDart, foreground[2].transform);
                     }
                     if ((Mathf.Floor(time) - 1) % 2 == 0)
                     {
                         init = false;
-                        Instantiate(fallingDart, foreground[2].transform);
-                        Instantiate(fallingDart, foreground[2].transform);
                     }
                 }
                 time += Time.deltaTime;
@@ -1635,33 +1724,6 @@ public class GameManager : MonoBehaviour
         {
             timeLooking += Time.deltaTime;
             yield return null;
-        }
-    }
-
-    void Bow(float power)
-    {
-        if (currentRoom == 2 && pocketDarts > 0)
-        {
-            pocketDarts--;
-            countDartsText.text = pocketDarts.ToString();
-            GameObject go = new();
-            SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
-            Rigidbody2D rigid = go.AddComponent<Rigidbody2D>();
-            Bullet bullet = go.AddComponent<Bullet>();
-            BoxCollider2D collider = go.AddComponent<BoxCollider2D>();
-            go.transform.position = character.transform.position;
-            go.transform.localRotation = bow.transform.rotation;
-            renderer.sprite = dart;
-            renderer.sortingLayerName = "Boss";
-            rigid.velocity = go.transform.up * (power/2);
-            collider.size = new Vector2(0.2f, 0.3f);
-            collider.offset = new Vector2(0, 0.1f);
-            LayerMask mask = LayerMask.GetMask("Player", "Default");
-            rigid.excludeLayers += mask;
-            collider.excludeLayers += mask;
-            
-            
-            Destroy(go, 5);
         }
     }
 

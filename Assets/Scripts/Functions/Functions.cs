@@ -100,6 +100,35 @@ public class Functions : MonoBehaviour
         }
     }
 
+    public static Vector2 RotateVector2(Vector2 vector, float angle)
+    {
+        float radians = angle * Mathf.Deg2Rad;
+        float[,] matrix = {{Mathf.Cos(radians),-Mathf.Sin(radians)}, {Mathf.Sin(radians),Mathf.Cos(radians)} };
+        float[] result = new float[2];
+        for (int i = 0; i <= 1; i++)
+        {
+            result[i] = matrix[i,0] * vector.x + matrix[i,1] * vector.y;
+        }
+        return new Vector2(result[0], result[1]);
+    }
+    public static Vector3 RotateVector3(Vector3 vector, float angle)
+    {
+        //x
+        //1, 0, 0
+        //0, cosA, -sinA
+        //0, sinA, cosA
+
+        //y
+        //cosA, 0, sinA
+        //0, 1, 0
+        //-sinA, 0, cosA
+
+        //z
+        //cosA, -sinA, 0
+        //sinA, cosA, 0
+        //0, 0, 1
+        return new Vector3(0, 0, 0);
+    }
     public static IEnumerator WaitFor(Action action)
     {
         action();
@@ -341,7 +370,9 @@ public class Functions : MonoBehaviour
 
     public static Vector2 ReflectionVector(Vector2 normal, Vector2 vector)
     {
-        return vector - 2 * Vector2.Dot(normal, vector) * normal - vector;
+        //return vector - 2 * Vector2.Dot(normal, vector) * normal - vector;
+        //return 2 * normal * Vector2.Dot(normal, vector) - vector;
+        return vector - 2 * Vector2.Dot(vector, normal) * normal;
     }
 
     /*// Action rpg = () => { };
