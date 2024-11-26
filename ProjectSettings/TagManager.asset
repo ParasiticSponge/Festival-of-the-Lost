@@ -17,6 +17,7 @@ TagManager:
   - TrappedParents
   - LionCage
   - Gate
+  - Character
   layers:
   - Default
   - TransparentFX
@@ -30,7 +31,7 @@ TagManager:
   - NPC
   - Boss
   - BossOverlay
-  - 
+  - Post Processing Main
   - Post Processing
   - 
   - 

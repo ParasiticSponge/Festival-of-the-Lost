@@ -15,6 +15,7 @@ public partial class MenuManager_2 : MonoBehaviour
     public Animator maskCanvas;
     GameObject mainMenu;
     GameObject settings;
+    GameObject dev;
 
     PointerEventData pointerEventData;
     EventSystem eventSystem;
@@ -36,6 +37,7 @@ public partial class MenuManager_2 : MonoBehaviour
     public static float sfxVol = 1;
     public static bool crossAssist = true;
     public static bool wiggleCross = false;
+    public static Int32 test = 0;
 
     [SerializeField] GameObject scrollContent;
     List<GameObject> boxes = new List<GameObject>();
@@ -50,6 +52,7 @@ public partial class MenuManager_2 : MonoBehaviour
     {
         mainMenu = canvas.transform.GetChild(0).gameObject;
         settings = canvas.transform.GetChild(1).gameObject;
+        dev = canvas.transform.GetChild(2).gameObject;
         eventSystem = EventSystem.current;
 
         //mask
@@ -103,6 +106,7 @@ public partial class MenuManager_2 : MonoBehaviour
     {
         Actions.Begin += PlayAnimation;
         Actions.Settings += Move;
+        Actions.Dev += MoveDev;
         //Actions.TextBoxColour += value => textBox = value;
         Actions.TextBoxColour += SetBox;
         Actions.Toggles += SwitchBool;
@@ -111,6 +115,7 @@ public partial class MenuManager_2 : MonoBehaviour
     {
         Actions.Begin -= PlayAnimation;
         Actions.Settings -= Move;
+        Actions.Dev -= MoveDev;
         //Actions.TextBoxColour -= value => textBox = value;
         Actions.TextBoxColour -= SetBox;
         Actions.Toggles -= SwitchBool;
@@ -197,6 +202,29 @@ public partial class MenuManager_2 : MonoBehaviour
                 break;
         }
     }
+    public void MoveDev(bool isOn)
+    {
+        Vector3 up = new Vector3(0, 1080, 0);
+        Vector3 centre = new Vector3(0, 0, 0);
+        Vector3 down = new Vector3(0, -1080, 0);
+        switch (isOn)
+        {
+            case true:
+                StartCoroutine(Functions.MoveCubic(mainMenu.GetComponent<RectTransform>().localPosition, up, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(Functions.MoveCubic(dev.GetComponent<RectTransform>().localPosition, centre, (value => dev.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(FerrisCartMove(up));
+                //StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, left));
+                //StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, centre));
+                break;
+            case false:
+                StartCoroutine(Functions.MoveCubic(mainMenu.GetComponent<RectTransform>().localPosition, centre, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(Functions.MoveCubic(dev.GetComponent<RectTransform>().localPosition, down, (value => dev.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(FerrisCartMove(centre));
+                //StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, centre));
+                //StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, right));
+                break;
+        }
+    }
     public void SetBox(int number)
     {
         textBox = number;
@@ -234,5 +262,10 @@ public partial class MenuManager_2 : MonoBehaviour
             }
             yield return null;
         }
+    }
+
+    public void ChangeTest(Dropdown dropdown)
+    {
+        test = dropdown.value;
     }
 }

@@ -9,6 +9,7 @@ public class BossDartController : MonoBehaviour
     float length = 4f;
     GameObject bow;
     Vector3 targetOrigin;
+    public bool fire;
     void Awake()
     {
         gameManager = FindObjectOfType<GameManager>();
@@ -19,23 +20,26 @@ public class BossDartController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-            Actions.Hold.Invoke();
-        if (Input.GetMouseButton(0))
+        if (!fire && !gameManager.paused)
         {
-            bow.SetActive(true);
-            Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
-            screenPos = Input.mousePosition - screenPos;
-            float angle = Mathf.Atan2(screenPos.y, screenPos.x);
-            screenPos = new Vector3(Mathf.Cos(angle) * length, Mathf.Sin(angle) * length, 0);
-            bow.transform.position = transform.position + screenPos;
-            bow.transform.localPosition = new Vector3(bow.transform.localPosition.x, bow.transform.localPosition.y, -1);
-            bow.transform.up = screenPos.normalized;
-        }
-        if (Input.GetMouseButtonUp(0))
-        {
-            bow.SetActive(false);
-            Actions.Release.Invoke();
+            if (Input.GetMouseButtonDown(0))
+                Actions.Hold.Invoke();
+            if (Input.GetMouseButton(0))
+            {
+                bow.SetActive(true);
+                Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
+                screenPos = Input.mousePosition - screenPos;
+                float angle = Mathf.Atan2(screenPos.y, screenPos.x);
+                screenPos = new Vector3(Mathf.Cos(angle) * length, Mathf.Sin(angle) * length, 0);
+                bow.transform.position = transform.position + screenPos;
+                bow.transform.localPosition = new Vector3(bow.transform.localPosition.x, bow.transform.localPosition.y, -1);
+                bow.transform.up = screenPos.normalized;
+            }
+            if (Input.GetMouseButtonUp(0))
+            {
+                bow.SetActive(false);
+                Actions.Release.Invoke();
+            }
         }
     }
 }

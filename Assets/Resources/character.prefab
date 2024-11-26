@@ -21,7 +21,7 @@ GameObject:
   - component: {fileID: 5562835083238809901}
   m_Layer: 8
   m_Name: character
-  m_TagString: Untagged
+  m_TagString: Character
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -190,6 +190,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 154259632c3b92846b1effe54e27fe21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fire: 0
+  hasFish: 0
 --- !u!50 &8386141916044463863
 Rigidbody2D:
   serializedVersion: 4

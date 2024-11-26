@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
-public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
+public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler
 {
     public enum TYPE
     {
@@ -49,5 +49,25 @@ public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
                 Actions.Hold.Invoke();
                 break;
         }
+    }
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        GameObject character = GameObject.FindGameObjectWithTag("Character");
+        if (character.GetComponent<BossDartController>())
+            character.GetComponent<BossDartController>().fire = true;
+        if (character.GetComponent<RodController>())
+            character.GetComponent<RodController>().fire = true;
+        if (character.GetComponent<MouseController2D>())
+            character.GetComponent<MouseController2D>().fire = true;
+    }
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        GameObject character = GameObject.FindGameObjectWithTag("Character");
+        if (character.GetComponent<BossDartController>())
+            character.GetComponent<BossDartController>().fire = false;
+        if (character.GetComponent<RodController>())
+            character.GetComponent<RodController>().fire = false;
+        if (character.GetComponent<MouseController2D>())
+            character.GetComponent<MouseController2D>().fire = false;
     }
 }

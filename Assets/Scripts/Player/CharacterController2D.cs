@@ -22,7 +22,6 @@ public class CharacterController2D : NPC_AI
 	private InputAction touchPress;
 	private InputAction keyboardPress;
 
-
 	Vector3 touchPosition;
     private void OnEnable()
     {

@@ -88,22 +88,23 @@ public class FishAI : MonoBehaviour
             Vector3 theScale = transform.localScale;
             theScale.x = -1;
             transform.localScale = theScale;
-            transform.Rotate(0, 0, angle);
         }
         else
         {
             Vector3 theScale = transform.localScale;
             theScale.x = 1;
             transform.localScale = theScale;
-            transform.Rotate(0, 0, 180 - angle);
         }
 
         while (distance > 0.1f)
         {
             vector = position - transform.position;
             distance = vector.magnitude;
-            angle = Mathf.Atan2(position.y, position.x);
-            transform.localRotation = Quaternion.Euler(0, 0, angle);
+            angle = Mathf.Atan2(vector.y, vector.x) * Mathf.Rad2Deg;
+            if (transform.localScale.x == -1)
+                transform.localRotation = Quaternion.Euler(0, 0, angle);
+            else
+                transform.localRotation = Quaternion.Euler(0, 0, 180 - angle);
 
             transform.position += vector.normalized * swimSpeed;
             yield return null;

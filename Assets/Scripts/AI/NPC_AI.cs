@@ -28,6 +28,7 @@ public class NPC_AI : MonoBehaviour
     public float runSpeed = 20;
     protected bool jump = false;
     protected float horizontal = 0;
+    public float Horizontal { get { return horizontal; } set { horizontal = value; } }
     public float gravity = 3;
     public bool canJump;
 

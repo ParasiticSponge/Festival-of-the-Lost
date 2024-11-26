@@ -20,7 +20,9 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
         MENU,
         SFX_TEST,
         CROSS,
-        WIGGLE
+        WIGGLE,
+        DEV,
+        MENUFromDev
     }
     public TYPE type;
     public Vector2 position;
@@ -80,6 +82,12 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
             case TYPE.WIGGLE:
                 Actions.Toggles.Invoke(MenuManager_2.wiggleCross, (value => MenuManager_2.wiggleCross = value));
                 break;
+            case TYPE.DEV:
+                StartCoroutine(DevPop());
+                break;
+            case TYPE.MENUFromDev:
+                Actions.Dev.Invoke(false);
+                break;
         }
     }
     public void OnPointerDown(PointerEventData eventData)
@@ -116,5 +124,12 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
         Actions.Settings.Invoke(true);
         yield return new WaitForSeconds(1);
         animator.Rebind();
+    }
+    IEnumerator DevPop()
+    {
+        //animator.Play("pop");
+        Actions.Dev.Invoke(true);
+        yield return new WaitForSeconds(1);
+        //animator.Rebind();
     }
 }

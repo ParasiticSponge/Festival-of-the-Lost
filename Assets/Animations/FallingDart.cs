@@ -6,7 +6,7 @@ public class FallingDart : MonoBehaviour
 {
     Rigidbody2D m_rigidbody;
     public float horizontal = 4.5f;
-
+    bool hit;
     private void Awake()
     {
         m_rigidbody = GetComponent<Rigidbody2D>();
@@ -42,9 +42,12 @@ public class FallingDart : MonoBehaviour
 
     private void OnCollisionEnter2D(UnityEngine.Collision2D collision)
     {
-        if (collision.gameObject.GetComponent<CharacterController2D>())
+        if (collision.gameObject.GetComponent<CharacterController2D>() && !hit)
         {
-            collision.gameObject.GetComponent<CharacterController2D>().DealDamage(10);
+            hit = true;
+            //collision.gameObject.GetComponent<CharacterController2D>().DealDamage(10);
+            GameManager manager = FindObjectOfType<GameManager>();
+            manager.LooseDarts();
         }
         StartCoroutine(Destroy());
     }
