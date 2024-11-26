@@ -62,7 +62,7 @@ public class FishAI : MonoBehaviour
         Switch();
     }
     // Update is called once per frame
-    private void Switch()
+    public void Switch()
     {
         switch (state)
         {
@@ -141,6 +141,7 @@ public class FishAI : MonoBehaviour
         {
             if (character.GetComponent<RodController>().hasFish && !hooked) 
             {
+                StopAllCoroutines();
                 StartCoroutine(Swim());
                 yield break; 
             }
@@ -151,6 +152,7 @@ public class FishAI : MonoBehaviour
         }
         StopAllCoroutines();
         hooked = true;
+        GetComponent<CircleCollider2D>().enabled = false;
         transform.parent = target.transform;
         Actions.Reel.Invoke(type);
     }
@@ -168,7 +170,6 @@ public class FishAI : MonoBehaviour
             Vector2 normal = collision.gameObject.GetComponent<TemporaryEdgeDetection>().normal;
             Vector2 reflection = Functions.ReflectionVector(normal, vector2D);
             Vector3 reflection3D = new Vector3(reflection.x, reflection.y, 0);
-            print(reflection3D);
 
             position = (transform.position + reflection3D);
         }
@@ -180,6 +181,15 @@ public class FishAI : MonoBehaviour
             StopAllCoroutines();
             state = STATES.follow;
             StartCoroutine(Follow(collision.gameObject));
+        }
+    }
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.name == "Bobber" && !hooked)
+        {
+            StopAllCoroutines();
+            state = STATES.idleSwim;
+            StartCoroutine(Swim());
         }
     }
 

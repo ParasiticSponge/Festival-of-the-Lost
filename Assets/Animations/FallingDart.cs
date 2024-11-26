@@ -37,13 +37,11 @@ public class FallingDart : MonoBehaviour
         GetComponent<Animator>().Play("FallingDart", 0, 0);
         yield return new WaitForSeconds(1);
 
-        print("change gravity");
         m_rigidbody.gravityScale = 3;
     }
 
     private void OnCollisionEnter2D(UnityEngine.Collision2D collision)
     {
-        print("should destroy");
         if (collision.gameObject.GetComponent<CharacterController2D>())
         {
             collision.gameObject.GetComponent<CharacterController2D>().DealDamage(10);
