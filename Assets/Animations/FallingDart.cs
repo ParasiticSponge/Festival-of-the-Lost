@@ -32,7 +32,7 @@ public class FallingDart : MonoBehaviour
         transform.localPosition = randomPos;
 
         Vector3 movePos = transform.localPosition + new Vector3(0, -1.5f, 0);
-        yield return StartCoroutine(Functions.MoveCubic(transform.localPosition, movePos, value => transform.localPosition = value));
+        yield return StartCoroutine(Functions.MoveCubic(transform.localPosition, movePos, value => transform.localPosition = value, 1));
 
         GetComponent<Animator>().Play("FallingDart", 0, 0);
         yield return new WaitForSeconds(1);
@@ -42,6 +42,7 @@ public class FallingDart : MonoBehaviour
 
     private void OnCollisionEnter2D(UnityEngine.Collision2D collision)
     {
+        StartCoroutine(Play_Menu_Sounds.PlayClip(10, MenuManager_2.sfxVol));
         if (collision.gameObject.GetComponent<CharacterController2D>() && !hit)
         {
             hit = true;

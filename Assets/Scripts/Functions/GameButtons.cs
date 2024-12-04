@@ -12,7 +12,7 @@ public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
         pauseBack,
         replayMini,
         resetMini,
-        exitToMenu,
+        pauseBackFromGameToMenu,
         pauseBackYes,
         pauseBackNo,
         settings,
@@ -25,6 +25,7 @@ public class GameButtons : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        StartCoroutine(Play_Menu_Sounds.PlayClip(12, MenuManager_2.sfxVol));
         switch (type)
         {
             case TYPE.Power:

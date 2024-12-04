@@ -1,10 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System;
-using Unity.VisualScripting;
-using System.Reflection;
 using UnityEngine.Rendering.Universal;
 
 public class Functions : MonoBehaviour
@@ -20,9 +17,19 @@ public class Functions : MonoBehaviour
         if (image.transform.GetComponent<SpriteRenderer>()) c = image.transform.GetComponent<SpriteRenderer>().color;
         //if fadeIn is 0, increment upwards, otherwise reverse it.
         float increment = stop >= start ? 1 : -1;
-        for (float alpha = start; stop >= start ? alpha <= stop : alpha >= stop; alpha += (increment * Time.deltaTime * speed))
+        /*for (float alpha = start; stop >= start ? alpha <= stop : alpha >= stop; alpha += (increment * Time.deltaTime * speed))
         {
             c.a = alpha;
+            if (image.transform.GetComponent<Image>()) image.transform.GetComponent<Image>().color = c;
+            if (image.transform.GetComponent<Text>()) image.transform.GetComponent<Text>().color = c;
+            if (image.transform.GetComponent<SpriteRenderer>()) image.transform.GetComponent<SpriteRenderer>().color = c;
+            if (image.transform.GetComponent<Light2D>()) image.transform.GetComponent<Light2D>().intensity = c.a;
+            yield return null;
+        }*/
+        while (c.a != stop)
+        {
+            c.a += (increment/1 * Time.deltaTime * speed);
+            if (c.a * increment >= stop) c.a = stop;
             if (image.transform.GetComponent<Image>()) image.transform.GetComponent<Image>().color = c;
             if (image.transform.GetComponent<Text>()) image.transform.GetComponent<Text>().color = c;
             if (image.transform.GetComponent<SpriteRenderer>()) image.transform.GetComponent<SpriteRenderer>().color = c;
@@ -186,11 +193,11 @@ public class Functions : MonoBehaviour
             yield return null;
         }
     }
-    public static IEnumerator MoveCubic(Vector3 a, Vector3 b, Action<Vector3> OP)
+    public static IEnumerator MoveCubic(Vector3 a, Vector3 b, Action<Vector3> OP, float speed)
     {
         Vector3 desired = b - a;
         //float FPS = 1.0f / Time.deltaTime;
-        for (float i = 0; i <= 1; i += Time.deltaTime)
+        for (float i = 0; i <= 1; i += Time.deltaTime * speed)
         {
             OP.Invoke(a + (desired * EasingFunctions.EaseOutCubic(i)));
             yield return null;

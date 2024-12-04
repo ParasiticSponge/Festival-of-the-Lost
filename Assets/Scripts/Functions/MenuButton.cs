@@ -22,7 +22,8 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
         CROSS,
         WIGGLE,
         DEV,
-        MENUFromDev
+        MENUFromDev,
+        GOTOMENU
     }
     public TYPE type;
     public Vector2 position;
@@ -87,6 +88,9 @@ public class MenuButton : MonoBehaviour, IPointerUpHandler, IPointerDownHandler
                 break;
             case TYPE.MENUFromDev:
                 Actions.Dev.Invoke(false);
+                break;
+            case TYPE.GOTOMENU:
+                SceneManager.LoadScene(0);
                 break;
         }
     }

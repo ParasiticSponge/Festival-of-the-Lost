@@ -63,6 +63,7 @@ public class PhysicsManager : MonoBehaviour
                         Actions.isOverDoor.Invoke(this_collision.gameObject, true);
                         character.doorNum = Int32.Parse(this_collision.gameObject.name);
                         character.enter = true;
+                        character.choice = 0;
                         /*// AI Resolution: Create a collision event that the gameobjects can respond to
 
                         float total_mass = this_collision.mass + other_collision.mass;

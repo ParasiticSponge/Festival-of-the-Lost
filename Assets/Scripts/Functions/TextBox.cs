@@ -12,6 +12,8 @@ public class TextBox : MonoBehaviour
     static string input;
     static bool destroying;
     static bool typed;
+    static AudioSource audioSource;
+    public static bool dialogueAudio = true;
 
     static GameObject textBox;
     static Animator mask;
@@ -141,6 +143,8 @@ public class TextBox : MonoBehaviour
     }
     IEnumerator DisplayText(Sprite appearance, string speaker, string text, float speed, float intensity, GameObject obj)
     {
+        if (dialogueAudio)
+            audioSource = Play_Menu_Sounds.CreateClipReturn(3, MenuManager_2.sfxVol);
         if (appearance != null)
         {
             TextBox.appearance.enabled = true;
@@ -257,6 +261,9 @@ public class TextBox : MonoBehaviour
 
     IEnumerator LoadNext()
     {
+        if (audioSource != null)
+            Destroy(audioSource.gameObject);
+
         mask.Play("HideDialogue", 0, 0);
         appearance.Play("hideCharacter", 0, 0);
 
@@ -278,6 +285,9 @@ public class TextBox : MonoBehaviour
     }
     IEnumerator Destroy()
     {
+        if (audioSource != null)
+            Destroy(audioSource.gameObject);
+
         mask.Play("HideDialogue", 0, 0);
         appearance.Play("hideCharacter", 0, 0);
         yield return new WaitForSeconds(0.5f);

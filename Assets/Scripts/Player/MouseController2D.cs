@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.TextCore.Text;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 public class MouseController2D : MonoBehaviour
 {
@@ -122,9 +121,13 @@ public class MouseController2D : MonoBehaviour
             Actions.BalloonType.Invoke((int)otherCollider.GetComponent<BalloonType>().type);
             Actions.HitBalloon.Invoke(true);
             otherCollider.GetComponent<Animator>().Play("BalloonPop", 0, 0);
+            StartCoroutine(Play_Menu_Sounds.PlayClip(5, MenuManager_2.sfxVol));
         }
         else
+        {
             Actions.HitBalloon.Invoke(false);
+            StartCoroutine(Play_Menu_Sounds.PlayClip(10, MenuManager_2.sfxVol));
+        }
     }
 
     /*private IEnumerator LoadSomeStuff()

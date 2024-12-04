@@ -11,6 +11,9 @@ using UnityEngine.InputSystem.HID;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.SceneManagement;
+using UnityEngine.Splines;
+using UnityEngine.U2D;
+using System.IO;
 //using UnityEditor.Animations;
 
 public class GameManager : MonoBehaviour
@@ -18,6 +21,9 @@ public class GameManager : MonoBehaviour
     // ------------------MANAGEMENT---------------------
     public Transform environment;
     List<Volume> volume = new List<Volume>();
+    AudioSource audioSource;
+    AudioSource ambience;
+    Play_Menu_Sounds audioManager;
     PhysicsManager physics;
     float initialGravity;
     public bool paused;
@@ -35,6 +41,7 @@ public class GameManager : MonoBehaviour
     System.Random random = new System.Random();
     // ---------------------NPCS------------------------
     List<GameObject> NPCs = new List<GameObject>();
+    List<GameObject> operatorNPCs = new List<GameObject>();
     GameObject mum;
     // ------------------OVERALL UI---------------------
     public GameObject UI;
@@ -78,6 +85,7 @@ public class GameManager : MonoBehaviour
     bool ridingCart;
     int plushiesFound = 0;
     float[,] plushiePos = { {-5.5f, 4}, {-1.833f, 4}, {1.834f, 4}, {5.5f, 4} };
+    List<AnimatorOverrideController> NPCDarkAnim = new List<AnimatorOverrideController>();
     // ---------------------LEVEL2------------------------
     GameObject f2_UI;
     GameObject stars;
@@ -95,7 +103,7 @@ public class GameManager : MonoBehaviour
     bool hold;
     int startingDart;
     GameObject crosshair;
-    Vector3 desiredPos;
+    public Vector3 desiredPos;
     float rapidTime;
     float slowTime;
     // ---------------------LEVEL3------------------------
@@ -111,11 +119,14 @@ public class GameManager : MonoBehaviour
     public int bossPhase = 1;
     List<GameObject> bossLights = new List<GameObject>();
     GameObject fallingDart;
+    GameObject bossPlushie;
+    AudioSource reelAudio;
     // --------------------LEVEL 4-------------------------
     GameObject f4_UI;
     Image powerBarFish;
     Transform fishes;
-    GameObject bobber;
+    public GameObject bobber;
+    public SplineContainer bobberSpline;
     int misses = 0;
     int tries = 0;
     public int scoreFish = 0;
@@ -123,7 +134,9 @@ public class GameManager : MonoBehaviour
     public GameObject fishReelUI;
     bool startFishTimer;
     Text fishTimerText;
-    float fishTimer = 2;
+    float fishTimer = 1;
+    GameObject bucket;
+    public static bool hitNose;
 
     // -------------------SPRITE LIST----------------------
     public List<Sprite> darkSprites = new List<Sprite>();
@@ -134,11 +147,24 @@ public class GameManager : MonoBehaviour
         none,
         balloons,
         fish,
-        boss
+        boss,
+        darkMode,
+        skipINTRO
     }
     public TEST test = TEST.none;
     private void Awake()
     {
+        AudioSource[] audios = FindObjectsOfType<AudioSource>();
+        foreach (AudioSource audio in audios)
+        {
+            if (audio.gameObject.name == "MainAudio")
+                audioSource = audio;
+            else if (audio.gameObject.name == "AmbAudio")
+                ambience = audio;
+        }
+
+        audioManager = GetComponent<Play_Menu_Sounds>();
+
         foreach (Transform child in environment)
         {
             if (child.GetComponent<Volume>())
@@ -163,11 +189,20 @@ public class GameManager : MonoBehaviour
         else
             test = (TEST)MenuManager_2.test;
 
+        float ratioX = (float)Screen.currentResolution.width / 1920;
+        float desiredRatioY = 1080 * ratioX;
+        float difference = (float)Screen.currentResolution.height / desiredRatioY;
+        Vector3 scale = Vector3.zero;
         foreach (Transform child in backgrounds.transform)
+        {
             background.Add(child.gameObject);
+            scale = child.localScale;
+            child.localScale = new Vector3(scale.x, scale.y * difference, 1);
+        }
         foreach (Transform child in foregrounds.transform)
             foreground.Add(child.gameObject);
 
+        background[1].transform.position += new Vector3(0, -2, 0);
         foreground[2].SetActive(true);
         boss = FindObjectOfType<Boss>().gameObject;
         foreground[2].SetActive(false);
@@ -178,11 +213,18 @@ public class GameManager : MonoBehaviour
                 circusTent = t1.gameObject;
             if (t1.name.Contains("NoticeBoard"))
                 noticeBoard = t1.gameObject;
-            if (t1.name.Contains("NPC"))
+            //if (t1.name.Contains("NPC"))
+            if (t1.name == "NPCs")
             {
-                NPCs.Add(t1.gameObject);
-                if (t1.name.Contains("Mum"))
-                    mum = t1.gameObject;
+                foreach (Transform child in t1)
+                {
+                    if (child.name.Contains("Employee"))
+                        operatorNPCs.Add(child.gameObject);
+                    else if (child.name.Contains("Mum"))
+                        mum = child.gameObject;
+                    else
+                        NPCs.Add(child.gameObject);
+                }
             }
             if (t1.GetComponent<Canvas>())
                 f1_UI = t1.gameObject;
@@ -200,6 +242,8 @@ public class GameManager : MonoBehaviour
                         treeStump1 = child.GetComponent<SpriteRenderer>().sprite;
                 }
             }
+            if (t1.name == "Plushie (Boss)")
+                bossPlushie = t1.gameObject;
         }
         foreach (Transform t2 in foreground[1].transform)
         {
@@ -224,6 +268,8 @@ public class GameManager : MonoBehaviour
                     child.gameObject.SetActive(false);
                 }
             }
+            if (t3.name == "Bucket")
+                bucket = t3.gameObject;
         }
         foreach (Transform t4 in foreground[3].transform)
         {
@@ -302,6 +348,12 @@ public class GameManager : MonoBehaviour
             powerBttnPhone.SetActive(true);
         else
             powerBttnPhone.SetActive(false);
+        string minutes = Mathf.Floor(fishTimer).ToString();
+        string seconds = Mathf.Floor(((fishTimer) - Mathf.Floor(fishTimer)) * 60).ToString();
+        Int32.TryParse(seconds, out int s);
+        if (s < 10) seconds = "0" + seconds.ToString();
+        fishTimerText.text = minutes + ":" + seconds;
+        bobberSpline = bobber.transform.GetChild(0).GetComponent<SplineContainer>();
 
         scoreTicketsText.text = tickets.ToString();
         retryButton = anims[1].gameObject.transform.GetChild(0).gameObject;
@@ -316,7 +368,7 @@ public class GameManager : MonoBehaviour
         darkSprites.Add(Resources.Load<Sprite>("Images/Backgrounds/BalloonBackDark"));
         darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/BalloonDark"));
         darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/NoticeDark"));
-        darkSprites.Add(Resources.Load<Sprite>("Images/Misc/Plushie Stand"));
+        darkSprites.Add(Resources.Load<Sprite>("Images/Misc/PlushieStandDark"));
         darkSprites.Add(Resources.Load<Sprite>("Images/Fauna/LionDark"));
         darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/FOTLGateDark"));
         darkSprites.Add(Resources.Load<Sprite>("Images/Booths/Dark/FOTLPostDark"));
@@ -343,8 +395,19 @@ public class GameManager : MonoBehaviour
         foreground[4].SetActive(false);
         background[3].SetActive(false);
 
+        NPCDarkAnim.Add(Resources.Load<AnimatorOverrideController>("Controllers/CandyGirlDarkAnim"));
+        NPCDarkAnim.Add(Resources.Load<AnimatorOverrideController>("Controllers/BalloonBoyDarkAnim"));
         //if (Application.platform == RuntimePlatform.Android)
-            
+
+    }
+    void ScreenResolution()
+    {
+        float ratioX = (float)Screen.currentResolution.width / 1920;
+        float desiredRatioY = 1080 * ratioX;
+        float difference = (float)Screen.currentResolution.height / desiredRatioY;
+
+        Vector3 scale = background[1].transform.localScale;
+        background[1].transform.localScale = new Vector3(scale.x, scale.y * difference, 1);
     }
     private void Update()
     {
@@ -360,7 +423,7 @@ public class GameManager : MonoBehaviour
         Actions.isOverDoor += DoorAnim;
         Actions.Back += showUI;
         Actions.Hold += Hold;
-        Actions.Release += () => { timeLooking = 0; hold = false; };
+        Actions.Release += () => { timeLooking = 0; hold = false; StartCoroutine(Play_Menu_Sounds.PlayClip(4, MenuManager_2.sfxVol)); };
         Actions.BalloonType += value => { scoreDarts += value; };
         Actions.HitBalloon += ScoreDarts;
         Actions.Talk += Talk;
@@ -402,7 +465,7 @@ public class GameManager : MonoBehaviour
         switchScreen.gameObject.SetActive(false);
         masks[1].SetActive(false);
         fade.SetActive(true);
-        StartCoroutine(Functions.Fade(fade, 1, -1, 1));
+        StartCoroutine(Functions.Fade(fade, 1, 0, 1));
         Test();
     }
     void Test()
@@ -421,10 +484,14 @@ public class GameManager : MonoBehaviour
             case TEST.boss:
                 tickets = 22;
                 scoreTicketsText.text = tickets.ToString();
-                pocketDarts = 22;
                 TransferParent();
 
                 StartCoroutine(SwitchRooms(2));
+                break;
+            case TEST.darkMode:
+                tickets = 22;
+                scoreTicketsText.text = tickets.ToString();
+                StartCoroutine(SwitchRooms(0));
                 break;
         }
     }
@@ -433,13 +500,51 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1);
 
+        character.GetComponent<CharacterController2D>().canMove = 0;
+
         TextBox.Text(null, "???", "What is your name?", textBoxSpeed);
         TextBox.Text();
         //TextBox.Text($"Oh! Your name is {character.charName}?", 0.05f, true);
         //I* ouputs the input of the player
         //TextBox.Text(charAppearance, "I*", "Mum? Dad? Where did you go?", textBoxSpeed);
-        TextBox.Text(mum.GetComponent<NPC_AI>().appearance, mum.GetComponent<NPC_AI>().charName, "We finally made it to the circus. Go play some minigames I*. The minigames are probably rigged so if you're having trouble, be sure to press ESCAPE and change some of the settings!", textBoxSpeed);
+        TextBox.Text(mum.GetComponent<NPC_AI>().appearance, mum.GetComponent<NPC_AI>().charName, "We finally made it to the circus. Go play some minigames I*", textBoxSpeed);
 
+        TextBox text = FindObjectOfType<TextBox>();
+        while (text != null)
+        {
+            yield return null;
+        }
+
+        Vector3 pos = new Vector3(-8.5f, character.transform.localPosition.y, character.transform.localPosition.z);
+        Vector3 dir = pos - character.transform.localPosition;
+        float magnitude = dir.magnitude;
+        if (Mathf.Sign(dir.x) == -1)
+            character.transform.localScale = new Vector3(-1, 1, 1);
+        StartCoroutine(Functions.Move(character.transform.localPosition, pos, value => character.transform.localPosition = value, 0.5f));
+        while (magnitude > 0.1f)
+        {
+            dir = pos - character.transform.localPosition;
+            magnitude = dir.magnitude;
+            character.GetComponent<Animator>().SetFloat("velocity", 100);
+            yield return null;
+        }
+        character.GetComponent<Animator>().SetFloat("velocity", 0);
+
+        TextBox.Text(charAppearance, controller.charName, "Hm? What's this!?", textBoxSpeed);
+        text = FindObjectOfType<TextBox>();
+        while (text != null)
+        {
+            yield return null;
+        }
+        yield return new WaitForSeconds(0.5f);
+
+        //plushie stand
+        bossPlushie.transform.parent = lightSprites[5].gameObject.transform;
+        bossPlushie.transform.localPosition = new Vector3(plushiePos[plushiesFound, 0], plushiePos[plushiesFound, 1], bossPlushie.transform.localPosition.z);
+        plushiesFound++;
+        TextBox.Text(null, "", "You take the plushie from its place... but something feels wrong...", textBoxSpeed);
+
+        character.GetComponent<CharacterController2D>().canMove = 1;
         StartCoroutine(DisableCollisions());
         fade.SetActive(false);
     }
@@ -451,9 +556,6 @@ public class GameManager : MonoBehaviour
             //this option brings user back to main circus
             case 0:
                 yield return StartCoroutine(Transition());
-                star[0].Rebind();
-                star[1].Rebind();
-                star[2].Rebind();
                 foreach (Collision2D collider in door) { collider.enabled = true; }
                 switch (currentRoom)
                 {
@@ -467,6 +569,19 @@ public class GameManager : MonoBehaviour
                         character.transform.localPosition = new Vector3(27.8f, -3.06f, -1);
                         break;
                 }
+
+                ambience.gameObject.SetActive(true);
+                if (!mood)
+                {
+                    Play_Menu_Sounds.ChangeClip(audioSource, audioManager.musicClips[0], MenuManager_2.musicVol);
+                    Play_Menu_Sounds.ChangeClip(ambience, audioManager.musicClips[1], MenuManager_2.musicVol);
+                }
+                else
+                {
+                    Play_Menu_Sounds.ChangeClip(audioSource, audioManager.musicClips[2], MenuManager_2.musicVol);
+                    Play_Menu_Sounds.ChangeClip(ambience, audioManager.musicClips[3], MenuManager_2.musicVol);
+                }
+
                 currentRoom = 0;
                 character.transform.localRotation = Quaternion.identity;
                 character.GetComponent<Rigidbody2D>().gravityScale = initialGravity;
@@ -483,6 +598,7 @@ public class GameManager : MonoBehaviour
                 break;
             case 1:
                 yield return StartCoroutine(Transition());
+                Play_Menu_Sounds.ChangeClip(audioSource, audioManager.musicClips[4], MenuManager_2.musicVol);
                 currentRoom = 1;
                 //default layer mask
                 character.GetComponent<SpriteRenderer>().sortingLayerName = "Default";
@@ -497,25 +613,29 @@ public class GameManager : MonoBehaviour
                 }
                 else if (tickets < ticketsToEnterTent)
                 {
+                    StartCoroutine(Play_Menu_Sounds.PlayClip(8, MenuManager_2.sfxVol));
                     TextBox.Text(charAppearance, controller.charName, "It appears I don't have enough tickets...", textBoxSpeed);
-                    
                     yield break;
                 }
                 yield return StartCoroutine(Transition());
+                TicketsUI.sprite = darkSprites[darkSprites.Count - 2];
+                countDartsText.text = pocketDarts.ToString();
 
-                StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 1, -1, 2));
-                StartCoroutine(Functions.Fade(UI.transform.GetChild(0).GetChild(0).gameObject, 1, -1, 2));
-                StartCoroutine(Functions.Fade(UI.transform.GetChild(0).GetChild(1).gameObject, 1, -1, 2));
+                StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 1, 0, 2));
+                StartCoroutine(Functions.Fade(UI.transform.GetChild(0).GetChild(0).gameObject, 1, 0, 2));
+                StartCoroutine(Functions.Fade(UI.transform.GetChild(0).GetChild(1).gameObject, 1, 0, 2));
 
-                StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(0).gameObject, 1, -1, 2));
-                StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(0).GetChild(0).gameObject, 1, -1, 2));
-                StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(1).gameObject, 1, -1, 2));
+                StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(0).gameObject, 1, 0, 2));
+                StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(0).GetChild(0).gameObject, 1, 0, 2));
+                StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(1).gameObject, 1, 0, 2));
 
-                StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(0).gameObject, 1, -1, 2));
-                StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(0).GetChild(0).gameObject, 1, -1, 2));
-                StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(1).gameObject, 1, -1, 2));
+                StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(0).gameObject, 1, 0, 2));
+                StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(0).GetChild(0).gameObject, 1, 0, 2));
+                StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(1).gameObject, 1, 0, 2));
 
                 character.GetComponent<SpriteRenderer>().sortingLayerName = "Boss";
+                audioSource.Stop();
+
                 currentRoom = 2;
                 tickets -= ticketsToEnterTent;
                 scoreTicketsText.text = tickets.ToString();
@@ -531,6 +651,7 @@ public class GameManager : MonoBehaviour
                 yield break;
             case 4:
                 yield return StartCoroutine(Transition());
+                Play_Menu_Sounds.ChangeClip(audioSource, audioManager.musicClips[5], MenuManager_2.musicVol);
                 currentRoom = 3;
                 character.GetComponent<SpriteRenderer>().sortingLayerName = "Default";
 
@@ -544,13 +665,16 @@ public class GameManager : MonoBehaviour
         if (n == 0 && tickets >= ticketsToEnterTent && !mood)
         {
             mood = true;
+            Play_Menu_Sounds.ChangeClip(audioSource, audioManager.musicClips[2], MenuManager_2.musicVol);
+            Play_Menu_Sounds.ChangeClip(ambience, audioManager.musicClips[3], MenuManager_2.musicVol);
 
             //Destroy(mum);
-            NPCs.Remove(mum);
+            //NPCs.Remove(mum);
             //yield return null;
 
             TransferParent();
 
+            //destroy other NPCs
             physics.UpdateCollision();
             ChangeMood();
             StartCoroutine(Sad());
@@ -566,6 +690,9 @@ public class GameManager : MonoBehaviour
     }
     IEnumerator Transition()
     {
+        ambience.gameObject.SetActive(false);
+        audioSource.loop = true;
+
         switchScreen.gameObject.SetActive(true);
         masks[1].SetActive(true);
         character.GetComponent<MouseController2D>().fire = true;
@@ -615,29 +742,66 @@ public class GameManager : MonoBehaviour
                 anims2[2].enabled = true;
                 PlayAnimation(anims2[2], "WarningShow", false);
                 break;
+            case GameButtons.TYPE.pauseBackFromGameToMenu:
+                //re-use boolean to switch whether user is going back to menu or main game in other function
+                settings = true;
+                paused = true;
+                Time.timeScale = 0;
+                anims2[2].enabled = true;
+                PlayAnimation(anims2[2], "WarningShow", false);
+                break;
             case GameButtons.TYPE.replayMini:
                 anims[1].updateMode = AnimatorUpdateMode.UnscaledTime;
                 canPause = true;
                 Time.timeScale = 1;
                 PlayAnimation(anims[1], "ScoreSheetShow", true);
-                ResetDartsGame(false);
+                switch (currentRoom)
+                {
+                    case 1:
+                        ResetDartsGame(false);
+                        break;
+                    case 3:
+                        ResetFishingGame(false);
+                        break;
+                }
                 break;
             case GameButtons.TYPE.resetMini:
                 Pause();
-                ResetDartsGame(true);
-                break;
-            case GameButtons.TYPE.exitToMenu:
-                canPause = true;
-                Time.timeScale = 1;
-                StartCoroutine(ExitToMenu());
+                switch (currentRoom)
+                {
+                    case 1:
+                        ResetDartsGame(true);
+                        break;
+                    case 3:
+                        ResetFishingGame(true);
+                        break;
+                }
                 break;
             case GameButtons.TYPE.pauseBackYes:
+                canPause = true;
                 //get rid of warning and unpause
                 Pause();
                 PlayAnimation(anims2[2], "WarningShow", true);
-                StartCoroutine(SwitchRooms(0));
+                switch (currentRoom)
+                {
+                    case int a when a != 0:
+                        if (settings)
+                        {
+                            settings = false;
+                            StartCoroutine(ExitToMenu());
+                        }
+                        else
+                        {
+                            StartCoroutine(SwitchRooms(0));
+                        }
+                        break;
+                    case 0:
+                        StartCoroutine(ExitToMenu());
+                        break;
+                }
                 break;
             case GameButtons.TYPE.pauseBackNo:
+                settings = false;
                 //get rid of warning but don't unpause
                 PlayAnimation(anims2[2], "WarningShow", true);
                 break;
@@ -712,7 +876,7 @@ public class GameManager : MonoBehaviour
                 if (currentRoom == 1)
                     Actions.Power.Invoke(desiredPos);
                 if (currentRoom == 2)
-                    Bow(i);
+                    Bullet(i);
                 if (currentRoom == 3)
                     CastRod(i);
                 //mouseController has x position updated to match mouse, overide this
@@ -731,7 +895,7 @@ public class GameManager : MonoBehaviour
                     if (currentRoom == 1)
                         Actions.Power.Invoke(desiredPos);
                     if (currentRoom == 2)
-                        Bow(i);
+                        Bullet(i);
                     if (currentRoom == 3)
                         CastRod(i);
                     crosshair.transform.position = desiredPos;
@@ -789,7 +953,7 @@ public class GameManager : MonoBehaviour
         Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         screenToWorld.y = darts[startingDart].transform.position.y;
         screenToWorld.z = darts[startingDart].transform.position.z;
-        yield return StartCoroutine(Functions.MoveCubic(darts[startingDart].transform.position, screenToWorld, (value => darts[startingDart].transform.position = value)));
+        yield return StartCoroutine(Functions.MoveCubic(darts[startingDart].transform.position, screenToWorld, value => darts[startingDart].transform.position = value, 1));
         //yield return StartCoroutine(Functions.Move(arg, screenToWorld));
 
         Sprite thrown = character.GetComponent<SpriteRenderer>().sprite;
@@ -816,6 +980,8 @@ public class GameManager : MonoBehaviour
     }
     public void ResetDartsGame(bool fullReset)
     {
+        Play_Menu_Sounds.ChangeClip(audioSource, audioManager.musicClips[4], MenuManager_2.musicVol);
+
         retryButton.SetActive(true);
         Vector3 room = background[currentRoom].transform.position;
         character.transform.position = new Vector3(room.x, room.y - 8, 0);
@@ -911,7 +1077,7 @@ public class GameManager : MonoBehaviour
             StartCoroutine(GameOver(0));
         }
     }
-    void Bow(float power)
+    void Bullet(float power)
     {
         if (currentRoom == 2 && pocketDarts > 0)
         {
@@ -932,22 +1098,48 @@ public class GameManager : MonoBehaviour
             LayerMask mask = LayerMask.GetMask("Player", "Default");
             rigid.excludeLayers += mask;
             collider.excludeLayers += mask;
-
+            Actions.BulletTarget.Invoke(boss);
+            if (pocketDarts == 0)
+            {
+                Vector3 position = bucket.transform.localPosition + new Vector3(0, -8.2f, 0);
+                StartCoroutine(Functions.Move(bucket.transform.localPosition, position, value => bucket.transform.localPosition = value, 1));
+            }
 
             Destroy(go, 5);
         }
     }
     void CastRod(float power)
     {
+        Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * (power / 100), 0));
+        Vector3 origin = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0));
+        Vector3 vector = screenToWorld - origin;
+        Vector2 vector2 = new Vector2(vector.x, vector.y);
+
+        string path = Application.persistentDataPath + "/Pond_without_lilypads.png";
+        try
+        {
+            ImageHeader.GetDimensions(path);
+        }
+        catch
+        {
+            path = @"C:\Users\123sj\Documents\GitHub\idk-what-to-call-this-game\Assets\Resources\Images\Backgrounds\Pond_without_lilypads.png";
+        }
+        
+        Vector2Int imgSize = ImageHeader.GetDimensions(path);
+        float bottomSection = 369/(float)imgSize.y;
+        float middleSection = 4232/(float)imgSize.y;
+        print(bottomSection);
+        print(middleSection);
+        float sus = middleSection * vector.y + (bottomSection * vector.y);
+        print(vector.y);
+        print(sus);
+        vector2.y = sus;
+
         if (!startFishTimer)
         {
             startFishTimer = true;
             StartCoroutine(FishTimer());
         }
-        Vector3 screenToWorld = Camera.main.ScreenToWorldPoint(new Vector3(0, Camera.main.pixelHeight * (power / 100), 0));
-        Vector3 origin = Camera.main.ScreenToWorldPoint(new Vector3(0, 0, 0));
-        Vector3 vector = screenToWorld - origin;
-        Vector2 vector2 = new Vector2(vector.x, vector.y);
 
         Vector3 mouseToWorld = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Vector3 mouse = mouseToWorld - character.transform.position;
@@ -956,8 +1148,33 @@ public class GameManager : MonoBehaviour
         Vector2 rotation = Functions.RotateVector2(vector2, angle);
         vector = new Vector3(rotation.x, rotation.y, 0);
 
+        Vector3 rodTip = character.transform.position + (mouse * 0.55f);
         desiredPos = (character.transform.position + vector);
-        bobber.transform.position = desiredPos;
+
+        //BezierKnot knot = bobberSpline.Spline.ToArray()[bobberSpline.Spline.Count - 1];
+        //StartCoroutine(MoveLine());
+        //IEnumerator MoveLine()
+        //{
+        //    for (float i = 0; i <= 1; i += Time.deltaTime)
+        //    {
+        //        bobber.transform.position = (rodTip + ((desiredPos - rodTip) * EasingFunctions.EaseOutCubic(i)));
+
+        //        knot = bobberSpline.Spline.ToArray()[bobberSpline.Spline.Count - 1];
+        //        knot.Position = bobberSpline.transform.InverseTransformPoint(rodTip);
+        //        knot.Rotation = Quaternion.Inverse(bobberSpline.transform.rotation) * Quaternion.Euler(0, 0, angle);
+        //        bobberSpline.Spline.SetKnot(bobberSpline.Spline.Count - 1, knot);
+
+        //        yield return null;
+        //    }
+        //}
+
+        StartCoroutine(Move());
+        IEnumerator Move()
+        {
+            yield return StartCoroutine(Functions.MoveCubic(rodTip, desiredPos, value => bobber.transform.position = value, 1.5f));
+            yield return StartCoroutine(Play_Menu_Sounds.PlayClip(11, MenuManager_2.sfxVol));
+        }
+        //bobber.transform.position = desiredPos;
 
     }
     IEnumerator FishTimer()
@@ -966,6 +1183,8 @@ public class GameManager : MonoBehaviour
         {
             string minutes = Mathf.Floor(i / 60).ToString();
             string seconds = Mathf.Floor(((i / 60) - Mathf.Floor(i / 60)) * 60).ToString();
+            Int32.TryParse(seconds, out int t);
+            if (t < 10) seconds = "0" + seconds.ToString();
             fishTimerText.text = minutes + ":" + seconds;
             yield return null;
         }
@@ -974,26 +1193,28 @@ public class GameManager : MonoBehaviour
     }
     IEnumerator FishMinigame(FishAI.TYPE type)
     {
+        reelAudio = Play_Menu_Sounds.CreateClipReturn(6, MenuManager_2.musicVol);
+        float speed = 1;
         character.GetComponent<RodController>().hasFish = true;
         character.GetComponent<RodController>().fire = true;
 
-        Transform fish = bobber.transform.GetChild(0);
+        Transform fish = bobber.transform.GetChild(1);
         Vector3 vector = character.transform.position - bobber.transform.position;
         Vector3 away = (bobber.transform.position - character.transform.position).normalized;
         Vector3 lift = Vector3.zero;
         float magnitude = vector.magnitude;
-        SwitchFishType(type);
+        SwitchFishType(type, ref speed);
         fishReelUI.SetActive(true);
 
         while (magnitude > 4)
         {
             vector = character.transform.position - bobber.transform.position;
             magnitude = vector.magnitude;
-            bobber.transform.position += vector.normalized * Time.deltaTime;
-
+            bobber.transform.position += vector.normalized * Time.deltaTime * speed;
             //fish moves away
             if (misses >= 3)
             {
+                Destroy(reelAudio.gameObject);
                 fish.parent = fishes;
                 fish.GetComponent<FishAI>().hooked = false;
                 fish.GetComponent<FishAI>().state = FishAI.STATES.idleSwim;
@@ -1017,13 +1238,17 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
+        Destroy(reelAudio.gameObject);
         scoreFish += (int)type;
         tickets += (int)type;
+        misses = 0;
+        tries = 0;
         scoreFishText.text = scoreFish.ToString();
         scoreTicketsText.text = tickets.ToString();
 
         fish.transform.localPosition = new Vector3(10, 0, 0);
         fish.GetComponent<FishAI>().enabled = false;
+        fish.parent = fishes;
 
         fishReelUI.SetActive(false);
         bobber.transform.position += new Vector3(0, -6, -2);
@@ -1039,38 +1264,54 @@ public class GameManager : MonoBehaviour
     IEnumerator SpawnFish(Transform fish)
     {
         yield return new WaitForSeconds(3);
-        fish.parent = fishes;
         // -6 => 6
         int randomX = Functions.random.Next(13) - 6;
         // -2 => 2
         int randomY = Functions.random.Next(5) - 2;
         fish.transform.localPosition = new Vector3(randomX, randomY, 0);
+        fish.GetComponent<FishAI>().hooked = false;
         fish.GetComponent<FishAI>().enabled = true;
+        fish.GetComponent<FishAI>().state = FishAI.STATES.idleSwim;
+        fish.GetComponent<FishAI>().Switch();
+        fish.GetComponent<CircleCollider2D>().enabled = true;
     }
-    void SwitchFishType(FishAI.TYPE type)
+    void SwitchFishType(FishAI.TYPE type, ref float speed)
     {
         switch (type)
         {
             case FishAI.TYPE.angler:
                 fishReelUI.GetComponent<FishReeler>().speed = 2;
                 fishReelUI.GetComponent<FishReeler>().sprite = 0;
+                speed = 2;
                 break;
             case FishAI.TYPE.bass:
                 fishReelUI.GetComponent<FishReeler>().speed = 2.5f;
                 fishReelUI.GetComponent<FishReeler>().sprite = 1;
+                speed = 1.5f;
                 break;
             case FishAI.TYPE.clown:
                 fishReelUI.GetComponent<FishReeler>().speed = 3;
                 fishReelUI.GetComponent<FishReeler>().sprite = 2;
+                speed = 1;
                 break;
         }
     }
     public void ResetFishingGame(bool fullReset)
     {
+        startFishTimer = false;
+        StopCoroutine(FishTimer());
+        Play_Menu_Sounds.ChangeClip(audioSource, audioManager.musicClips[5], MenuManager_2.musicVol);
+
+        string minutes = Mathf.Floor(fishTimer).ToString();
+        string seconds = Mathf.Floor(((fishTimer) - Mathf.Floor(fishTimer)) * 60).ToString();
+        Int32.TryParse(seconds, out int s);
+        if (s < 10) seconds = "0" + seconds.ToString();
+        fishTimerText.text = minutes + ":" + seconds;
+
         bobber.transform.position += new Vector3(0, -6, -2);
         retryButton.SetActive(true);
         Vector3 room = background[currentRoom].transform.position;
-        character.transform.position = new Vector3(room.x, room.y - 14, 0);
+        character.transform.position = new Vector3(room.x, room.y - 14.5f, 0);
         Vector3 pos = character.transform.localPosition;
         character.transform.localPosition = new Vector3(pos.x, pos.y, charDartDistanceFromCam);
         character.GetComponent<Animator>().Play("rodIdle", 0, 0);
@@ -1093,27 +1334,6 @@ public class GameManager : MonoBehaviour
         powerBarFish.fillAmount = 0;
         scoreFish = 0;
         scoreFishText.text = scoreFish.ToString();
-        //startingDart = 0;
-        /*for (int i = 1; i < darts.Count + 1; i++)
-        {
-            darts[i - 1].transform.localPosition = new Vector3(i + 1.5f, -2.5f, dartDistanceFromCam);
-            darts[i - 1].GetComponent<SpriteRenderer>().sprite = dart;
-        }
-        if (fullReset)
-        {
-            for (int i = 0; i < balloons.Count; i++)
-            {
-                balloons[i].GetComponent<SpriteRenderer>().sprite = balloon;
-                balloons[i].GetComponent<Animator>().Rebind();
-                balloons[i].GetComponent<CircleCollider2D>().enabled = true;
-            }
-        }
-
-        //reset y to middle of screen
-        GameObject cross = character.GetComponent<MouseController2D>().crosshair;
-        Vector3 desiredPos = new Vector3(cross.transform.localPosition.x, 0, cross.transform.localPosition.z);
-        if (cross.activeSelf)
-            cross.transform.localPosition = desiredPos;*/
     }
 
     public void Talk(GameObject obj)
@@ -1141,8 +1361,8 @@ public class GameManager : MonoBehaviour
         //circusTent.GetComponent<SpriteRenderer>().sprite = tentSheet[1];
 
         yield return new WaitForSeconds(1.5f);
-        TextBox.Text(NPCs[1].GetComponent<NPC_AI>().appearance, NPCs[1].GetComponent<NPC_AI>().charName, "Wow, nice job kiddo! Here, take some darts as a souvenir", textBoxSpeed);
 
+        /*TextBox.Text(operatorNPCs[0].GetComponent<NPC_AI>().appearance, operatorNPCs[0].GetComponent<NPC_AI>().charName, "Wow, nice job kiddo! Here, take some darts as a souvenir", textBoxSpeed);
         TextBox text = FindObjectOfType<TextBox>();
         while (text != null)
         {
@@ -1151,15 +1371,23 @@ public class GameManager : MonoBehaviour
         //Play animation
         anims[0].Play("Aquire", 0, 0);
         pocketDarts = 20;
-        countDartsText.text = pocketDarts.ToString();
+        countDartsText.text = pocketDarts.ToString();*/
+        //yield return new WaitForSeconds(2.5f);
+        //TextBox.Text(charAppearance, controller.charName, "Thanks!", textBoxSpeed);
 
-        yield return new WaitForSeconds(2.5f);
-        TextBox.Text(charAppearance, controller.charName, "Thanks!", textBoxSpeed);
+        TextBox.dialogueAudio = false;
         TextBox.Text(charAppearance, controller.charName, "...", textBoxSpeed);
+        TextBox textBox = FindObjectOfType<TextBox>();
+        while (textBox == null)
+        {
+            yield return null;
+        }
+        TextBox.dialogueAudio = true;
         TextBox.Text(charAppearance, controller.charName, "Dad? Where did you go?", textBoxSpeed);
     }
     public void ChangeMood()
     {
+        charAppearance = Resources.Load<Sprite>("Images/Appearance/PlayerAppearanceSad");
         fade.SetActive(true);
         StartCoroutine(moodyFade());
         //other static stuff
@@ -1173,17 +1401,23 @@ public class GameManager : MonoBehaviour
         }
         MenuManager_2.textBoxColourLight = MenuManager_2.textBoxColourDark;
 
-        //mum npc removed so -1 in array
-        NPCs[4].GetComponent<Animator>().Play("BoyPointDarkAnim");
-
         for (int i = 0; i < lightSprites.Count; i++)
         {
             lightSprites[i].sprite = darkSprites[i];
         }
-        TicketsUI.sprite = darkSprites[darkSprites.Count - 2];
         circusTent.GetComponent<SpriteRenderer>().sprite = darkSprites[darkSprites.Count - 1];
-        NPCs[6].GetComponent<Animator>().Play("GirlEatDarkAnim");
-        NPCs[7].GetComponent<Animator>().Play("BoyPointDarkAnim");
+
+        NPCs[0].SetActive(false);
+        NPCs[1].SetActive(false);
+        NPCs[2].SetActive(false);
+        NPCs[6].SetActive(false);
+        NPCs[8].SetActive(false);
+
+        NPCs[3].GetComponent<Animator>().Play("GirlEatDarkAnim");
+        NPCs[4].GetComponent<Animator>().Play("BoyPointDarkAnim");
+
+        NPCs[5].GetComponent<Animator>().runtimeAnimatorController = NPCDarkAnim[0];
+        NPCs[7].GetComponent<Animator>().runtimeAnimatorController = NPCDarkAnim[1];
 
         volume[0].gameObject.SetActive(true);
     }
@@ -1261,7 +1495,9 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(BoardLooking());
                 StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 1, 0, 1));
                 StartCoroutine(Functions.Fade(scoreTicketsText.gameObject, 1, 0, 1));
+                StartCoroutine(Functions.Fade(countDartsText.gameObject, 1, 0, 1));
                 StartCoroutine(Functions.Fade(character, 1, 0, 1));
+                StartCoroutine(Functions.Fade(mum, 1, 0, 1));
                 controller.canMove = 0;
                 //character.GetComponent<CharacterController2D>().enabled = false;
                 foreach (GameObject npc in NPCs)
@@ -1269,10 +1505,10 @@ public class GameManager : MonoBehaviour
                     StartCoroutine(Functions.Fade(npc, 1, 0, 1));
                     if (npc.GetComponent<NPC_AI>()) npc.GetComponent<NPC_AI>().canMove = 0;
                 }
-                door[2].gameObject.SetActive(false);
+                door[1].gameObject.SetActive(false);
                 pos = new Vector3(noticeBoard.transform.position.x, noticeBoard.transform.position.y, -10);
                 Camera.main.GetComponent<CameraFollow>().enabled = false;
-                StartCoroutine(Functions.MoveCubic(Camera.main.transform.position, pos, (value => Camera.main.transform.position = value)));
+                StartCoroutine(Functions.MoveCubic(Camera.main.transform.position, pos, value => Camera.main.transform.position = value, 1));
                 //StartCoroutine(Functions.Move(arg => Camera.main.transform.position = arg, pos));
                 StartCoroutine(Functions.Zoom(Camera.main, -9));
                 break;
@@ -1281,7 +1517,9 @@ public class GameManager : MonoBehaviour
                 timeLooking = 0;
                 StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 0, 1, 1));
                 StartCoroutine(Functions.Fade(scoreTicketsText.gameObject, 0, 1, 1));
+                StartCoroutine(Functions.Fade(countDartsText.gameObject, 0, 1, 1));
                 StartCoroutine(Functions.Fade(character, 0, 1, 1));
+                StartCoroutine(Functions.Fade(mum, 0, 1, 1));
                 //TODO: when moving before completely zoomed out, camera snaps rather than smooths to position 
                 controller.canMove = 1;
                 //character.GetComponent<CharacterController2D>().enabled = true;
@@ -1290,11 +1528,11 @@ public class GameManager : MonoBehaviour
                     StartCoroutine(Functions.Fade(npc, 0, 1, 1));
                     if (npc.GetComponent<NPC_AI>()) npc.GetComponent<NPC_AI>().canMove = 1;
                 }
-                door[2].gameObject.SetActive(true);
+                door[1].gameObject.SetActive(true);
                 CameraFollow component = Camera.main.GetComponent<CameraFollow>();
                 pos = new Vector3(character.transform.position.x, character.transform.position.y, 0) + component.offset;
                 component.enabled = true;
-                StartCoroutine(Functions.MoveCubic(Camera.main.transform.position, pos, (value => Camera.main.transform.position = value)));
+                StartCoroutine(Functions.MoveCubic(Camera.main.transform.position, pos, value => Camera.main.transform.position = value, 1));
                 //StartCoroutine(Functions.Move(arg, pos));
                 StartCoroutine(Functions.Zoom(Camera.main, 9));
                 break;
@@ -1384,25 +1622,48 @@ public class GameManager : MonoBehaviour
 
     IEnumerator ExitToMenu()
     {
-        switchScreen.speed = 1;
-        switchScreen.Play("MenuSelectOption", 0, 0);
-        fade.SetActive(true);
-        yield return new WaitForSecondsRealtime(1);
-        StartCoroutine(Functions.Fade(fade, 0, 1, 1));
+        switchScreen.gameObject.SetActive(true);
+        masks[1].SetActive(true);
+        PlayAnimation(switchScreen, "MenuSelectOption", false);
+        yield return null;
+        yield return new WaitForSecondsRealtime(CurrentClipLength(switchScreen));
+        SceneManager.LoadScene(0);
     }
 
     IEnumerator GameOver(int scoringSystem)
     {
-        float scoring = 0;
+        if (reelAudio != null)
+        {
+            Destroy(reelAudio.gameObject);
+        }
+
+        character.GetComponent<MouseController2D>().enabled = false;
+        character.GetComponent<RodController>().enabled = false;
+
+        float count = tickets;
+        tickets += scoreDarts;
+        scoreTicketsText.text = (tickets).ToString();
+
+        int scoring = 0;
         switch (scoringSystem)
         {
             case 0:
                 scoring = scoreDarts;
+                star[0].Rebind();
+                star[1].Rebind();
+                star[2].Rebind();
                 break;
             case 1:
+                startFishTimer = false;
+                StopCoroutine(FishTimer());
                 scoring = scoreFish;
                 break;
         }
+        audioSource.loop = false;
+        if (scoring == 0)
+            Play_Menu_Sounds.ChangeClip(audioSource, audioManager.musicClips[7], MenuManager_2.musicVol);
+        else
+            Play_Menu_Sounds.ChangeClip(audioSource, audioManager.musicClips[8], MenuManager_2.musicVol);
         canPause = false;
 
         anims[0].transform.parent.transform.localScale = Vector3.one;
@@ -1414,19 +1675,19 @@ public class GameManager : MonoBehaviour
         anims[1].speed = 1;
         PlayAnimation(anims[1], "ScoreSheetShow", false);
         yield return new WaitForSecondsRealtime(1);
-        for (int i = 0; i < scoreDarts; i++)
+        for (int i = 0; i < scoring; i++)
         {
-            tickets ++;
+            count++;
             //Play ticket collecting sound
-            anims[1].transform.GetChild(4).gameObject.GetComponent<Text>().text = (tickets).ToString();
-            scoreTicketsText.text = (tickets).ToString();
+            StartCoroutine(Play_Menu_Sounds.PlayClip(7, MenuManager_2.sfxVol));
+            anims[1].transform.GetChild(4).gameObject.GetComponent<Text>().text = (count).ToString();
             yield return new WaitForSecondsRealtime(0.1f);
         }
 
         //parent animator affects scaling of children, so disable change to physics
         //anims[1].updateMode = AnimatorUpdateMode.AnimatePhysics;
 
-        switch (scoreDarts)
+        switch (scoring)
         {
             case 0:
                 break;
@@ -1455,11 +1716,21 @@ public class GameManager : MonoBehaviour
 
     void CrossOutTickets()
     {
-        if (tickets <= 22)
+        if (flagTickets[10].gameObject.activeSelf == false)
         {
-            for (int i = 0; i < Mathf.Floor((float)tickets / 2); i++)
+            if (tickets <= 22)
             {
-                flagTickets[i].gameObject.SetActive(true);
+                for (int i = 0; i < Mathf.Floor((float)tickets / 2); i++)
+                {
+                    flagTickets[i].gameObject.SetActive(true);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 11; i++)
+                {
+                    flagTickets[i].gameObject.SetActive(true);
+                }
             }
         }
     }
@@ -1485,6 +1756,13 @@ public class GameManager : MonoBehaviour
                 if (child.transform.childCount > 0) 
                     child.transform.GetChild(0).gameObject.SetActive(false);
             }
+            foreach (GameObject child in operatorNPCs)
+            {
+                if (child.transform.childCount > 0)
+                    child.transform.GetChild(0).gameObject.SetActive(false);
+            }
+            if (mum.transform.childCount > 0)
+                mum.transform.GetChild(0).gameObject.SetActive(false);
             text = FindObjectOfType<TextBox>();
             yield return null;
         }
@@ -1492,17 +1770,17 @@ public class GameManager : MonoBehaviour
     //alternatively setup a trigger boxCollider2D and invoke an action to begin boss fight
     public void ResetBossFight()
     {
-        StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 1, -1, 2));
-        StartCoroutine(Functions.Fade(UI.transform.GetChild(0).GetChild(0).gameObject, 1, -1, 2));
-        StartCoroutine(Functions.Fade(UI.transform.GetChild(0).GetChild(1).gameObject, 1, -1, 2));
+        StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 1, 0, 2));
+        StartCoroutine(Functions.Fade(UI.transform.GetChild(0).GetChild(0).gameObject, 1, 0, 2));
+        StartCoroutine(Functions.Fade(UI.transform.GetChild(0).GetChild(1).gameObject, 1, 0, 2));
 
-        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(0).gameObject, 1, -1, 2));
-        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(0).GetChild(0).gameObject, 1, -1, 2));
-        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(1).gameObject, 1, -1, 2));
+        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(0).gameObject, 1, 0, 2));
+        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(0).GetChild(0).gameObject, 1, 0, 2));
+        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(1).gameObject, 1, 0, 2));
 
-        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(0).gameObject, 1, -1, 2));
-        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(0).GetChild(0).gameObject, 1, -1, 2));
-        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(1).gameObject, 1, -1, 2));
+        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(0).gameObject, 1, 0, 2));
+        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(0).GetChild(0).gameObject, 1, 0, 2));
+        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(1).gameObject, 1, 0, 2));
 
         character.transform.localPosition = new Vector3(0, -33.5f, -1);
 
@@ -1524,7 +1802,10 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
-        TextBox.Text(null, "", "...", textBoxSpeed);
+        yield return new WaitForSeconds(0.7f);
+
+        StartCoroutine(Play_Menu_Sounds.PlayClip(13, MenuManager_2.sfxVol));
+        TextBox.dialogueAudio = false;
         TextBox.Text(null, "???", "Help!", textBoxSpeed);
 
         text = FindObjectOfType<TextBox>();
@@ -1537,16 +1818,26 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSeconds(1);
         bossLights[0].SetActive(true);
         bossLights[3].SetActive(true);
+
+        StartCoroutine(Play_Menu_Sounds.PlayClip(2, MenuManager_2.sfxVol));
         bossLights[3].GetComponent<Light2D>().intensity = 0.0025f;
+
         yield return new WaitForSeconds(1);
         bossLights[1].SetActive(true);
+
+        StartCoroutine(Play_Menu_Sounds.PlayClip(2, MenuManager_2.sfxVol));
         bossLights[3].GetComponent<Light2D>().intensity = 0.005f;
+
         yield return new WaitForSeconds(1);
         bossLights[2].SetActive(true);
+
+        StartCoroutine(Play_Menu_Sounds.PlayClip(2, MenuManager_2.sfxVol));
         bossLights[3].GetComponent<Light2D>().intensity = 0.05f;
+
         yield return new WaitForSeconds(1.5f);
         StartCoroutine(Functions.Fade(bossLights[3], 0.05f, 0.4f, 1));
 
+        TextBox.dialogueAudio = true;
         TextBox.Text(charAppearance, controller.name, "Dad! Is That you!?!", textBoxSpeed);
         text = FindObjectOfType<TextBox>();
         while (text != null)
@@ -1561,17 +1852,19 @@ public class GameManager : MonoBehaviour
         boss.GetComponent<Animator>().Play("fall", 0, 0);
         yield return new WaitForSeconds(2f);
         boss.transform.localPosition = new Vector3(boss.transform.localPosition.x, 9, boss.transform.localPosition.z);
-        Vector3 backPos = background[2].transform.localPosition + new Vector3(0, -3.8f, 0);
-        Vector3 platPos = bossPlatform.transform.localPosition + new Vector3(0, 1.6f, 0);
-        Vector3 bossPos = boss.transform.localPosition + new Vector3(0, -6.7f, 0);
-        Vector3 groundPos = foreground[2].transform.GetChild(0).localPosition + new Vector3(0, -3.8f, 0);
-        StartCoroutine(Functions.MoveCubic(background[2].transform.localPosition, backPos, value => background[2].transform.localPosition = value));
-        StartCoroutine(Functions.MoveCubic(bossPlatform.transform.localPosition, platPos, value => bossPlatform.transform.localPosition = value));
-        StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
-        StartCoroutine(Functions.MoveCubic(foreground[2].transform.GetChild(0).localPosition, groundPos, value => foreground[2].transform.GetChild(0).localPosition = value));
+        Vector3 position = background[2].transform.localPosition + new Vector3(0, -3.8f, 0);
+        StartCoroutine(Functions.MoveCubic(background[2].transform.localPosition, position, value => background[2].transform.localPosition = value, 1));
+        position = bossPlatform.transform.localPosition + new Vector3(0, 1.6f, 0);
+        StartCoroutine(Functions.MoveCubic(bossPlatform.transform.localPosition, position, value => bossPlatform.transform.localPosition = value, 1));
+        position = boss.transform.localPosition + new Vector3(0, -6.7f, 0);
+        StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, position, value => boss.transform.localPosition = value, 1));
+        position = foreground[2].transform.GetChild(0).localPosition + new Vector3(0, -3.8f, 0);
+        StartCoroutine(Functions.MoveCubic(foreground[2].transform.GetChild(0).localPosition, position, value => foreground[2].transform.GetChild(0).localPosition = value, 1));
         yield return new WaitForSeconds(1);
         boss.GetComponent<Animator>().Play("taunt", 0, 0);
-        TextBox.Text(null, "Poppy", "Hahaha! Your parents are mine!", textBoxSpeed);
+        StartCoroutine(Play_Menu_Sounds.PlayClip(9, MenuManager_2.sfxVol));
+        TextBox.dialogueAudio = false;
+        TextBox.Text(null, "Poppy", "Why are you here? You should be happy i took your father away. Now you can play at the circus all the time!", textBoxSpeed);
 
         text = FindObjectOfType<TextBox>();
         while (text != null)
@@ -1579,20 +1872,71 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
-        StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 0, 1.1f, 1));
-        StartCoroutine(Functions.Fade(UI.transform.GetChild(0).GetChild(0).gameObject, 0, 1.1f, 1));
-        StartCoroutine(Functions.Fade(UI.transform.GetChild(0).GetChild(1).gameObject, 0, 1.1f, 1));
+        yield return new WaitForSeconds(1);
 
-        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(0).gameObject, 0, 1.1f, 1));
-        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(0).GetChild(0).gameObject, 0, 1.1f, 1));
-        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(1).gameObject, 0, 1.1f, 1));
+        //drop dart on boss
+        StartCoroutine(DropDart());
+    }
+    IEnumerator DropDart()
+    {
+        Vector3 increment = new Vector3(-1, 0, 0);
+        Vector3 position = new Vector3(-4.5f, bucket.transform.localPosition.y, bucket.transform.localPosition.z);
+        float magnitude = (position - bucket.transform.localPosition).magnitude;
+        bool hasDropped = false;
 
-        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(0).gameObject, 0, 1.1f, 1));
-        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(0).GetChild(0).gameObject, 0, 1.1f, 1));
-        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(1).gameObject, 0, 1.1f, 1));
+        while (magnitude > 0.1f)
+        {
+            magnitude = (position - bucket.transform.localPosition).magnitude;
+            bucket.transform.localPosition += increment * Time.deltaTime * 1.5f;
+            if (bucket.transform.localPosition.x <= 5.8f && !hasDropped)
+            {
+                hasDropped = true;
+                GameObject go = new();
+                SpriteRenderer renderer = go.AddComponent<SpriteRenderer>();
+                Rigidbody2D rigid = go.AddComponent<Rigidbody2D>();
+                Bullet bullet = go.AddComponent<Bullet>();
+                BoxCollider2D collider = go.AddComponent<BoxCollider2D>();
+                go.transform.position = bucket.transform.position;
+                go.transform.localRotation = bow.transform.rotation;
+                renderer.sprite = dart;
+                renderer.sortingLayerName = "Boss";
+                collider.size = new Vector2(0.2f, 0.3f);
+                collider.offset = new Vector2(0, 0.1f);
+                LayerMask mask = LayerMask.GetMask("Player", "Default");
+                rigid.excludeLayers += mask;
+                collider.excludeLayers += mask;
+
+                Actions.BulletTarget.Invoke(boss);
+                Destroy(go, 5);
+            }
+            yield return null;
+        }
+
+        position = bucket.transform.localPosition + new Vector3(0, -5.8f, 0);
+        StartCoroutine(Functions.Move(bucket.transform.localPosition, position, value => bucket.transform.localPosition = value, 1));
+
+        magnitude = (position - bucket.transform.localPosition).magnitude;
+        while (magnitude > 0.1f)
+        {
+            magnitude = (position - bucket.transform.localPosition).magnitude;
+            yield return null;
+        }
+
+        StartCoroutine(Functions.Fade(UI.transform.GetChild(0).gameObject, 0, 1, 1));
+        StartCoroutine(Functions.Fade(UI.transform.GetChild(0).GetChild(0).gameObject, 0, 1, 1));
+        StartCoroutine(Functions.Fade(UI.transform.GetChild(0).GetChild(1).gameObject, 0, 1, 1));
+
+        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(0).gameObject, 0, 1, 1));
+        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(0).GetChild(0).gameObject, 0, 1, 1));
+        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(0).GetChild(1).gameObject, 0, 1, 1));
+
+        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(0).gameObject, 0, 1, 1));
+        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(0).GetChild(0).gameObject, 0, 1, 1));
+        StartCoroutine(Functions.Fade(f3_UI.transform.GetChild(1).GetChild(1).gameObject, 0, 1, 1));
 
         character.GetComponent<CharacterController2D>().enabled = true;
         character.GetComponent<BossDartController>().enabled = true;
+        Play_Menu_Sounds.ChangeClip(audioSource, audioManager.musicClips[6], MenuManager_2.musicVol);
         boss.GetComponent<Animator>().Play("idle", 0, 0);
     }
     IEnumerator PhaseTwo()
@@ -1600,7 +1944,8 @@ public class GameManager : MonoBehaviour
         bossPhase = 2;
         character.GetComponent<BossDartController>().enabled = false;
         PlayAnimation(boss.GetComponent<Animator>(), "taunt", false);
-        TextBox.Text(null, "Poppy", "Did you really think it was going to be that easy!?", textBoxSpeed);
+        StartCoroutine(Play_Menu_Sounds.PlayClip(9, MenuManager_2.sfxVol));
+        TextBox.Text(null, "Poppy", "What an ungrateful child, Did you really think it was going to be that easy!?", textBoxSpeed);
 
         TextBox text = FindObjectOfType<TextBox>();
         while (text != null)
@@ -1617,7 +1962,7 @@ public class GameManager : MonoBehaviour
         bossPhase = 3;
         character.GetComponent<BossDartController>().enabled = false;
         PlayAnimation(boss.GetComponent<Animator>(), "idle", false);
-        TextBox.Text(null, "Poppy", "You're seriously bursting my balloon kid", textBoxSpeed);
+        TextBox.Text(null, "Poppy", "You're seriously bursting my balloon. I'll make sure you and every other child never leave the circus!", textBoxSpeed);
 
         TextBox text = FindObjectOfType<TextBox>();
         while (text != null)
@@ -1633,11 +1978,26 @@ public class GameManager : MonoBehaviour
     public void LooseDarts()
     {
         //play animation
-        PlayAnimation(anims[3], "LooseDarts", false);
-        pocketDarts -= 2;
-        countDartsText.text = pocketDarts.ToString();
+        if (pocketDarts > 0)
+        {
+            anims[3].transform.GetChild(0).GetComponent<Text>().text = "-2";
+            PlayAnimation(anims[3], "LooseDarts", false);
+            pocketDarts -= 2;
+            countDartsText.text = pocketDarts.ToString();
+        }
+    }
+    public void GainDarts()
+    {
         if (pocketDarts <= 0)
-            StartCoroutine(RestartBoss());
+        {
+            anims[3].transform.GetChild(0).GetComponent<Text>().text = "+5";
+            PlayAnimation(anims[3], "LooseDarts", false);
+            pocketDarts += 5;
+            countDartsText.text = pocketDarts.ToString();
+
+            Vector3 position = bucket.transform.localPosition + new Vector3(0, 8.2f, 0);
+            StartCoroutine(Functions.Move(bucket.transform.localPosition, position, value => bucket.transform.localPosition = value, 1));
+        }
     }
     public IEnumerator RestartBoss()
     {
@@ -1646,7 +2006,7 @@ public class GameManager : MonoBehaviour
         PlayAnimation(anims[0], "GameOverMinigame", false);
         yield return new WaitForSeconds(3);
         fade.SetActive(true);
-        StartCoroutine(Fade(fade, 0, 1.1f, 0.5f));
+        StartCoroutine(Fade(fade, 0, 1, 0.5f));
         yield return new WaitForSeconds(3);
 
         ResetBossFight();
@@ -1656,6 +2016,7 @@ public class GameManager : MonoBehaviour
     {
         bossPhase = 4;
         character.GetComponent<BossDartController>().enabled = false;
+        PlayAnimation(boss.GetComponent<Animator>(), "Spin", false);
         TextBox.Text(null, "Poppy", "GAHH!!", textBoxSpeed);
 
         TextBox text = FindObjectOfType<TextBox>();
@@ -1665,17 +2026,17 @@ public class GameManager : MonoBehaviour
         }
 
         //boss goes to centre
-        Vector3 bossPos = boss.transform.localPosition + new Vector3(0, -5f, 0);
-        yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
+        Vector3 bossPos = boss.transform.localPosition + new Vector3(0, -9f, 0);
+        yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value, 1));
         Destroy(boss);
         yield return new WaitForSeconds(1);
 
         Vector3 backPos = background[2].transform.localPosition + new Vector3(0, 3.8f, 0);
         Vector3 platPos = bossPlatform.transform.localPosition + new Vector3(0, -1.6f, 0);
         Vector3 groundPos = foreground[2].transform.GetChild(0).localPosition + new Vector3(0, 3.8f, 0);
-        StartCoroutine(Functions.MoveCubic(background[2].transform.localPosition, backPos, value => background[2].transform.localPosition = value));
-        StartCoroutine(Functions.MoveCubic(bossPlatform.transform.localPosition, platPos, value => bossPlatform.transform.localPosition = value));
-        yield return StartCoroutine(Functions.MoveCubic(foreground[2].transform.GetChild(0).localPosition, groundPos, value => foreground[2].transform.GetChild(0).localPosition = value));
+        StartCoroutine(Functions.MoveCubic(background[2].transform.localPosition, backPos, value => background[2].transform.localPosition = value, 1));
+        StartCoroutine(Functions.MoveCubic(bossPlatform.transform.localPosition, platPos, value => bossPlatform.transform.localPosition = value, 1));
+        yield return StartCoroutine(Functions.MoveCubic(foreground[2].transform.GetChild(0).localPosition, groundPos, value => foreground[2].transform.GetChild(0).localPosition = value, 1));
 
         StartCoroutine(Ending());
     }
@@ -1701,7 +2062,7 @@ public class GameManager : MonoBehaviour
         }
         character.GetComponent<Animator>().SetFloat("velocity", 0);
 
-        character.GetComponent<Animator>().SetBool("walk", false);
+        TextBox.dialogueAudio = true;
         TextBox.Text(charAppearance, controller.charName, "Dad!?", textBoxSpeed);
         TextBox text = FindObjectOfType<TextBox>();
         while (text != null)
@@ -1709,6 +2070,7 @@ public class GameManager : MonoBehaviour
             yield return null;
         }
 
+        Play_Menu_Sounds.ChangeClip(audioSource, audioManager.musicClips[8], MenuManager_2.musicVol);
         mum.SetActive(true);
         yield return new WaitForSeconds(3);
 
@@ -1736,7 +2098,7 @@ public class GameManager : MonoBehaviour
     {
         Vector3 camPos = new Vector3(Camera.main.transform.position.x, -78, Camera.main.transform.position.z);
         StartCoroutine(Functions.Move(Camera.main.transform.position, camPos, value => Camera.main.transform.position = value, 0.25f));
-        StartCoroutine(Functions.Fade(fade, 0, 1.1f, 0.75f));
+        StartCoroutine(Functions.Fade(fade, 0, 1, 0.75f));
     }
 
     IEnumerator FallingDarts(bool hard)
@@ -1747,10 +2109,10 @@ public class GameManager : MonoBehaviour
         float initialX = boss.transform.localPosition.x;
         //boss goes to centre
         Vector3 bossPos = boss.transform.localPosition + new Vector3(0, -9, 0);
-        yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
+        yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value, 1));
         boss.transform.localPosition = new Vector3(0, boss.transform.localPosition.y, boss.transform.localPosition.z);
         bossPos = boss.transform.localPosition + new Vector3(0, 9, 0);
-        yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
+        yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value, 1));
 
         boss.GetComponent<Animator>().Play("removeHead", 0, 0);
         yield return new WaitForSeconds(CurrentClipLength(boss.GetComponent<Animator>()));
@@ -1794,10 +2156,10 @@ public class GameManager : MonoBehaviour
 
         //boss goes back
         bossPos = boss.transform.localPosition + new Vector3(0, -9, 0);
-        yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
+        yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value, 1));
         boss.transform.localPosition = new Vector3(initialX, boss.transform.localPosition.y, boss.transform.localPosition.z);
         bossPos = boss.transform.localPosition + new Vector3(0, 9, 0);
-        yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value));
+        yield return StartCoroutine(Functions.MoveCubic(boss.transform.localPosition, bossPos, value => boss.transform.localPosition = value, 1));
 
         PlayAnimation(boss.GetComponent<Animator>(), "juggleHeadTran", true);
         yield return new WaitForSeconds(0.2f);
@@ -1851,11 +2213,21 @@ public class GameManager : MonoBehaviour
             character.transform.localRotation = Quaternion.identity;
             character.transform.localPosition = new Vector3(0, -3.5f, 1);
             controller.enabled = false;
+            operatorNPCs[2].transform.GetChild(0).gameObject.SetActive(false);
             waitingForCart = false;
             StartCoroutine(RideTime());
         }
+        if (ridingCart && timeLooking > 20 && !hold)
+        {
+            //re-use bool
+            hold = true;
+            tickets += 3;
+            scoreTicketsText.text = tickets.ToString();
+            TextBox.Text(null, "", "The height of the cart bolsters the wind and you catch flying tickets", textBoxSpeed);
+        }
         if (ridingCart && timeLooking > 45)
         {
+            hold = false;
             ridingCart = false;
             character.GetComponent<Rigidbody2D>().gravityScale = controller.gravity;
             character.transform.rotation = Quaternion.identity;
@@ -1872,6 +2244,15 @@ public class GameManager : MonoBehaviour
     {
         while (ridingCart)
         {
+            /*if (hold)
+            {
+                //stop and wait
+                TextBox text = FindObjectOfType<TextBox>();
+                while (text != null)
+                {
+                    yield return null;
+                }
+            }*/
             timeLooking += Time.deltaTime;
             yield return null;
         }

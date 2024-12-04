@@ -1,0 +1,15 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!221 &22100000
+AnimatorOverrideController:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: CandyGirlAnim
+  m_Controller: {fileID: 9100000, guid: 3c7a7ac617ce8b74ca8bd7463bbd7c70, type: 2}
+  m_Clips:
+  - m_OriginalClip: {fileID: 7400000, guid: 276ebc45606f30e42932176ce4d531e8, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 5d2f19f080804394aa88f6440147cdb3, type: 2}
+  - m_OriginalClip: {fileID: 7400000, guid: 2c0c6c4648a74644eb2f57d1761e1dfc, type: 2}
+    m_OverrideClip: {fileID: 7400000, guid: 8abdc8c7314b133408c2e7876dd0917f, type: 2}

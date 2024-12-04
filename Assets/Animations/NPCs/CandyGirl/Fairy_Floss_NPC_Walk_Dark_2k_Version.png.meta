@@ -1,0 +1,340 @@
+fileFormatVersion: 2
+guid: 3c11386de4a79cf499006b04beb29274
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 250
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Fairy_Floss_NPC_Walk_Dark_2k_Version_6
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 1894
+        width: 258
+        height: 492
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0ed1f892de7d7bd4bbf161fabf3d4100
+      internalID: 958296593
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fairy_Floss_NPC_Walk_Dark_2k_Version_7
+      rect:
+        serializedVersion: 2
+        x: 1321
+        y: 1891
+        width: 258
+        height: 492
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 05e3be9926b929341930613655547ad0
+      internalID: -1133384118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fairy_Floss_NPC_Walk_Dark_2k_Version_8
+      rect:
+        serializedVersion: 2
+        x: 2474
+        y: 1893
+        width: 258
+        height: 492
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 243aab0fa1023654fb160153d713bb44
+      internalID: 69870862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fairy_Floss_NPC_Walk_Dark_2k_Version_21
+      rect:
+        serializedVersion: 2
+        x: 175
+        y: 1097
+        width: 258
+        height: 492
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1dedca9e6859f29489d14ba9a82e647e
+      internalID: 1696356369
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fairy_Floss_NPC_Walk_Dark_2k_Version_23
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 1095
+        width: 258
+        height: 492
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8d14895467db67f45b2be9c80f33ba5c
+      internalID: -1611771689
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fairy_Floss_NPC_Walk_Dark_2k_Version_24
+      rect:
+        serializedVersion: 2
+        x: 2468
+        y: 1094
+        width: 258
+        height: 492
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 114776e2e417e6146bfddc6a0999afc8
+      internalID: -1362606115
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fairy_Floss_NPC_Walk_Dark_2k_Version_29
+      rect:
+        serializedVersion: 2
+        x: 174
+        y: 296
+        width: 258
+        height: 492
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 301402e76750c1747b435d8e9c67a55d
+      internalID: 823354731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Fairy_Floss_NPC_Walk_Dark_2k_Version_30
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 298
+        width: 258
+        height: 492
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1a8b176622c391944be6f2be6041ac55
+      internalID: -1077562227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable:
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_0: -885205906
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_1: 421059387
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_10: -1289678252
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_11: -250485031
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_12: 1582999821
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_13: -560824474
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_14: -1211014322
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_15: 2134542113
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_16: -82680627
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_17: 504759979
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_18: -2003155120
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_19: 1250192106
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_2: 670361420
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_20: -538337422
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_21: 1696356369
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_22: -1257343404
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_23: -1611771689
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_24: -1362606115
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_25: -1880353826
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_26: -428375101
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_27: -1713319981
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_28: 1509568178
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_29: 823354731
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_3: -1928157670
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_30: -1077562227
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_31: -688870693
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_4: -113868435
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_5: 269371159
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_6: 958296593
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_7: -1133384118
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_8: 69870862
+      Fairy_Floss_NPC_Walk_Dark_2k_Version_9: -499223975
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

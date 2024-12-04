@@ -15,7 +15,7 @@ public class CharacterController2D : NPC_AI
 	[SerializeField] int health = 100;
 
 	private GameObject talkingTo;
-	List<Collider2D> collisions = new List<Collider2D>();
+	public List<Collider2D> collisions = new List<Collider2D>();
 
 	//references to buttons
 	private PlayerInput playerInput;
@@ -36,6 +36,8 @@ public class CharacterController2D : NPC_AI
 		//touchPress.performed -= OnTouchBegin;
 		touchPress.canceled -= OnTouchExit;
         keyboardPress.canceled -= OnTouchExit;
+
+        collisions.Clear();
     }
     private void Awake()
 	{
@@ -62,40 +64,10 @@ public class CharacterController2D : NPC_AI
 		{
 			foreach (Collider2D collider in collisions)
 			{
-                if (Int32.TryParse(collider.gameObject.name, out int j))
-                {
-                    Actions.isOverDoor.Invoke(collider.gameObject, false);
-                    enter = false;
-                }
-                if (collider.CompareTag("Plushie"))
-                {
-                    if (collider.transform.childCount > 0) Actions.isOverDoor.Invoke(collider.gameObject, false);
-                    choice = 0;
-                }
-                else
-                {
-                    Actions.isOverDoor.Invoke(collider.gameObject, false);
-                    choice = 0;
-                }
+				Collisions(collider, false);
             }
 			Collider2D other = ReturnSmallestDistance(collisions.ToArray());
-            if (Int32.TryParse(other.gameObject.name, out int i))
-            {
-                Actions.isOverDoor.Invoke(other.gameObject, true);
-                enter = true;
-            }
-            if (other.CompareTag("Plushie"))
-            {
-                if (other.transform.childCount > 0) Actions.isOverDoor.Invoke(other.gameObject, true);
-                talkingTo = other.gameObject;
-                choice = 2;
-            }
-            else
-            {
-                Actions.isOverDoor.Invoke(other.gameObject, true);
-                talkingTo = other.gameObject;
-                choice = 1;
-            }
+            Collisions(other, true);
         }
 
 		/*if (UnityEngine.Input.touchCount > 0)
@@ -113,6 +85,34 @@ public class CharacterController2D : NPC_AI
 		else
 			horizontal = 0;*/
 	}
+	public void Collisions(Collider2D collider, bool condition)
+	{
+        if (Int32.TryParse(collider.gameObject.name, out int j))
+        {
+            Actions.isOverDoor.Invoke(collider.gameObject, condition);
+            enter = condition;
+        }
+        if (collider.CompareTag("Plushie"))
+        {
+            if (collider.transform.childCount > 0) Actions.isOverDoor.Invoke(collider.gameObject, condition);
+			if (!condition) choice = 0;
+			else
+			{
+                talkingTo = collider.gameObject;
+                choice = 2;
+            }
+        }
+        else if (collider.gameObject.GetComponent<NPC_AI>())
+        {
+            Actions.isOverDoor.Invoke(collider.gameObject, condition);
+            if (!condition) choice = 0;
+			else
+			{
+                talkingTo = collider.gameObject;
+                choice = 1;
+            }
+        }
+    }
 	public Collider2D ReturnSmallestDistance(Collider2D[] colliderList)
 	{
 		Collider2D target = colliderList[0];
@@ -127,7 +127,6 @@ public class CharacterController2D : NPC_AI
 			}
         }
 
-		print(target.gameObject.name);
 		return target;
     }
     private void FixedUpdate()
@@ -148,7 +147,8 @@ public class CharacterController2D : NPC_AI
 
 	private void OnMove(InputValue input)
 	{
-		horizontal = input.Get<Vector2>().x * runSpeed;
+		if (enabled)
+			horizontal = input.Get<Vector2>().x * runSpeed;
 	}
     private void OnEnter(InputValue input)
 	{
@@ -175,15 +175,18 @@ public class CharacterController2D : NPC_AI
     }
 	private void OnTouch(InputValue input)
 	{
-		touchPosition = Touchscreen.current.position.ReadValue();
+        if (enabled)
+        {
+            touchPosition = Touchscreen.current.position.ReadValue();
 
-		float width = Screen.width / 3;
-		if (touchPosition.x > width * 2)
-			horizontal = 1 * runSpeed;
-		else if (touchPosition.x < width)
-			horizontal = -1 * runSpeed;
-		else
-			OnEnter(input);
+            float width = Screen.width / 3;
+            if (touchPosition.x > width * 2)
+                horizontal = 1 * runSpeed;
+            else if (touchPosition.x < width)
+                horizontal = -1 * runSpeed;
+            else
+                OnEnter(input);
+        }
     }
     private void OnTouchExit(InputAction.CallbackContext input)
 	{
@@ -193,7 +196,14 @@ public class CharacterController2D : NPC_AI
 	private void OnTriggerEnter2D(Collider2D other)
 	{
 		if (enabled)
+		{
 			collisions.Add(other);
+
+			if (other.name == "Bucket")
+			{
+				gameManager.GainDarts();
+			}
+		}
 
 		/*if (enabled)
 		{
@@ -221,21 +231,7 @@ public class CharacterController2D : NPC_AI
 	{
 		if (enabled)
 		{
-			if (Int32.TryParse(other.gameObject.name, out int i))
-			{
-				Actions.isOverDoor.Invoke(other.gameObject, false);
-				enter = false;
-			}
-			if (other.CompareTag("Plushie"))
-			{
-				if (other.transform.childCount > 0) Actions.isOverDoor.Invoke(other.gameObject, false);
-				choice = 0;
-			}
-			else
-			{
-				Actions.isOverDoor.Invoke(other.gameObject, false);
-				choice = 0;
-			}
+			Collisions(other, false);
 
 			Collider2D target = other;
             foreach (Collider2D collider in collisions)

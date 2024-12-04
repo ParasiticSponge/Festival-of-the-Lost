@@ -244,16 +244,13 @@ public class IntroManager : MonoBehaviour
                     yield break;
                 }
 
+                physicsManager.enabled = false;
                 Destroy(door[0]);
-                yield return null;
-                physicsManager.UpdateCollision();
 
                 fade.SetActive(true);
                 yield return StartCoroutine(Functions.Fade(fade, 0, 1.1f, 1));
                 scene1.SetActive(false);
                 scene2.SetActive(true);
-                yield return null;
-                physicsManager.UpdateCollision();
                 yield return StartCoroutine(Functions.Fade(fade, 1, 0, 1));
                 //yield return StartCoroutine(Transition());
                 /*character.GetComponent<SpriteRenderer>().sortingLayerName = "Default";

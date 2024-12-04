@@ -16,6 +16,8 @@ public partial class MenuManager_2 : MonoBehaviour
     GameObject mainMenu;
     GameObject settings;
     GameObject dev;
+    GameObject titleRender;
+    GameObject floor;
 
     PointerEventData pointerEventData;
     EventSystem eventSystem;
@@ -48,6 +50,7 @@ public partial class MenuManager_2 : MonoBehaviour
     GameObject border;
     GameObject selection;
 
+    float difference;
     private void Awake()
     {
         mainMenu = canvas.transform.GetChild(0).gameObject;
@@ -61,7 +64,13 @@ public partial class MenuManager_2 : MonoBehaviour
         animator.Add(canvas.GetComponent<Animator>());
         //circus
         animator.Add(mainMenu.transform.GetChild(13).GetComponent<Animator>());
-
+        foreach (Transform m in mainMenu.transform)
+        {
+            if (m.name == "TitleRender")
+                titleRender = m.gameObject;
+            if (m.name == "Floor")
+                floor = m.gameObject;
+        }
         foreach (Transform s in settings.transform)
         {
             if (s.name == "Options")
@@ -93,6 +102,9 @@ public partial class MenuManager_2 : MonoBehaviour
         {
             boxes.Add(scrollContent.transform.GetChild(i).gameObject);
         }
+
+        ScreenResolution();
+
         audioSource.volume = musicSlider.value;
         musicVol = musicSlider.value;
         sfxVol = sfxSlider.value;
@@ -187,15 +199,15 @@ public partial class MenuManager_2 : MonoBehaviour
         switch (isOn)
         {
             case true:
-                StartCoroutine(Functions.MoveCubic(mainMenu.GetComponent<RectTransform>().localPosition, left, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
-                StartCoroutine(Functions.MoveCubic(settings.GetComponent<RectTransform>().localPosition, centre, (value => settings.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(Functions.MoveCubic(mainMenu.GetComponent<RectTransform>().localPosition, left, value => mainMenu.GetComponent<RectTransform>().localPosition = value, 1));
+                StartCoroutine(Functions.MoveCubic(settings.GetComponent<RectTransform>().localPosition, centre, value => settings.GetComponent<RectTransform>().localPosition = value, 1));
                 StartCoroutine(FerrisCartMove(left));
                 //StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, left));
                 //StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, centre));
                 break;
             case false:
-                StartCoroutine(Functions.MoveCubic(mainMenu.GetComponent<RectTransform>().localPosition, centre, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
-                StartCoroutine(Functions.MoveCubic(settings.GetComponent<RectTransform>().localPosition, right, (value => settings.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(Functions.MoveCubic(mainMenu.GetComponent<RectTransform>().localPosition, centre, value => mainMenu.GetComponent<RectTransform>().localPosition = value, 1));
+                StartCoroutine(Functions.MoveCubic(settings.GetComponent<RectTransform>().localPosition, right, value => settings.GetComponent<RectTransform>().localPosition = value, 1));
                 StartCoroutine(FerrisCartMove(centre));
                 //StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, centre));
                 //StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, right));
@@ -204,21 +216,21 @@ public partial class MenuManager_2 : MonoBehaviour
     }
     public void MoveDev(bool isOn)
     {
-        Vector3 up = new Vector3(0, 1080, 0);
+        Vector3 up = new Vector3(0, 1080 * difference, 0);
         Vector3 centre = new Vector3(0, 0, 0);
-        Vector3 down = new Vector3(0, -1080, 0);
+        Vector3 down = new Vector3(0, -1080 * difference, 0);
         switch (isOn)
         {
             case true:
-                StartCoroutine(Functions.MoveCubic(mainMenu.GetComponent<RectTransform>().localPosition, up, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
-                StartCoroutine(Functions.MoveCubic(dev.GetComponent<RectTransform>().localPosition, centre, (value => dev.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(Functions.MoveCubic(mainMenu.GetComponent<RectTransform>().localPosition, up, value => mainMenu.GetComponent<RectTransform>().localPosition = value, 1));
+                StartCoroutine(Functions.MoveCubic(dev.GetComponent<RectTransform>().localPosition, centre, value => dev.GetComponent<RectTransform>().localPosition = value, 1));
                 StartCoroutine(FerrisCartMove(up));
                 //StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, left));
                 //StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, centre));
                 break;
             case false:
-                StartCoroutine(Functions.MoveCubic(mainMenu.GetComponent<RectTransform>().localPosition, centre, (value => mainMenu.GetComponent<RectTransform>().localPosition = value)));
-                StartCoroutine(Functions.MoveCubic(dev.GetComponent<RectTransform>().localPosition, down, (value => dev.GetComponent<RectTransform>().localPosition = value)));
+                StartCoroutine(Functions.MoveCubic(mainMenu.GetComponent<RectTransform>().localPosition, centre, value => mainMenu.GetComponent<RectTransform>().localPosition = value, 1));
+                StartCoroutine(Functions.MoveCubic(dev.GetComponent<RectTransform>().localPosition, down, value => dev.GetComponent<RectTransform>().localPosition = value, 1));
                 StartCoroutine(FerrisCartMove(centre));
                 //StartCoroutine(Functions.Move(mainMenu.GetComponent<RectTransform>().localPosition, centre));
                 //StartCoroutine(Functions.Move(settings.GetComponent<RectTransform>().localPosition, right));
@@ -267,5 +279,84 @@ public partial class MenuManager_2 : MonoBehaviour
     public void ChangeTest(Dropdown dropdown)
     {
         test = dropdown.value;
+    }
+
+    public void ScreenResolution()
+    {
+        //float desiredScaleX = ((float)Screen.currentResolution.width / 1920);
+        //float desiredScaleY = ((float)Screen.currentResolution.height / 1080);
+        //print(Screen.dpi);
+
+        /*//object[] obj = GameObject.FindSceneObjectsOfType(typeof(GameObject));
+        Image[] img = GameObject.FindObjectsOfType<Image>();
+        foreach (Image child in img)
+        {
+            Debug.Log(child.name);
+        }*/
+        //mainMenu.transform.localScale = new Vector3(scale.x * desiredScaleX, 1.1f, 1);
+        /*Vector3 scale = mainMenu.transform.localScale;
+        mainMenu.transform.localScale = new Vector3(scale.x * desiredScaleX, 1.1f, 1);
+        scale = settings.transform.localScale;
+        settings.transform.localScale = new Vector3(scale.x * desiredScaleX, scale.y * desiredScaleY, 1);
+        scale = dev.transform.localScale;
+        dev.transform.localScale = new Vector3(scale.x * desiredScaleX, scale.y * desiredScaleY, 1);*/
+
+
+
+        /*Vector3 deviceScreenResolution = new Vector3(Screen.width, Screen.height, 1);
+        float deviceScreen = deviceScreenResolution.x / deviceScreenResolution.y;
+        Camera.main.aspect = deviceScreen;
+        float camHeight = 100 * Camera.main.orthographicSize * 2;
+        float camWidth = camHeight * deviceScreen;
+
+        Image[] img = GameObject.FindObjectsOfType<Image>();
+        foreach (Image child in img)
+        {
+            float sprHeight = child.sprite.rect.height;
+            float sprWidth = child.sprite.rect.width;
+            float scaleRatioWidth = camWidth / sprWidth;
+            float scaleRatioHeight = camHeight / sprHeight;
+            child.transform.localScale = new Vector3(scaleRatioWidth, scaleRatioHeight, 1);
+        }*/
+
+        float ratioX = (float)Screen.currentResolution.width / 1920;
+        float desiredRatioY = 1080 * ratioX;
+        difference = (float)Screen.currentResolution.height / desiredRatioY;
+
+        Vector3 scale = mainMenu.transform.GetChild(0).GetComponent<RectTransform>().localScale;
+        mainMenu.transform.GetChild(0).GetComponent<RectTransform>().localScale = new Vector3(scale.x, scale.y * difference, 1);
+        mainMenu.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 0);
+
+        scale = settings.transform.GetChild(0).GetComponent<RectTransform>().localScale;
+        settings.transform.GetChild(0).GetComponent<RectTransform>().localScale = new Vector3(scale.x, scale.y * difference, 1);
+        settings.GetComponent<RectTransform>().anchoredPosition = new Vector2(1920, 0);
+
+        scale = dev.transform.GetChild(0).GetComponent<RectTransform>().localScale;
+        dev.transform.GetChild(0).GetComponent<RectTransform>().localScale = new Vector3(scale.x, scale.y * difference, 1);
+        dev.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -1080 * difference);
+
+        scale = floor.GetComponent<RectTransform>().localScale;
+        floor.GetComponent<RectTransform>().localScale = new Vector3(scale.x, (scale.y * difference) + ((scale.y * difference) / 2), 1);
+        scale = floor.GetComponent<RectTransform>().localScale;
+        float halfScreen = -1080 * difference / 2;
+        print(halfScreen);
+        float halfSpr = -floor.GetComponent<RectTransform>().sizeDelta.y * scale.y / 2;
+        print(-floor.GetComponent<RectTransform>().sizeDelta.y);
+        print(scale.y);
+        scale = floor.GetComponent<RectTransform>().anchoredPosition;
+        floor.GetComponent<RectTransform>().anchoredPosition = new Vector2(scale.x, halfScreen - halfSpr);
+
+        //Vector3 scale = mainMenu.GetComponent<RectTransform>().localScale;
+        //mainMenu.GetComponent<RectTransform>().localScale = new Vector3(scale.x, scale.y * difference, 1);
+        //scale = settings.GetComponent<RectTransform>().localScale;
+        //settings.GetComponent<RectTransform>().localScale = new Vector3(scale.x, scale.y * difference, 1);
+        //scale = dev.GetComponent<RectTransform>().localScale;
+        //dev.GetComponent<RectTransform>().localScale = new Vector3(scale.x, scale.y * difference, 1);
+        //float posY = dev.GetComponent<RectTransform>().anchoredPosition.y;
+        //dev.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, posY * difference);
+        scale = maskCanvas.GetComponent<RectTransform>().sizeDelta;
+        maskCanvas.GetComponent<RectTransform>().sizeDelta = new Vector2(scale.x * difference, scale.y * difference);
+        scale = titleRender.GetComponent<RectTransform>().anchoredPosition;
+        titleRender.GetComponent<RectTransform>().anchoredPosition = new Vector2(scale.x * difference, scale.y * difference);
     }
 }

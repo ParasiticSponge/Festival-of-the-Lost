@@ -34,4 +34,5 @@ public class Actions
     public static Action<int> ChooseCharacter;
     public static Action<FishAI.TYPE> Reel;
     public static Action missedReel;
+    public static Action<GameObject> BulletTarget;
 }

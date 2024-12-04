@@ -43,15 +43,17 @@ public class FishReeler : MonoBehaviour
         float positionalAngle = Mathf.Atan2(position.y, position.x) - 67.5f;
         bar.GetComponent<RectTransform>().localRotation = Quaternion.Euler(0, 0, positionalAngle * Mathf.Rad2Deg);
 
-        if (Input.GetMouseButtonDown(0) && inRange)
+        if (Input.GetMouseButtonDown(0))
         {
-            correct = true;
-            direction *= -1;
-            RandomMask(Mathf.Atan2(position.y, position.x));
-        }
-        else if (Input.GetMouseButtonDown(0) && !inRange)
-        {
-            Missed();
+            StartCoroutine(Play_Menu_Sounds.PlayClip(12, MenuManager_2.sfxVol));
+            if (inRange)
+            {
+                correct = true;
+                direction *= -1;
+                RandomMask(Mathf.Atan2(position.y, position.x));
+            }
+            else
+                Missed();
         }
     }
 

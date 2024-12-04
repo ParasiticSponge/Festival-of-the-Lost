@@ -122,6 +122,85 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &208031771
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 208031772}
+  - component: {fileID: 208031774}
+  - component: {fileID: 208031773}
+  m_Layer: 5
+  m_Name: Text (Legacy)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &208031772
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 208031771}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 734509288}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 100}
+  m_SizeDelta: {x: 500, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &208031773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 208031771}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 35
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 0
+    m_MaxSize: 50
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: Thank you for playing!
+--- !u!222 &208031774
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 208031771}
+  m_CullTransparentMesh: 1
 --- !u!1 &390957507
 GameObject:
   m_ObjectHideFlags: 0
@@ -146,14 +225,14 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 390957507}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2093063697}
   - {fileID: 1022326023}
-  m_Father: {fileID: 684944694}
+  m_Father: {fileID: 949285852}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
@@ -197,6 +276,7 @@ GameObject:
   - component: {fileID: 473395796}
   - component: {fileID: 473395795}
   - component: {fileID: 473395794}
+  - component: {fileID: 473395797}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -278,6 +358,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &473395797
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 473395793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_VolumeFrameworkUpdateModeOption: 2
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_AllowHDROutput: 1
+  m_UseScreenCoordOverride: 0
+  m_ScreenSizeOverride: {x: 0, y: 0, z: 0, w: 0}
+  m_ScreenCoordScaleBias: {x: 0, y: 0, z: 0, w: 0}
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_Version: 2
+  m_TaaSettings:
+    m_Quality: 3
+    m_FrameInfluence: 0.1
+    m_JitterScale: 1
+    m_MipBias: 0
+    m_VarianceClampScale: 0.9
+    m_ContrastAdaptiveSharpening: 0
 --- !u!1 &684944693
 GameObject:
   m_ObjectHideFlags: 0
@@ -290,7 +414,7 @@ GameObject:
   - component: {fileID: 684944696}
   - component: {fileID: 684944695}
   m_Layer: 5
-  m_Name: Image
+  m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -308,7 +432,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 390957508}
+  - {fileID: 949285852}
+  - {fileID: 734509288}
   m_Father: {fileID: 1671137116}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -354,6 +479,148 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 684944693}
   m_CullTransparentMesh: 1
+--- !u!1 &734509287
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 734509288}
+  - component: {fileID: 734509290}
+  - component: {fileID: 734509289}
+  - component: {fileID: 734509291}
+  m_Layer: 5
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &734509288
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734509287}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 208031772}
+  m_Father: {fileID: 684944694}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -698}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &734509289
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734509287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 0963daf616471cb488de7e5cc3168fe4, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!222 &734509290
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734509287}
+  m_CullTransparentMesh: 1
+--- !u!114 &734509291
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 734509287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a064de4539225264f844db3d1c3cacff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 13
+  position: {x: 0, y: 0}
+  selected: 0
+  shouldFloat: 0
+--- !u!1 &949285851
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 949285852}
+  - component: {fileID: 949285853}
+  m_Layer: 5
+  m_Name: Slide
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &949285852
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 949285851}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 390957508}
+  m_Father: {fileID: 684944694}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: -608}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &949285853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 949285851}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db1b1288df7860e4c8d52e0985654b8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &958029748
 GameObject:
   m_ObjectHideFlags: 0
@@ -457,7 +724,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 651.6173, y: 600.9724}
+  m_SizeDelta: {x: 651.6173, y: 3408.062}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &1022326024
 MonoBehaviour:
@@ -500,7 +767,41 @@ MonoBehaviour:
     Festival\r\nFestival of the Lost\r\nThe Balloon's Edge\r\nTwilight Fair\r\nBright
     to Dark\r\nShadowplay\r\nShifting lights\r\nGlow to Gloom\nfestival of the shadows\r\nfestival
     of balloons\r\n#whoneedsparentsanyway\nPop Till You Drop: Festival Edition\nBoop
-    the clown with sharp darts\n"
+    the clown with sharp darts\n\nMusic:\nGate SFX:\r\nirongate2 by viaaico2013\r\nhttps://pixabay.com/sound-effects/irongate2-85045/\r\nLicence:
+    Pixabay Content License\n\nMain Game Light Theme:\r\nWaltz of the Carnies by
+    Kevin MacLeod\r\nwww.incompetech.com\r\nLicence: Creative Commons 3.0\r\n\r\nMain
+    Game Ambience Light Theme:\r\nAmusement Park sound enviroment by imagefilm.berlin\r\nhttps://freesound.org/s/747490/\r\nLicense:
+    Attribution 4.0\r\n\r\nMain Game Dark Theme:\r\nCreepy by Benjamin Tissot\r\nhttps://www.bensound.com/royalty-free-music/track/creepy\r\nLicence:
+    Creative Commons 3.0\r\nLicense code: ZI5WWZWAIUFS20BN\r\n\r\nMain Game Ambience
+    Dark Theme:\r\nCoulrophobia (Original) by Beetlemuse\r\nhttps://freesound.org/s/588173/\r\nLicense:
+    Attribution 4.0\r\n\r\nButton Click\r\nMenu Selection Click by NenadSimic\r\nhttps://freesound.org/s/171697/\r\nLicense:
+    Creative Commons 0\r\n\r\nBalloon Popping Minigame Track\r\nFun Times With The
+    Guys by GoldenSoundLabs\r\nhttps://pixabay.com/music/happy-childrens-tunes-fun-times-with-the-guys-223972/\r\nLicense:
+    Pixabay Content License\r\n\r\nBalloon Popping SFX:\r\nBalloon Burst.aiff by
+    DodoDuck\r\nhttps://freesound.org/s/177483/\r\nLicense: Attribution NonCommercial
+    3.0\r\n\r\nDart Throw SFX, Rod Throw SFX and Thud SFX:\r\nA Dart Being Thrown
+    by theguitarmanjp\r\nhttps://freesound.org/s/435004/\r\nLicense: Attribution
+    3.0\r\n\r\nWater Splash SFX:\r\nWater Splash by freesound_community\r\nhttps://pixabay.com/sound-effects/search/throwing-stones/\r\nLicense:
+    Pixabay Content License\n\r\nFishing Minigame Track:\r\nAquarium Fish by Magiksolo\r\nhttps://pixabay.com/music/beats-aquarium-fish-132518/\r\nLicense:
+    Pixabay Content License\r\n\r\nFishing Reel SFX:\r\nFly Fishing reeling reel
+    by TheFlyFishingFilmmaker\r\nhttps://freesound.org/s/641696/\r\nLicense: Attribution
+    4.0\r\n\r\nGame Over Track:\r\nKL Peach Game Over II by Lightyeartraxx\r\nhttps://pixabay.com/music/video-games-kl-peach-game-over-ii-135684/\r\nLicense:
+    Pixabay Content License\r\n\r\nTicket SFX:\r\nVideo Game Coin by harrietniamh\r\nhttps://freesound.org/s/415083/\r\nLicense:
+    Attribution 4.0\r\n\nBoss Level Access Denied SFX:\r\nThud1.wav by nebulasnails\r\nhttps://freesound.org/s/405539/\r\nLicense:
+    Creative Commons 0\r\n\r\nMan Screaming\r\nmale_Thijs_loud_scream.aiff by thanvannispen\r\nhttps://freesound.org/s/9432/\r\nLicense:
+    Attribution 4.0\r\n\nBoss Poppy Hurt SFX:\r\nInjury Scream by freesound_community\r\nhttps://pixabay.com/sound-effects/injury-scream-86808/\r\nLicense:
+    Pixabay Content License\n\r\nBoss Fight:\r\nFast Pantomime with Acceleration
+    by Andorios\r\nhttps://pixabay.com/music/circus-fast-pantomime-with-acceleration-257026/\r\nLicence:
+    Pixabay Content License\r\n\r\nBoss Fight Poppy Laugh:\r\nShrieking Laughter
+    by plasterbrain\r\nhttps://freesound.org/s/243022/\r\nLicense: Creative Commons
+    0\r\n\r\nEvil laugh_Claire Johnstone .wav by trijohnstone\r\nhttps://freesound.org/s/558229/\r\nLicense:
+    Creative Commons 0\n\nBoss Poppy Nose Hit SFX:\r\nFist Fight by Univerfield\r\nhttps://pixabay.com/sound-effects/search/damage/\r\nLicense:
+    Pixabay Content License\r\n\r\nGame Complete:\r\nSuccess Resolution Video Game
+    Fanfare Sound Effect.mp3 by FunWithSound\r\nhttps://freesound.org/s/456968/\r\nLicense:
+    Attribution 4.0\r\n\r\nDialogue SFX:\r\ncartoon gibberish over phone.flac by
+    Timbre\r\nhttps://freesound.org/s/166182/\r\nLicense: Attribution NonCommercial
+    4.0\r\n\r\nGuilt by genghisattenborough\r\nhttps://freesound.org/s/166168/\r\nLicense:
+    Attribution NonCommercial 4.0"
 --- !u!222 &1022326025
 CanvasRenderer:
   m_ObjectHideFlags: 0
